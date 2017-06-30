@@ -1,1 +1,1 @@
-include ':mastercard-gateway'
+include ':mpg-sdk-android'
