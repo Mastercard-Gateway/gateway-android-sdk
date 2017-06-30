@@ -1,0 +1,16 @@
+{
+  "apiOperation":"UPDATE_PAYER_DATA",
+  "sourceOfFunds":{
+    "provided":{
+	  "card":{
+	    "nameOnCard":"Bobert Boberton",
+		"number":"1234000043210000",
+		"securityCode":"909",
+		"expiry":{
+		  "month":"08",
+		  "year":"19"
+		}
+	  }
+	}
+  }
+}
