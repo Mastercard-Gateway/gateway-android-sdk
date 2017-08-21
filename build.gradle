@@ -4,10 +4,12 @@ buildscript {
 
     repositories {
         jcenter()
+        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.2'
-        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.0.1'
+        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.4.12'
+        classpath 'me.tatarka:gradle-retrolambda:3.6.0'
     }
 }
 
@@ -15,6 +17,7 @@ allprojects {
     repositories {
         jcenter()
         mavenCentral()
+        google()
         maven {
             url 'http://tools.labs.mastercard.com/artifactory/libs-release-local'
         }
