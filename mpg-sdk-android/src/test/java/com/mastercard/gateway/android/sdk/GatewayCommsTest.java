@@ -140,7 +140,7 @@ public class GatewayCommsTest {
         Mockito.when( connection.getOutputStream() ).thenReturn( stream );
         Mockito.when( connection.getResponseCode() ).thenReturn( HttpURLConnection.HTTP_ACCEPTED );
 
-        assertEquals( "Response code", HttpURLConnection.HTTP_ACCEPTED,
+        assertEquals( "HttpResponse code", HttpURLConnection.HTTP_ACCEPTED,
                 comms.makeJsonRequest( connection, "POST", json ) );
 
         assertEquals( "Output", json, stream.toString() );
