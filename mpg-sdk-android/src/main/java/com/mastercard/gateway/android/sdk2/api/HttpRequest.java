@@ -1,4 +1,4 @@
-package com.mastercard.gateway.android.sdk2;
+package com.mastercard.gateway.android.sdk2.api;
 
 import android.support.annotation.Nullable;
 import android.util.Pair;
@@ -8,12 +8,15 @@ import com.google.auto.value.AutoValue;
 import java.util.List;
 
 @AutoValue
-abstract class HttpRequest {
+public abstract class HttpRequest {
 
     public enum Method {GET, PUT, POST, DELETE, HEAD, TRACE}
 
+
+    @Nullable
     public abstract String endpoint();
 
+    @Nullable
     public abstract Method method();
 
     @Nullable
@@ -25,6 +28,10 @@ abstract class HttpRequest {
     @Nullable
     public abstract List<Pair<String, Object>> headers();
 
+
+    public abstract HttpRequest withEndpoint(String endpoint);
+
+    public abstract HttpRequest withMethod(Method method);
 
     public abstract HttpRequest withPayload(String payload);
 

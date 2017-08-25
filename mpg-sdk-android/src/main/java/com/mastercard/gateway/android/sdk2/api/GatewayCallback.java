@@ -1,4 +1,4 @@
-package com.mastercard.gateway.android.sdk2;
+package com.mastercard.gateway.android.sdk2.api;
 
 
 public interface GatewayCallback<T extends GatewayResponse> {

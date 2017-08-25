@@ -9,6 +9,12 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mastercard.gateway.android.sdk2.api.ErrorResponse;
+import com.mastercard.gateway.android.sdk2.api.GatewayCallback;
+import com.mastercard.gateway.android.sdk2.api.GatewayException;
+import com.mastercard.gateway.android.sdk2.api.GatewayRequest;
+import com.mastercard.gateway.android.sdk2.api.GatewayResponse;
+import com.mastercard.gateway.android.sdk2.api.HttpRequest;
+import com.mastercard.gateway.android.sdk2.api.HttpResponse;
 import com.mastercard.gateway.android.sdk2.api.UpdateSessionRequest;
 import com.mastercard.gateway.android.sdk2.api.UpdateSessionResponse;
 import com.mastercard.gateway.android.sdk2.api.model.Card;
@@ -35,13 +41,14 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
+import io.reactivex.Single;
+
 public class Gateway {
 
     String apiEndpoint;
     String merchantId;
-
+    String sessionId;
     Map<String, String> certificates = new HashMap<>();
-    Gson gson = new GsonBuilder().create();
 
 
     public Gateway() {
@@ -57,9 +64,10 @@ public class Gateway {
     /**
      * @param apiEndpoint
      */
-    public void setApiEndpoint(String apiEndpoint) throws MalformedURLException {
+    public Gateway setApiEndpoint(String apiEndpoint) throws MalformedURLException {
         // TODO sanitize or validate this?
         this.apiEndpoint = apiEndpoint;
+        return this;
     }
 
     /**
@@ -72,16 +80,35 @@ public class Gateway {
     /**
      * @param merchantId
      */
-    public void setMerchantId(String merchantId) {
+    public Gateway setMerchantId(String merchantId) {
         this.merchantId = merchantId;
+        return this;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    /**
+     *
+     * @param sessionId
+     */
+    public Gateway setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+        return this;
     }
 
     /**
      * @param alias
      * @param certificate
      */
-    public void addTrustedCertificate(String alias, String certificate) {
+    public Gateway addTrustedCertificate(String alias, String certificate) {
         certificates.put(alias, certificate);
+        return this;
     }
 
     /**
@@ -98,16 +125,63 @@ public class Gateway {
         certificates.clear();
     }
 
-    public void updateSession(String sessionId, String nameOnCard, String cardNumber, String securityCode, String expiryMM, String expiryYY, UpdateSessionRequest.Callback callback) {
+    /**
+     *
+     * @param nameOnCard
+     * @param cardNumber
+     * @param securityCode
+     * @param expiryMM
+     * @param expiryYY
+     * @param callback
+     */
+    public void updateSession(String nameOnCard, String cardNumber, String securityCode, String expiryMM, String expiryYY, GatewayCallback<UpdateSessionResponse> callback) {
         UpdateSessionRequest request = buildUpdateSessionRequest(nameOnCard, cardNumber, securityCode, expiryMM, expiryYY);
-        updateSession(sessionId, request, callback);
+        runGatewayRequest(request, callback);
     }
 
-    public void updateSession(String sessionId, UpdateSessionRequest request, UpdateSessionRequest.Callback callback) {
+    /**
+     *
+     * @param nameOnCard
+     * @param cardNumber
+     * @param securityCode
+     * @param expiryMM
+     * @param expiryYY
+     * @return
+     */
+    public Single<UpdateSessionResponse> updateSession(String nameOnCard, String cardNumber, String securityCode, String expiryMM, String expiryYY) {
+        UpdateSessionRequest request = buildUpdateSessionRequest(nameOnCard, cardNumber, securityCode, expiryMM, expiryYY);
+        return runGatewayRequest(request);
+    }
+
+    /**
+     *
+     * @param gatewayRequest
+     * @param callback
+     */
+    public void runGatewayRequest(GatewayRequest gatewayRequest, GatewayCallback callback) {
         // create handler on current thread
         Handler handler = new Handler(msg -> handleCallbackMessage(callback, msg.obj));
 
-        new Thread(() -> runUpdateSession(sessionId, request, handler)).start();
+        new Thread(() -> {
+            Message m = handler.obtainMessage();
+            try {
+                m.obj = executeGatewayRequest(gatewayRequest);
+            } catch (Exception e) {
+                m.obj = e;
+            }
+
+            handler.sendMessage(m);
+        }).start();
+    }
+
+    /**
+     *
+     * @param gatewayRequest
+     * @param <T>
+     * @return
+     */
+    public <T extends GatewayResponse> Single<T> runGatewayRequest(GatewayRequest<T> gatewayRequest) {
+        return Single.fromCallable(() -> executeGatewayRequest(gatewayRequest));
     }
 
 
@@ -134,32 +208,6 @@ public class Gateway {
                 .build();
     }
 
-    // This is the body of the Runnable when executing the request on a new thread
-    void runUpdateSession(String sessionId, UpdateSessionRequest request, Handler handler) {
-        Message m = handler.obtainMessage();
-        try {
-            m.obj = executeUpdateSession(sessionId, request);
-        } catch (Exception e) {
-            m.obj = e;
-        }
-
-        handler.sendMessage(m);
-    }
-
-    UpdateSessionResponse executeUpdateSession(String sessionId, UpdateSessionRequest request) throws Exception {
-
-        HttpRequest httpRequest = HttpRequest.builder()
-                .endpoint(apiEndpoint + "/merchant/" + merchantId + "/session/" + sessionId)
-                .method(HttpRequest.Method.PUT)
-                .payload(gson.toJson(request))
-                .contentType("application/json")
-                .build();
-
-        return executeHttpRequest(httpRequest, UpdateSessionResponse.class);
-    }
-
-
-
     // handler callback method when executing a request on a new thread
     @SuppressWarnings("unchecked")
     <T extends GatewayResponse> boolean handleCallbackMessage(GatewayCallback<T> callback, Object arg) {
@@ -173,7 +221,10 @@ public class Gateway {
         return true;
     }
 
-    <T extends GatewayResponse> T executeHttpRequest(HttpRequest httpRequest, Class<T> responseClass) throws Exception {
+    <T extends GatewayResponse> T executeGatewayRequest(GatewayRequest<T> gatewayRequest) throws Exception {
+        // build the http request from the gateway request object
+        HttpRequest httpRequest = gatewayRequest.buildHttpRequest().withEndpoint(apiEndpoint + "/merchant/" + merchantId + "/session/" + sessionId);
+
         // init ssl context with limiting trust managers
         SSLContext context = SSLContext.getInstance("TLS");
         context.init(null, createTrustManagers(), null);
@@ -217,6 +268,8 @@ public class Gateway {
             throw response.getException();
         }
 
+        Gson gson = new GsonBuilder().create();
+
         // if response has bad status code, create a gateway exception and throw it
         if (!response.isOk()) {
             GatewayException exception = new GatewayException();
@@ -227,7 +280,7 @@ public class Gateway {
         }
 
         // build the response object from the payload
-        return gson.fromJson(response.getPayload(), responseClass);
+        return gson.fromJson(response.getPayload(), gatewayRequest.getResponseClass());
     }
 
     TrustManager[] createTrustManagers() {

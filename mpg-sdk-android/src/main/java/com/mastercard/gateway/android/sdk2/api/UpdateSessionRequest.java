@@ -6,8 +6,8 @@ import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
-import com.mastercard.gateway.android.sdk2.GatewayCallback;
 import com.mastercard.gateway.android.sdk2.api.model.Billing;
 import com.mastercard.gateway.android.sdk2.api.model.Customer;
 import com.mastercard.gateway.android.sdk2.api.model.Device;
@@ -16,9 +16,7 @@ import com.mastercard.gateway.android.sdk2.api.model.Shipping;
 import com.mastercard.gateway.android.sdk2.api.model.SourceOfFunds;
 
 @AutoValue
-public abstract class UpdateSessionRequest implements Parcelable {
-
-    public interface Callback extends GatewayCallback<UpdateSessionResponse> {}
+public abstract class UpdateSessionRequest implements GatewayRequest<UpdateSessionResponse>, Parcelable {
 
     @Nullable
     public abstract String apiOperation();
@@ -44,6 +42,21 @@ public abstract class UpdateSessionRequest implements Parcelable {
     @Nullable
     public abstract SourceOfFunds sourceOfFunds();
 
+    @Override
+    public HttpRequest buildHttpRequest() {
+        Gson gson = new GsonBuilder().create();
+
+        return HttpRequest.builder()
+                .method(HttpRequest.Method.PUT)
+                .payload(gson.toJson(this))
+                .contentType("application/json")
+                .build();
+    }
+
+    @Override
+    public Class<UpdateSessionResponse> getResponseClass() {
+        return UpdateSessionResponse.class;
+    }
 
     public static TypeAdapter<UpdateSessionRequest> typeAdapter(Gson gson) {
         return new AutoValue_UpdateSessionRequest.GsonTypeAdapter(gson);

@@ -1,4 +1,4 @@
-package com.mastercard.gateway.android.sdk2;
+package com.mastercard.gateway.android.sdk2.api;
 
 
 import java.io.BufferedReader;
@@ -9,7 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 
 @SuppressWarnings("unused")
-class HttpResponse {
+public class HttpResponse {
 
     HttpURLConnection connection;
     boolean socketTimeout = false;
@@ -18,10 +18,10 @@ class HttpResponse {
     String payload = "";
 
 
-    HttpResponse() {
+    public HttpResponse() {
     }
 
-    HttpResponse(HttpURLConnection conn) {
+    public HttpResponse(HttpURLConnection conn) {
         if (conn == null) {
             throw new IllegalArgumentException();
         }
