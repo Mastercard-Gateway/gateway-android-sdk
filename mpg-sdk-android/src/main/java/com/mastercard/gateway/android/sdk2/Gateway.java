@@ -198,9 +198,9 @@ public class Gateway {
         return true;
     }
 
-    <T extends GatewayResponse> T executeGatewayRequest(String url, GatewayRequest<T> gatewayRequest) throws Exception {
+    <T extends GatewayResponse> T executeGatewayRequest(String endpoint, GatewayRequest<T> gatewayRequest) throws Exception {
         // build the http request from the gateway request object
-        HttpRequest httpRequest = gatewayRequest.buildHttpRequest().withEndpoint(url);
+        HttpRequest httpRequest = gatewayRequest.buildHttpRequest().withEndpoint(endpoint);
 
         // init ssl context with limiting trust managers
         SSLContext context = SSLContext.getInstance("TLS");
