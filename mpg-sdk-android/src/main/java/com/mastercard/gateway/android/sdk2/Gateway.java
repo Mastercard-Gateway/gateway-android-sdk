@@ -47,7 +47,6 @@ public class Gateway {
 
     String apiEndpoint;
     String merchantId;
-    String sessionId;
     Map<String, String> certificates = new HashMap<>();
 
 
@@ -86,23 +85,6 @@ public class Gateway {
     }
 
     /**
-     *
-     * @return
-     */
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    /**
-     *
-     * @param sessionId
-     */
-    public Gateway setSessionId(String sessionId) {
-        this.sessionId = sessionId;
-        return this;
-    }
-
-    /**
      * @param alias
      * @param certificate
      */
@@ -134,9 +116,11 @@ public class Gateway {
      * @param expiryYY
      * @param callback
      */
-    public void updateSession(String nameOnCard, String cardNumber, String securityCode, String expiryMM, String expiryYY, GatewayCallback<UpdateSessionResponse> callback) {
+    public void updateSessionWithPayerData(String sessionId, String nameOnCard, String cardNumber, String securityCode, String expiryMM, String expiryYY, GatewayCallback<UpdateSessionResponse> callback) {
+        String url = apiEndpoint + "/merchant/" + merchantId + "/session/" + sessionId;
         UpdateSessionRequest request = buildUpdateSessionRequest(nameOnCard, cardNumber, securityCode, expiryMM, expiryYY);
-        runGatewayRequest(request, callback);
+
+        runGatewayRequest(url, request, callback);
     }
 
     /**
@@ -148,24 +132,24 @@ public class Gateway {
      * @param expiryYY
      * @return
      */
-    public Single<UpdateSessionResponse> updateSession(String nameOnCard, String cardNumber, String securityCode, String expiryMM, String expiryYY) {
+    public Single<UpdateSessionResponse> updateSessionWithPayerData(String sessionId, String nameOnCard, String cardNumber, String securityCode, String expiryMM, String expiryYY) {
+        String url = apiEndpoint + "/merchant/" + merchantId + "/session/" + sessionId;
         UpdateSessionRequest request = buildUpdateSessionRequest(nameOnCard, cardNumber, securityCode, expiryMM, expiryYY);
-        return runGatewayRequest(request);
+
+        return runGatewayRequest(url, request);
     }
 
-    /**
-     *
-     * @param gatewayRequest
-     * @param callback
-     */
-    public void runGatewayRequest(GatewayRequest gatewayRequest, GatewayCallback callback) {
+
+
+
+    void runGatewayRequest(String url, GatewayRequest gatewayRequest, GatewayCallback callback) {
         // create handler on current thread
         Handler handler = new Handler(msg -> handleCallbackMessage(callback, msg.obj));
 
         new Thread(() -> {
             Message m = handler.obtainMessage();
             try {
-                m.obj = executeGatewayRequest(gatewayRequest);
+                m.obj = executeGatewayRequest(url, gatewayRequest);
             } catch (Exception e) {
                 m.obj = e;
             }
@@ -174,16 +158,9 @@ public class Gateway {
         }).start();
     }
 
-    /**
-     *
-     * @param gatewayRequest
-     * @param <T>
-     * @return
-     */
-    public <T extends GatewayResponse> Single<T> runGatewayRequest(GatewayRequest<T> gatewayRequest) {
-        return Single.fromCallable(() -> executeGatewayRequest(gatewayRequest));
+    <T extends GatewayResponse> Single<T> runGatewayRequest(String url, GatewayRequest<T> gatewayRequest) {
+        return Single.fromCallable(() -> executeGatewayRequest(url, gatewayRequest));
     }
-
 
     UpdateSessionRequest buildUpdateSessionRequest(String nameOnCard, String cardNumber, String securityCode, String expiryMM, String expiryYY) {
         return UpdateSessionRequest.builder()
@@ -221,9 +198,9 @@ public class Gateway {
         return true;
     }
 
-    <T extends GatewayResponse> T executeGatewayRequest(GatewayRequest<T> gatewayRequest) throws Exception {
+    <T extends GatewayResponse> T executeGatewayRequest(String url, GatewayRequest<T> gatewayRequest) throws Exception {
         // build the http request from the gateway request object
-        HttpRequest httpRequest = gatewayRequest.buildHttpRequest().withEndpoint(apiEndpoint + "/merchant/" + merchantId + "/session/" + sessionId);
+        HttpRequest httpRequest = gatewayRequest.buildHttpRequest().withEndpoint(url);
 
         // init ssl context with limiting trust managers
         SSLContext context = SSLContext.getInstance("TLS");
