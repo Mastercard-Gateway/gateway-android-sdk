@@ -25,7 +25,6 @@ import com.mastercard.gateway.android.sdk2.api.model.SourceOfFunds;
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
@@ -63,7 +62,7 @@ public class Gateway {
     /**
      * @param apiEndpoint
      */
-    public Gateway setApiEndpoint(String apiEndpoint) throws MalformedURLException {
+    public Gateway setApiEndpoint(String apiEndpoint) {
         // TODO sanitize or validate this?
         this.apiEndpoint = apiEndpoint;
         return this;
