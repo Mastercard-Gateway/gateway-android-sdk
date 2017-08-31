@@ -1,1 +1,1 @@
-include ':mpg-sdk-android'
+include ':gateway-android'
