@@ -1,0 +1,74 @@
+apply plugin: 'com.android.application'
+def date = new Date();
+def formattedDate = date.format('yyyyMMddHHmmss')
+
+android {
+    compileSdkVersion 26
+    buildToolsVersion '26.0.1'
+
+    defaultConfig {
+        applicationId "com.mastercard.gateway.android.sampleapp"
+        minSdkVersion 19
+        targetSdkVersion 26
+        versionCode 1
+        versionName '1.0.0-SNAPSHOT'
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        all {
+            buildConfigField( 'String', 'CREATE_SESSION_URL', '"' + createSessionUrl + '"' )
+            buildConfigField( 'String', 'COMPLETE_SESSION_URL', '"' + completeSessionUrl + '"' )
+            buildConfigField( 'String', 'NOT_FOUND_URL', '"' + notFoundUrl + '"' )
+            buildConfigField( 'String', 'TIMEOUT_URL', '"' + timeoutUrl + '"' )
+            buildConfigField( 'String', 'GATEWAY_BASE_URL', '"' + gatewayBaseUrl + '"' )
+
+            buildConfigField( 'String', 'MERCHANT_ID', '"' + merchantId + '"')
+            buildConfigField( 'String', 'GATEWAY_URL', '"' + gatewayUrl + '"')
+            buildConfigField( 'String', 'HEROKU_URL', '"' + herokuUrl + '"')
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+		snapshot {
+            archivesBaseName = "${libraryArtifactId}-${libraryVersion}"
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+}
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+
+    compile 'com.jakewharton:butterknife:7.0.0'
+
+    compile 'com.google.code.gson:gson:2.8.1'
+
+    compile 'com.google.android.gms:play-services-appindexing:9.8.0'
+
+    compile 'com.android.support:appcompat-v7:26.0.0'
+    compile 'com.android.support:design:26.0.0'
+    compile 'com.android.support:support-v4:26.0.0'
+
+    compile 'com.nineoldandroids:library:2.4.0'
+
+    compile 'com.daimajia.easing:library:1.0.1@aar'
+    compile 'com.daimajia.androidanimations:library:1.1.3@aar'
+
+    compile 'com.mastercard.gateway:gateway-android:0.1.0-SNAPSHOT'
+
+
+    // Espresso testing
+    androidTestCompile 'junit:junit:4.12'
+
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2') {
+        exclude module: 'support-annotations'
+    }
+    androidTestCompile('com.android.support.test:runner:0.5') {
+        exclude module: 'support-annotations'
+    }
+}

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:id="@+id/capturePaymentView"
+    android:background="@color/main_bg"
+    tools:context=".PaymentCaptureActivity">
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TableRow>
+            <TextView
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:paddingStart="0dp"
+                android:paddingEnd="5dp"
+                android:paddingLeft="0dp"
+                android:paddingRight="5dp"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/prompt_cardname"/>
+
+            <EditText
+                android:layout_height="wrap_content"
+                android:id="@+id/nameOnCard"/>
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:paddingStart="0dp"
+                android:paddingEnd="5dp"
+                android:paddingLeft="0dp"
+                android:paddingRight="5dp"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/prompt_cardnumber"/>
+
+            <EditText
+                android:layout_height="wrap_content"
+                android:ems="8"
+                android:inputType="number"
+                android:id="@+id/cardnumber"/>
+        </TableRow>
+
+        <TableRow android:gravity="center_vertical">
+            <TextView
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:paddingStart="0dp"
+                android:paddingEnd="5dp"
+                android:paddingLeft="0dp"
+                android:paddingRight="5dp"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/prompt_expiry"/>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:id="@+id/expiry_month"
+                    android:hint="@string/prompt_mm"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="@string/divider_mm_yy" />
+
+                <EditText
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:id="@+id/expiry_year"
+                    android:hint="@string/prompt_yy"/>
+            </LinearLayout>
+        </TableRow>
+
+        <TableRow android:gravity="center_vertical">
+            <TextView
+                android:layout_height="wrap_content"
+                android:gravity="right|bottom"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/prompt_cvv"/>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_height="wrap_content" >
+                <EditText
+                    android:layout_height="wrap_content"
+                    android:layout_width="60dp"
+                    android:inputType="numberPassword"
+                    android:id="@+id/cvv"/>
+            </LinearLayout>
+        </TableRow>
+
+        <TableRow android:layout_marginTop="40dp">
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:text="@string/submit_cardform"
+                android:id="@+id/submitButton" />
+        </TableRow>
+    </TableLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentBottom="true">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/session_id_display"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textIsSelectable="true"
+            android:id="@+id/sessionText" />
+    </LinearLayout>
+</RelativeLayout>

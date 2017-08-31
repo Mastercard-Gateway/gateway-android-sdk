@@ -1,0 +1,88 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/main_bg"
+    android:id="@+id/payView"
+    android:padding="20dp"
+    android:gravity="center_horizontal"
+    tools:context=".PayActivity">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/prompt_pay_confirm"/>
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp">
+
+        <TableRow android:layout_marginTop="10dp">
+            <TextView
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:paddingStart="0dp"
+                android:paddingEnd="15dp"
+                android:paddingLeft="0dp"
+                android:paddingRight="15dp"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/prompt_cardnumber"/>
+
+            <TextView
+                android:layout_height="wrap_content"
+                android:id="@+id/confirmCardNo"
+                android:textAppearance="?android:attr/textAppearanceMedium"/>
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:paddingStart="0dp"
+                android:paddingEnd="15dp"
+                android:paddingLeft="0dp"
+                android:paddingRight="15dp"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/prompt_amount"/>
+
+            <TextView
+                android:layout_height="wrap_content"
+                android:id="@+id/confirmAmount"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/main_activity_price"/>
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:paddingStart="0dp"
+                android:paddingEnd="15dp"
+                android:paddingLeft="0dp"
+                android:paddingRight="15dp"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/prompt_currency"/>
+
+            <TextView
+                android:layout_height="wrap_content"
+                android:id="@+id/confirmCurrency"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/main_activity_currency"/>
+        </TableRow>
+    </TableLayout>
+
+    <Button
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="40dp"
+        android:layout_gravity="end"
+        android:text="@string/pay_button"
+        android:id="@+id/confirmBtn"
+        android:textSize="18sp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"/>
+</LinearLayout>

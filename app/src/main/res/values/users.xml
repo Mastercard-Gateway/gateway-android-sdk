@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="users">
+        <item>Alice Aqua</item>
+        <item>Bob Brown</item>
+        <item>Carol Chartreuse</item>
+    </string-array>
+
+    <string-array name="userIds" translatable="false">
+        <item>u00001</item>
+        <item>u00002</item>
+        <item>u00003</item>
+    </string-array>
+</resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="behaviour_succeed" translatable="false">succeed</string>
+    <string name="behaviour_fail" translatable="false">fail</string>
+    <string name="behaviour_timeout" translatable="false">timeout</string>
+
+    <string-array name="behavioursText">
+        <item>Connects successfully</item>
+        <item>Fails to find gateway</item>
+        <item>Times out</item>
+    </string-array>
+
+    <string-array name="behaviours" translatable="false">
+        <item>@string/behaviour_succeed</item>
+        <item>@string/behaviour_fail</item>
+        <item>@string/behaviour_timeout</item>
+    </string-array>
+</resources>

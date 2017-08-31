@@ -1,0 +1,104 @@
+<resources>
+    <string name="app_name">Android Sample App</string>
+
+    <!-- Strings for the main activity -->
+    <string name="title_activity_main">Sample App</string>
+    <string name="main_activity_choose_product">Purchase:</string>
+    <string name="main_activity_currency">GBP</string>
+    <string name="main_activity_price">4995.95</string>
+    <string name="main_activity_button">Checkout</string>
+    <string name="main_activity_logged_in">Logged in as</string>
+    <string name="main_activity_switch_user">(Switch user)</string>
+
+    <!-- Strings related to session creation -->
+    <string name="create_denied_text">Access denied</string>
+    <string name="create_denied_explanation">The server refused an attempt to create a
+        session</string>
+
+    <string name="create_error_text">Server error</string>
+    <string name="create_error_explanation">The server encountered an error when trying to create
+        a checkout session</string>
+
+    <string name="create_unrecognised_text">Unknown error</string>
+    <string name="create_unrecognised_explanation">The server responded with an unrecognised
+        response</string>
+
+    <string name="create_failed_text">Could not connect</string>
+    <string name="create_failed_explanation">An attempt to connect to the server was
+        unsuccessful</string>
+
+    <string name="create_timeout_text">Connection timeout</string>
+    <string name="create_timeout_explanation">The server did not respond in a timely manner</string>
+
+    <!-- Strings present on payment capture screen -->
+    <string name="title_activity_capture_payment_details">Enter payment details</string>
+    <string name="prompt_cardname">Name on card:</string>
+    <string name="prompt_cardnumber">Card number:</string>
+    <string name="prompt_expiry">Expiry:</string>
+    <string name="prompt_mm">MM</string>
+    <string name="prompt_yy">YY</string>
+    <string name="prompt_cvv">CVV:</string>
+    <string name="divider_mm_yy">/</string>
+    <string name="submit_cardform">Continue</string>
+    <string name="session_id_display">Your Session ID:</string>
+
+    <!-- Strings related to session update outcomes -->
+    <string name="update_commserror_text">Could not connect</string>
+    <string name="update_commserror_explanation">An attempt to connect to the payment gateway was unsuccessful</string>
+    <string name="update_commserror_explanation_badurl">Could not connect to payment gateway - bad URL</string>
+
+    <string name="update_timeout_text">Payment gateway timeout</string>
+    <string name="update_timeout_explanation">The payment gateway did not respond in a timely
+        manner</string>
+
+    <string name="update_noreply_text">No response</string>
+    <string name="update_noreply_explanation">No reply from payment gateway</string>
+
+    <string name="update_malformed_text">Bad reply</string>
+    <string name="update_malformed_explanation_parse">Payment gateway reply malformed - unparseable</string>
+    <string name="update_malformed_explanation_status">Payment gateway reply malformed - unknown status</string>
+    <string name="update_malformed_explanation_missing">Payment gateway reply malformed - missing or invalid field </string>
+
+    <string name="update_error_text">Payment details rejected</string>
+
+    <string name="update_failure_text">Payment gateway failure</string>
+    <string name="update_failure_explanation">Failure to update payment details</string>
+
+    <string name="update_unknown_error_text">Unknown error</string>
+    <string name="update_unknown_error_explanation">The payment gateway responded with an unrecognised response</string>
+
+    <!-- Strings related to completion (pay) -->
+    <string name="title_activity_pay">Finalising Payment</string>
+    <string name="prompt_pay_confirm">Please confirm the following information:</string>
+    <string name="prompt_currency">Currency:</string>
+    <string name="prompt_amount">Amount:</string>
+    <string name="pay_button">Confirm and pay</string>
+    <string name="pay_successful_text">Payment successful</string>
+    <string name="pay_denied_text">Payment request rejected</string>
+
+    <string name="pay_comms_error_text">Could not connect</string>
+    <string name="pay_comms_error_explanation">An attempt to connect to the server was unsuccessful</string>
+
+    <string name="pay_timeout_text">Connection timeout</string>
+    <string name="pay_timeout_explanation">The server did not respond in a timely manner</string>
+
+    <string name="pay_error_text">Server error</string>
+    <string name="pay_error_explanation">The server encountered an error when trying to finalise payment</string>
+
+    <!-- Strings related to result screen -->
+    <string name="title_activity_result">Result</string>
+    <string name="result_button">Start again</string>
+
+    <!-- Strings related to Settings -->
+    <string name="title_activity_settings">Preferences</string>
+    <string name="pref_title_create_behaviour">Connection result on \'create\'</string>
+    <string name="pref_title_update_behaviour">Connection result on \'update\'</string>
+    <string name="pref_title_complete_behaviour">Connection result on \'complete\'</string>
+    <string name="pref_title_timeout">Connection timeout in milliseconds; zero for no timeout</string>
+    <string name="pref_title_num_update_attempts">Number of \'update\' attempts</string>
+    <string name="pref_title_username">Username for \'create/complete\' auth</string>
+    <string name="pref_title_password">Password for \'create\'/\'complete\' auth</string>
+    <string name="pref_default_username">test</string>
+    <string name="pref_default_password">Password</string>
+
+</resources>

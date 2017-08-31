@@ -1,0 +1,49 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:key="pref_key_create_behaviour"
+        android:title="@string/pref_title_create_behaviour"
+        android:entries="@array/behavioursText"
+        android:entryValues="@array/behaviours"
+        android:defaultValue="@string/behaviour_succeed"
+        android:summary="%s"/>
+
+    <ListPreference
+        android:key="pref_key_update_behaviour"
+        android:title="@string/pref_title_update_behaviour"
+        android:entries="@array/behavioursText"
+        android:entryValues="@array/behaviours"
+        android:defaultValue="@string/behaviour_succeed"
+        android:summary="%s" />
+
+    <ListPreference
+        android:key="pref_key_complete_behaviour"
+        android:title="@string/pref_title_complete_behaviour"
+        android:entries="@array/behavioursText"
+        android:entryValues="@array/behaviours"
+        android:defaultValue="@string/behaviour_succeed"
+        android:summary="%s"/>
+
+    <EditTextPreference
+        android:key="pref_key_timeout"
+        android:title="@string/pref_title_timeout"
+        android:defaultValue="4000"
+        android:numeric="integer"/>
+
+    <EditTextPreference
+        android:key="pref_key_num_update_attempts"
+        android:title="@string/pref_title_num_update_attempts"
+        android:defaultValue="1"
+        android:numeric="integer"
+        android:maxLength="2"/>
+
+    <EditTextPreference
+        android:key="pref_key_username"
+        android:title="@string/pref_title_username"
+        android:defaultValue="@string/pref_default_username"/>
+
+    <EditTextPreference
+        android:key="pref_key_password"
+        android:title="@string/pref_title_password"
+        android:defaultValue="@string/pref_default_password"
+        android:password="true"/>
+</PreferenceScreen>

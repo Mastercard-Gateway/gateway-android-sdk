@@ -1,0 +1,49 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/in_progress_bg"
+    android:gravity="bottom"
+    android:id="@+id/resultView"
+    tools:context=".ResultActivity">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/resultText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:textColor="@android:color/black"
+            android:textSize="50sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/resultExplanation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:textSize="18sp"
+            android:layout_marginTop="12dp" />
+
+    </LinearLayout>
+
+    <Button
+        android:layout_width="166dp"
+        android:layout_height="match_parent"
+        android:layout_weight="2"
+        android:layout_marginBottom="50dp"
+        android:text="@string/result_button"
+        android:id="@+id/continueBtn"
+        android:layout_gravity="center_horizontal" />
+
+</LinearLayout>
