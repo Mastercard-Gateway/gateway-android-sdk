@@ -35,7 +35,6 @@ public class PayActivity extends AbstractActivity {
     @OnClick(R.id.confirmBtn)
     protected void doConfirm() {
         confirmBtn.setEnabled(false);
-//        new CompleteSessionTask().execute();
 
         apiController.completeSession(sessionId, getResources().getString(R.string.main_activity_price), "USD", new CompleteSessionCallback());
     }
@@ -49,47 +48,9 @@ public class PayActivity extends AbstractActivity {
 
         @Override
         public void onError(Throwable throwable) {
+            throwable.printStackTrace();
             startResultActivity(R.string.pay_error_text, R.string.pay_error_explanation);
             confirmBtn.setEnabled(true);
         }
     }
-
-//    protected class CompleteSessionTask extends AsyncTask<String, Long, MerchantSimulatorResponse> {
-//        protected MerchantSimulatorResponse doInBackground(String... params) {
-//            SharedPreferences prefs =
-//                    PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-//
-//            String behaviour = prefs.getString("pref_key_complete_behaviour",
-//                    getResources().getString(R.string.behaviour_succeed));
-//
-//            return apiController.completeSession(getIntent().getStringExtra("PRODUCT_ID"),
-//                    getResources().getString(R.string.main_activity_price), behaviour,
-//                    timeout(prefs));
-//        }
-//
-//        protected void onPostExecute(MerchantSimulatorResponse response) {
-//            if (response == null || response.status == null) {
-//                startResultActivity(R.string.pay_comms_error_text,
-//                        R.string.pay_comms_error_explanation);
-//            } else {
-//                switch (response.status) {
-//                    case "SUCCESS":
-//                        startResultActivity(R.string.pay_successful_text, "", R.color.success_bg);
-//                        break;
-//                    case "TIMEOUT":
-//                        startResultActivity(R.string.pay_timeout_text,
-//                                R.string.pay_timeout_explanation);
-//                        break;
-//                    case "DENIED":
-//                        startResultActivity(R.string.pay_denied_text, "");
-//                        break;
-//                    default:
-//                        startResultActivity(R.string.pay_error_text,
-//                                R.string.pay_error_explanation);
-//                }
-//            }
-//
-//            confirmBtn.setEnabled(true);
-//        }
-//    }
 }

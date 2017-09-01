@@ -30,9 +30,6 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings" />
-        <activity
             android:name=".PaymentCaptureActivity"
             android:label="@string/title_activity_capture_payment_details" />
         <activity

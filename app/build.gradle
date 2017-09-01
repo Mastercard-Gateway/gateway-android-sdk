@@ -1,6 +1,4 @@
 apply plugin: 'com.android.application'
-def date = new Date();
-def formattedDate = date.format('yyyyMMddHHmmss')
 
 android {
     compileSdkVersion 26
@@ -18,12 +16,6 @@ android {
 
     buildTypes {
         all {
-            buildConfigField( 'String', 'CREATE_SESSION_URL', '"' + createSessionUrl + '"' )
-            buildConfigField( 'String', 'COMPLETE_SESSION_URL', '"' + completeSessionUrl + '"' )
-            buildConfigField( 'String', 'NOT_FOUND_URL', '"' + notFoundUrl + '"' )
-            buildConfigField( 'String', 'TIMEOUT_URL', '"' + timeoutUrl + '"' )
-            buildConfigField( 'String', 'GATEWAY_BASE_URL', '"' + gatewayBaseUrl + '"' )
-
             buildConfigField( 'String', 'MERCHANT_ID', '"' + merchantId + '"')
             buildConfigField( 'String', 'GATEWAY_URL', '"' + gatewayUrl + '"')
             buildConfigField( 'String', 'HEROKU_URL', '"' + herokuUrl + '"')
@@ -31,9 +23,6 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-		snapshot {
-            archivesBaseName = "${libraryArtifactId}-${libraryVersion}"
         }
     }
 

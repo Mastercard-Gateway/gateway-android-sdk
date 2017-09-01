@@ -1,7 +1,6 @@
 package com.mastercard.gateway.android.sampleapp;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -16,6 +15,8 @@ public abstract class AbstractActivity extends AppCompatActivity {
         super.onCreate( savedInstanceState );
         setContentView( getContentView() );
         Log.i( getClass().getSimpleName(), "Displaying" );
+
+        apiController.setHerokuUrl(BuildConfig.HEROKU_URL);
 
         ButterKnife.bind( this );
     }
@@ -75,25 +76,5 @@ public abstract class AbstractActivity extends AppCompatActivity {
      */
     protected void startResultActivity( int textResource, String explanation ) {
         startResultActivity( textResource, explanation, R.color.failed_bg );
-    }
-
-    protected int numAttempts( SharedPreferences prefs ) {
-        try {
-            return Math.max( 1,
-                    Integer.parseInt( prefs.getString( "pref_key_num_update_attempts", "1" ) ) );
-        }
-        catch ( NumberFormatException e ) {
-            return 1;
-        }
-    }
-
-    protected int timeout( SharedPreferences prefs ) {
-        try {
-            return Math.max( 0,
-                    Integer.parseInt( prefs.getString( "pref_key_timeout", "4000" ) ) );
-        }
-        catch ( NumberFormatException e ) {
-            return 4000;
-        }
     }
 }

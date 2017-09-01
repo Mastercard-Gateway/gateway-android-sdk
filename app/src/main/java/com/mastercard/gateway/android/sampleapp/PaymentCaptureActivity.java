@@ -64,7 +64,7 @@ public class PaymentCaptureActivity extends AbstractActivity {
         gateway.setMerchantId(BuildConfig.MERCHANT_ID)
                 .setApiEndpoint(BuildConfig.GATEWAY_URL);
 
-        sessionField.setText(apiController.session.getSessionId());
+        sessionField.setText(getIntent().getStringExtra("SESSION_ID"));
         nameOnCardField.requestFocus();
 
         submitButton.setEnabled(false);
@@ -89,7 +89,6 @@ public class PaymentCaptureActivity extends AbstractActivity {
         Log.i("Product ID", productId);
 
         submitButton.setEnabled(false);
-//        new UpdateSessionTask().execute();
 
         gateway.updateSessionWithPayerData(sessionId, nameOnCard, cardNumber, cvv, expiryMM, expiryYY, new UpdateSessionCallback());
     }
@@ -148,102 +147,6 @@ public class PaymentCaptureActivity extends AbstractActivity {
             }
         }
     }
-
-//    protected class UpdateSessionTask extends AsyncTask<String, Long, UpdateSessionWithPayerDataResponse> {
-//        protected Exception error;
-//
-//        protected UpdateSessionWithPayerDataResponse doInBackground( String...params ) {
-//
-//            String behaviour = prefs.getString( "pref_key_update_behaviour",
-//                    getResources().getString( R.string.behaviour_succeed ) );
-//
-//            try {
-//                return apiController.updateSession( cardNumber, expiryMM, expiryYY,
-//                        cvv, nameOnCard, behaviour, numAttempts( prefs ), timeout( prefs ) );
-//            }
-//            catch ( Exception e ) {
-//                error = e;
-//                return null;
-//            }
-//        }
-//
-//        @Override
-//        protected void onPostExecute( UpdateSessionWithPayerDataResponse resultFromSDK ) {
-//            if ( error != null ) {
-//                Log.e( PaymentCaptureActivity.class.getSimpleName(), error.getMessage(), error );
-//
-//                if ( error instanceof MalformedURLException ) {
-//                    startResultActivity( R.string.update_commserror_text,
-//                            R.string.update_commserror_explanation_badurl );
-//                }
-//                else if ( error instanceof CommsTimeoutException ) {
-//                    startResultActivity( R.string.update_timeout_text,
-//                            R.string.update_timeout_explanation );
-//                }
-//                else if ( error instanceof CommsException ) {
-//                    startResultActivity( R.string.update_commserror_text,
-//                            R.string.update_commserror_explanation );
-//                }
-//                else if ( error instanceof JsonParseException ) {
-//                    startResultActivity( R.string.update_malformed_text,
-//                            R.string.update_malformed_explanation_parse );
-//                }
-//                else if ( error instanceof GatewayErrorException ) {
-//                    GatewayErrorException gee = (GatewayErrorException) error;
-//                    startResultActivity( R.string.update_error_text,
-//                            gee.getResponse().getError().getExplanation() );
-//                }
-//                else if ( error instanceof ValidationException ) {
-//                    startResultActivity( R.string.update_malformed_text,
-//                        getResources().getString( R.string.update_malformed_explanation_missing ) +
-//                            ((ValidationException) error).path );
-//                }
-//                else {
-//                    Log.e( PaymentCaptureActivity.class.getSimpleName(),
-//                            "Unexpected error type " + error.getClass().getName() );
-//
-//                    startResultActivity( R.string.update_unknown_error_text,
-//                            R.string.update_unknown_error_explanation );
-//                }
-//            }
-//            else if ( resultFromSDK == null ) {
-//                startResultActivity( R.string.update_noreply_text,
-//                        R.string.update_noreply_explanation );
-//            }
-//            else {
-//                Intent intent = new Intent( PaymentCaptureActivity.this, PayActivity.class );
-//                intent.putExtra( "PRODUCT_ID", productId );
-//                intent.putExtra( "PAN_MASK", maskedCardNumber() );
-//                Log.i( PaymentCaptureActivity.class.getSimpleName(), "Successful pay" );
-//
-//                startActivity( intent );
-//
-//                // TODO: reinstate this if there's any way to get a FAILURE response?
-//                /*
-//                switch (resultFromSDK.getSession().getUpdateStatus()) {
-//                    case "SUCCESS":
-//                        Intent intent = new Intent( PaymentCaptureActivity.this, PayActivity.class );
-//                        intent.putExtra( "PRODUCT_ID", productId );
-//                        intent.putExtra( "PAN_MASK", maskedCardNumber() );
-//                        Log.e( PaymentCaptureActivity.class.getSimpleName(), "Successful pay" );
-//
-//                        if (storeCardCheckbox.isChecked()) {
-//                            (new TokenTask()).execute();
-//                        }
-//                        startActivity( intent );
-//                        break;
-//                    case "FAILURE":
-//                        startResultActivity( R.string.update_failure_text,
-//                                R.string.update_failure_explanation );
-//                        break;
-//                    default:
-//                        startResultActivity( R.string.update_malformed_text,
-//                                R.string.update_malformed_explanation_status );
-//                }
-//                */
-//            }
-//        }
-//    }
 
     @OnTextChanged({R.id.nameOnCard, R.id.cardnumber, R.id.expiry_month, R.id.expiry_year, R.id.cvv})
     public void enableSubmitButton() {

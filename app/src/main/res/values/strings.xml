@@ -12,20 +12,16 @@
 
     <!-- Strings related to session creation -->
     <string name="create_denied_text">Access denied</string>
-    <string name="create_denied_explanation">The server refused an attempt to create a
-        session</string>
+    <string name="create_denied_explanation">The server refused an attempt to create a session</string>
 
     <string name="create_error_text">Server error</string>
-    <string name="create_error_explanation">The server encountered an error when trying to create
-        a checkout session</string>
+    <string name="create_error_explanation">The server encountered an error when trying to create a checkout session</string>
 
     <string name="create_unrecognised_text">Unknown error</string>
-    <string name="create_unrecognised_explanation">The server responded with an unrecognised
-        response</string>
+    <string name="create_unrecognised_explanation">The server responded with an unrecognised response</string>
 
     <string name="create_failed_text">Could not connect</string>
-    <string name="create_failed_explanation">An attempt to connect to the server was
-        unsuccessful</string>
+    <string name="create_failed_explanation">An attempt to connect to the server was unsuccessful</string>
 
     <string name="create_timeout_text">Connection timeout</string>
     <string name="create_timeout_explanation">The server did not respond in a timely manner</string>
@@ -48,8 +44,7 @@
     <string name="update_commserror_explanation_badurl">Could not connect to payment gateway - bad URL</string>
 
     <string name="update_timeout_text">Payment gateway timeout</string>
-    <string name="update_timeout_explanation">The payment gateway did not respond in a timely
-        manner</string>
+    <string name="update_timeout_explanation">The payment gateway did not respond in a timely manner</string>
 
     <string name="update_noreply_text">No response</string>
     <string name="update_noreply_explanation">No reply from payment gateway</string>
@@ -88,17 +83,5 @@
     <!-- Strings related to result screen -->
     <string name="title_activity_result">Result</string>
     <string name="result_button">Start again</string>
-
-    <!-- Strings related to Settings -->
-    <string name="title_activity_settings">Preferences</string>
-    <string name="pref_title_create_behaviour">Connection result on \'create\'</string>
-    <string name="pref_title_update_behaviour">Connection result on \'update\'</string>
-    <string name="pref_title_complete_behaviour">Connection result on \'complete\'</string>
-    <string name="pref_title_timeout">Connection timeout in milliseconds; zero for no timeout</string>
-    <string name="pref_title_num_update_attempts">Number of \'update\' attempts</string>
-    <string name="pref_title_username">Username for \'create/complete\' auth</string>
-    <string name="pref_title_password">Password for \'create\'/\'complete\' auth</string>
-    <string name="pref_default_username">test</string>
-    <string name="pref_default_password">Password</string>
 
 </resources>
