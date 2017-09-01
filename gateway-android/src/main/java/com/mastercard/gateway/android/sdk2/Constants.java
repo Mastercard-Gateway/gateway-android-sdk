@@ -15,8 +15,8 @@ final class Constants {
 
     static final String API_PATH_CARDTOKEN = "/payment/cardToken";
 
-    static final String EU_CA_ALIAS = "eu-gateway.mastercard.com";
-    static final String EU_CA =
+    static final String CA_ALIAS = "eu-gateway.mastercard.com";
+    static final String INTERMEDIATE_CA =
             "MIIFAzCCA+ugAwIBAgIEUdNg7jANBgkqhkiG9w0BAQsFADCBvjELMAkGA1UEBhMC" +
             "VVMxFjAUBgNVBAoTDUVudHJ1c3QsIEluYy4xKDAmBgNVBAsTH1NlZSB3d3cuZW50" +
             "cnVzdC5uZXQvbGVnYWwtdGVybXMxOTA3BgNVBAsTMChjKSAyMDA5IEVudHJ1c3Qs" +

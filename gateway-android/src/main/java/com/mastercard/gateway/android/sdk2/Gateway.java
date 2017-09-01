@@ -264,7 +264,7 @@ public class Gateway {
             // create and initialize a KeyStore
             KeyStore keyStore = createSSLKeyStore();
 
-            // create a TrustManager that trusts the CA in our KeyStore
+            // create a TrustManager that trusts the INTERMEDIATE_CA in our KeyStore
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init(keyStore);
 
@@ -281,9 +281,7 @@ public class Gateway {
         keyStore.load(null, null);
 
         // add our trusted cert to the keystore
-        keyStore.setCertificateEntry(Constants.EU_CA_ALIAS, readPemCertificate(Constants.EU_CA));
-        // TODO US
-        // TODO AU
+        keyStore.setCertificateEntry(Constants.CA_ALIAS, readPemCertificate(Constants.INTERMEDIATE_CA));
 
         // add user-provided trusted certs to keystore
         for (String alias : certificates.keySet()) {
