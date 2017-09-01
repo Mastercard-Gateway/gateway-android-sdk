@@ -53,13 +53,13 @@ public abstract class UpdateSessionRequest implements GatewayRequest<UpdateSessi
                 .build();
     }
 
-    @Override
-    public Class<UpdateSessionResponse> getResponseClass() {
-        return UpdateSessionResponse.class;
-    }
-
     public static TypeAdapter<UpdateSessionRequest> typeAdapter(Gson gson) {
         return new AutoValue_UpdateSessionRequest.GsonTypeAdapter(gson);
+    }
+
+    @Override
+    public TypeAdapter<UpdateSessionResponse> getResponseTypeAdapter(Gson gson) {
+        return new AutoValue_UpdateSessionResponse.GsonTypeAdapter(gson);
     }
 
     public static Builder builder() {

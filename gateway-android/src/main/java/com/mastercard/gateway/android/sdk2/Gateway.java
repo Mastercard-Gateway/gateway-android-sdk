@@ -256,7 +256,7 @@ public class Gateway {
         }
 
         // build the response object from the payload
-        return gson.fromJson(response.getPayload(), gatewayRequest.getResponseClass());
+        return gatewayRequest.getResponseTypeAdapter(gson).fromJson(response.getPayload());
     }
 
     TrustManager[] createTrustManagers() {
