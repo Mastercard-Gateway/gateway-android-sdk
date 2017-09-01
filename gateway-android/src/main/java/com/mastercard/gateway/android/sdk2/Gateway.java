@@ -115,9 +115,20 @@ public class Gateway {
      * @param expiryYY
      * @param callback
      */
-    public void updateSessionWithPayerData(String sessionId, String nameOnCard, String cardNumber, String securityCode, String expiryMM, String expiryYY, GatewayCallback<UpdateSessionResponse> callback) {
+    public void updateSessionWithCardInfo(String sessionId, String nameOnCard, String cardNumber, String securityCode, String expiryMM, String expiryYY, GatewayCallback<UpdateSessionResponse> callback) {
+        Card card = buildCard(nameOnCard, cardNumber, securityCode, expiryMM, expiryYY);
+        updateSessionWithCardInfo(sessionId, card, callback);
+    }
+
+    /**
+     *
+     * @param sessionId
+     * @param card
+     * @param callback
+     */
+    public void updateSessionWithCardInfo(String sessionId, Card card, GatewayCallback<UpdateSessionResponse> callback) {
         String url = apiEndpoint + "/merchant/" + merchantId + "/session/" + sessionId;
-        UpdateSessionRequest request = buildUpdateSessionRequest(nameOnCard, cardNumber, securityCode, expiryMM, expiryYY);
+        UpdateSessionRequest request = buildUpdateSessionRequest(card);
 
         runGatewayRequest(url, request, callback);
     }
@@ -131,9 +142,20 @@ public class Gateway {
      * @param expiryYY
      * @return
      */
-    public Single<UpdateSessionResponse> updateSessionWithPayerData(String sessionId, String nameOnCard, String cardNumber, String securityCode, String expiryMM, String expiryYY) {
+    public Single<UpdateSessionResponse> updateSessionWithCardInfo(String sessionId, String nameOnCard, String cardNumber, String securityCode, String expiryMM, String expiryYY) {
+        Card card = buildCard(nameOnCard, cardNumber, securityCode, expiryMM, expiryYY);
+        return updateSessionWithCardInfo(sessionId, card);
+    }
+
+    /**
+     *
+     * @param sessionId
+     * @param card
+     * @return
+     */
+    public Single<UpdateSessionResponse> updateSessionWithCardInfo(String sessionId, Card card) {
         String url = apiEndpoint + "/merchant/" + merchantId + "/session/" + sessionId;
-        UpdateSessionRequest request = buildUpdateSessionRequest(nameOnCard, cardNumber, securityCode, expiryMM, expiryYY);
+        UpdateSessionRequest request = buildUpdateSessionRequest(card);
 
         return runGatewayRequest(url, request);
     }
@@ -161,22 +183,25 @@ public class Gateway {
         return Single.fromCallable(() -> executeGatewayRequest(url, gatewayRequest));
     }
 
-    UpdateSessionRequest buildUpdateSessionRequest(String nameOnCard, String cardNumber, String securityCode, String expiryMM, String expiryYY) {
+    Card buildCard(String nameOnCard, String cardNumber, String securityCode, String expiryMM, String expiryYY) {
+        return Card.builder()
+                .nameOnCard(nameOnCard)
+                .number(cardNumber)
+                .securityCode(securityCode)
+                .expiry(Expiry.builder()
+                        .month(expiryMM)
+                        .year(expiryYY)
+                        .build()
+                )
+                .build();
+    }
+
+    UpdateSessionRequest buildUpdateSessionRequest(Card card) {
         return UpdateSessionRequest.builder()
                 .apiOperation("UPDATE_PAYER_DATA")
                 .sourceOfFunds(SourceOfFunds.builder()
                         .provided(Provided.builder()
-                                .card(Card.builder()
-                                        .nameOnCard(nameOnCard)
-                                        .number(cardNumber)
-                                        .securityCode(securityCode)
-                                        .expiry(Expiry.builder()
-                                                .month(expiryMM)
-                                                .year(expiryYY)
-                                                .build()
-                                        )
-                                        .build()
-                                )
+                                .card(card)
                                 .build()
                         )
                         .build()
