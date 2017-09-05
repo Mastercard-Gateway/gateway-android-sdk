@@ -44,27 +44,62 @@ import io.reactivex.Single;
 
 public class Gateway {
 
-    String apiEndpoint;
-    String merchantId;
+    public enum Region {
+        TEST("test"),
+        EUROPE("eu"),
+        NORTH_AMERICA("na"),
+        AUSTRALIA("ap");
+
+        String urlPrefix;
+
+        Region(String urlPrefix) {
+            this.urlPrefix = urlPrefix;
+        }
+    }
+
+    Region region = Region.TEST;
+    int apiVersion = BuildConfig.DEFAULT_API_VERSION;
     Map<String, String> certificates = new HashMap<>();
+
+    String merchantId;
 
 
     public Gateway() {
     }
 
     /**
+     *
      * @return
      */
-    public String getApiEndpoint() {
-        return apiEndpoint;
+    public Region getRegion() {
+        return region;
     }
 
     /**
-     * @param apiEndpoint
+     *
+     * @param region
+     * @return
      */
-    public Gateway setApiEndpoint(String apiEndpoint) {
-        // TODO sanitize or validate this?
-        this.apiEndpoint = apiEndpoint;
+    public Gateway setRegion(Region region) {
+        this.region = region;
+        return this;
+    }
+
+    /**
+     *
+     * @param regionName
+     * @return
+     */
+    public Gateway setRegion(String regionName) {
+        this.region = Region.TEST;
+
+        for (Region region : Region.values()) {
+            if (region.name().equalsIgnoreCase(regionName)) {
+                this.region = region;
+                break;
+            }
+        }
+
         return this;
     }
 
@@ -127,10 +162,8 @@ public class Gateway {
      * @param callback
      */
     public void updateSessionWithCardInfo(String sessionId, Card card, GatewayCallback<UpdateSessionResponse> callback) {
-        String url = apiEndpoint + "/merchant/" + merchantId + "/session/" + sessionId;
         UpdateSessionRequest request = buildUpdateSessionRequest(card);
-
-        runGatewayRequest(url, request, callback);
+        runGatewayRequest(getUpdateSessionUrl(sessionId), request, callback);
     }
 
     /**
@@ -154,14 +187,18 @@ public class Gateway {
      * @return
      */
     public Single<UpdateSessionResponse> updateSessionWithCardInfo(String sessionId, Card card) {
-        String url = apiEndpoint + "/merchant/" + merchantId + "/session/" + sessionId;
         UpdateSessionRequest request = buildUpdateSessionRequest(card);
-
-        return runGatewayRequest(url, request);
+        return runGatewayRequest(getUpdateSessionUrl(sessionId), request);
     }
 
 
+    String getApiUrl() {
+        return "https://" + region.urlPrefix + "-gateway.mastercard.com/api/rest/version/" + apiVersion;
+    }
 
+    String getUpdateSessionUrl(String sessionId) {
+        return getApiUrl() + "/merchant/" + merchantId + "/session/" + sessionId;
+    }
 
     void runGatewayRequest(String url, GatewayRequest gatewayRequest, GatewayCallback callback) {
         // create handler on current thread
@@ -236,9 +273,9 @@ public class Gateway {
         if (url.getProtocol().startsWith("https")) {
             ((HttpsURLConnection) c).setSSLSocketFactory(context.getSocketFactory());
         }
-        c.setConnectTimeout(Constants.CONNECTION_TIMEOUT);
-        c.setReadTimeout(Constants.SOCKET_TIMEOUT);
-        c.setRequestProperty("User-Agent", Constants.USER_AGENT);
+        c.setConnectTimeout(15000);
+        c.setReadTimeout(60000);
+        c.setRequestProperty("User-Agent", "Gateway-Android-SDK/" + BuildConfig.VERSION_NAME);
         c.setRequestProperty("Content-Type", httpRequest.contentType());
         c.setDoOutput(true);
         c.setRequestMethod(httpRequest.method().name());
@@ -306,7 +343,7 @@ public class Gateway {
         keyStore.load(null, null);
 
         // add our trusted cert to the keystore
-        keyStore.setCertificateEntry(Constants.CA_ALIAS, readPemCertificate(Constants.INTERMEDIATE_CA));
+        keyStore.setCertificateEntry("gateway.mastercard.com", readPemCertificate(BuildConfig.INTERMEDIATE_CA));
 
         // add user-provided trusted certs to keystore
         for (String alias : certificates.keySet()) {

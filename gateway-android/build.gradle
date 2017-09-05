@@ -18,8 +18,12 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 26
+        versionName version
 
         consumerProguardFiles 'proguard.pro'
+
+        buildConfigField "Integer", "DEFAULT_API_VERSION", defaultApiVersion
+        buildConfigField "String", "INTERMEDIATE_CA", '"' + intermediateCa + '"'
     }
 
     compileOptions {
