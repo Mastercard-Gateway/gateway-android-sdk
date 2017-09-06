@@ -48,7 +48,7 @@ public class Gateway {
         TEST("test"),
         EUROPE("eu"),
         NORTH_AMERICA("na"),
-        AUSTRALIA("ap");
+        ASIA_PACIFIC("ap");
 
         String urlPrefix;
 
@@ -64,6 +64,9 @@ public class Gateway {
     String merchantId;
 
 
+    /**
+     *
+     */
     public Gateway() {
     }
 
@@ -100,6 +103,24 @@ public class Gateway {
             }
         }
 
+        return this;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public int getApiVersion() {
+        return apiVersion;
+    }
+
+    /**
+     *
+     * @param version
+     * @return
+     */
+    public Gateway setApiVersion(int version) {
+        apiVersion = version;
         return this;
     }
 
@@ -163,6 +184,16 @@ public class Gateway {
      */
     public void updateSessionWithCardInfo(String sessionId, Card card, GatewayCallback<UpdateSessionResponse> callback) {
         UpdateSessionRequest request = buildUpdateSessionRequest(card);
+        updateSession(sessionId, request, callback);
+    }
+
+    /**
+     *
+     * @param sessionId
+     * @param request
+     * @param callback
+     */
+    public void updateSession(String sessionId, UpdateSessionRequest request, GatewayCallback<UpdateSessionResponse> callback) {
         runGatewayRequest(getUpdateSessionUrl(sessionId), request, callback);
     }
 
@@ -188,6 +219,16 @@ public class Gateway {
      */
     public Single<UpdateSessionResponse> updateSessionWithCardInfo(String sessionId, Card card) {
         UpdateSessionRequest request = buildUpdateSessionRequest(card);
+        return updateSession(sessionId, request);
+    }
+
+    /**
+     *
+     * @param sessionId
+     * @param request
+     * @return
+     */
+    public Single<UpdateSessionResponse> updateSession(String sessionId, UpdateSessionRequest request) {
         return runGatewayRequest(getUpdateSessionUrl(sessionId), request);
     }
 
@@ -312,7 +353,7 @@ public class Gateway {
         if (!response.isOk()) {
             GatewayException exception = new GatewayException();
             exception.setStatusCode(response.getStatusCode());
-            exception.setErrorResponse(gson.fromJson(response.getPayload(), ErrorResponse.class));
+            exception.setErrorResponse(ErrorResponse.typeAdapter(gson).fromJson(response.getPayload()));
 
             throw exception;
         }

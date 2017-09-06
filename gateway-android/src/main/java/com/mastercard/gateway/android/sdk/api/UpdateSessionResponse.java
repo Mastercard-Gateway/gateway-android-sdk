@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import com.google.auto.value.AutoValue;
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
+import com.google.gson.annotations.SerializedName;
 
 @AutoValue
 public abstract class UpdateSessionResponse implements GatewayResponse, Parcelable {
@@ -15,7 +16,8 @@ public abstract class UpdateSessionResponse implements GatewayResponse, Parcelab
     public abstract String correlationId();
 
     @Nullable
-    public abstract String session();
+    @SerializedName("session")
+    public abstract String sessionId();
 
     @Nullable
     public abstract String version();
@@ -33,7 +35,7 @@ public abstract class UpdateSessionResponse implements GatewayResponse, Parcelab
     public abstract static class Builder {
         public abstract Builder correlationId(String correlationId);
 
-        public abstract Builder session(String session);
+        public abstract Builder sessionId(String sessionId);
 
         public abstract Builder version(String version);
 
