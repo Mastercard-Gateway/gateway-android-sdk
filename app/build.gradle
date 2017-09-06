@@ -16,9 +16,9 @@ android {
 
     buildTypes {
         all {
-            buildConfigField( 'String', 'MERCHANT_ID', '"' + merchantId + '"')
-            buildConfigField( 'String', 'GATEWAY_URL', '"' + gatewayUrl + '"')
-            buildConfigField( 'String', 'HEROKU_URL', '"' + herokuUrl + '"')
+            buildConfigField 'String', 'GATEWAY_MERCHANT_ID', '"' + gatewayMerchantId + '"'
+            buildConfigField 'String', 'GATEWAY_REGION', '"' + gatewayRegion + '"'
+            buildConfigField 'String', 'MERCHANT_SERVICE_URL', '"' + merchantServiceUrl + '"'
         }
         release {
             minifyEnabled false

@@ -16,7 +16,7 @@ public abstract class AbstractActivity extends AppCompatActivity {
         setContentView( getContentView() );
         Log.i( getClass().getSimpleName(), "Displaying" );
 
-        apiController.setHerokuUrl(BuildConfig.HEROKU_URL);
+        apiController.setMerchantServiceUrl(BuildConfig.MERCHANT_SERVICE_URL);
 
         ButterKnife.bind( this );
     }

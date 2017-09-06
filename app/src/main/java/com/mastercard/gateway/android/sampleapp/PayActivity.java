@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.UUID;
+
 import butterknife.Bind;
 import butterknife.OnClick;
 
@@ -36,7 +38,13 @@ public class PayActivity extends AbstractActivity {
     protected void doConfirm() {
         confirmBtn.setEnabled(false);
 
-        apiController.completeSession(sessionId, getResources().getString(R.string.main_activity_price), "USD", new CompleteSessionCallback());
+        // random order/txn IDs for example purposes
+        String orderId = UUID.randomUUID().toString();
+        orderId = orderId.substring(0, orderId.indexOf('-'));
+        String transactionId = UUID.randomUUID().toString();
+        transactionId = transactionId.substring(0, transactionId.indexOf('-'));
+
+        apiController.completeSession(sessionId, orderId, transactionId, getResources().getString(R.string.main_activity_price), "USD", new CompleteSessionCallback());
     }
 
     class CompleteSessionCallback implements ApiController.CompleteSessionCallback {

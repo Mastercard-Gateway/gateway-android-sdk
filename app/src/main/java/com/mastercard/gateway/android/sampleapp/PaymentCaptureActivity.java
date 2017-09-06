@@ -11,13 +11,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.gson.JsonParseException;
-import com.mastercard.gateway.android.sdk.CommsException;
-import com.mastercard.gateway.android.sdk.CommsTimeoutException;
-import com.mastercard.gateway.android.sdk.GatewayErrorException;
-import com.mastercard.gateway.android.sdk.ValidationException;
-import com.mastercard.gateway.android.sdk2.Gateway;
-import com.mastercard.gateway.android.sdk2.api.GatewayCallback;
-import com.mastercard.gateway.android.sdk2.api.UpdateSessionResponse;
+import com.mastercard.gateway.android.sdk.Gateway;
+import com.mastercard.gateway.android.sdk.api.GatewayCallback;
+import com.mastercard.gateway.android.sdk.api.UpdateSessionResponse;
 
 import java.net.MalformedURLException;
 import java.util.Arrays;
@@ -61,8 +57,8 @@ public class PaymentCaptureActivity extends AbstractActivity {
         super.onCreate(savedInstanceState);
         prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
-        gateway.setMerchantId(BuildConfig.MERCHANT_ID)
-                .setApiEndpoint(BuildConfig.GATEWAY_URL);
+        gateway.setRegion(BuildConfig.GATEWAY_REGION)
+                .setMerchantId(BuildConfig.GATEWAY_MERCHANT_ID);
 
         sessionField.setText(getIntent().getStringExtra("SESSION_ID"));
         nameOnCardField.requestFocus();
@@ -89,8 +85,7 @@ public class PaymentCaptureActivity extends AbstractActivity {
         Log.i("Product ID", productId);
 
         submitButton.setEnabled(false);
-
-        gateway.updateSessionWithPayerData(sessionId, nameOnCard, cardNumber, cvv, expiryMM, expiryYY, new UpdateSessionCallback());
+        gateway.updateSessionWithCardInfo(sessionId, nameOnCard, cardNumber, cvv, expiryMM, expiryYY, new UpdateSessionCallback());
     }
 
     private String maskedCardNumber() {
@@ -121,23 +116,9 @@ public class PaymentCaptureActivity extends AbstractActivity {
             if (throwable instanceof MalformedURLException) {
                 startResultActivity(R.string.update_commserror_text,
                         R.string.update_commserror_explanation_badurl);
-            } else if (throwable instanceof CommsTimeoutException) {
-                startResultActivity(R.string.update_timeout_text,
-                        R.string.update_timeout_explanation);
-            } else if (throwable instanceof CommsException) {
-                startResultActivity(R.string.update_commserror_text,
-                        R.string.update_commserror_explanation);
             } else if (throwable instanceof JsonParseException) {
                 startResultActivity(R.string.update_malformed_text,
                         R.string.update_malformed_explanation_parse);
-            } else if (throwable instanceof GatewayErrorException) {
-                GatewayErrorException gee = (GatewayErrorException) throwable;
-                startResultActivity(R.string.update_error_text,
-                        gee.getResponse().getError().getExplanation());
-            } else if (throwable instanceof ValidationException) {
-                startResultActivity(R.string.update_malformed_text,
-                        getResources().getString(R.string.update_malformed_explanation_missing) +
-                                ((ValidationException) throwable).path);
             } else {
                 Log.e(PaymentCaptureActivity.class.getSimpleName(),
                         "Unexpected error type " + throwable.getClass().getName());

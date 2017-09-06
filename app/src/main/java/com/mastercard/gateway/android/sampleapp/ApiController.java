@@ -38,7 +38,7 @@ public class ApiController {
 
     static final Gson GSON = new GsonBuilder().create();
 
-    String herokuUrl;
+    String merchantServiceUrl;
 
 
     interface CreateSessionCallback {
@@ -60,8 +60,8 @@ public class ApiController {
         return INSTANCE;
     }
 
-    public void setHerokuUrl(String url) {
-        herokuUrl = url;
+    public void setMerchantServiceUrl(String url) {
+        merchantServiceUrl = url;
     }
 
     public void createSession(final CreateSessionCallback callback) {
@@ -93,7 +93,7 @@ public class ApiController {
         }).start();
     }
 
-    public void completeSession(final String sessionId, final String amount, final String currency, final CompleteSessionCallback callback) {
+    public void completeSession(final String sessionId, final String orderId, final String transactionId, final String amount, final String currency, final CompleteSessionCallback callback) {
         final Handler handler = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(Message message) {
@@ -113,7 +113,7 @@ public class ApiController {
             public void run() {
                 Message m = handler.obtainMessage();
                 try {
-                    m.obj = executeCompleteSession(sessionId, amount, currency);
+                    m.obj = executeCompleteSession(sessionId, orderId, transactionId, amount, currency);
                 } catch (Exception e) {
                     m.obj = e;
                 }
@@ -123,7 +123,7 @@ public class ApiController {
     }
 
     String executeCreateSession() throws Exception {
-        String jsonResponse = doJsonRequest(new URL(herokuUrl + "/session.php"), "", "POST", null, null, HttpsURLConnection.HTTP_OK);
+        String jsonResponse = doJsonRequest(new URL(merchantServiceUrl + "/session.php"), "", "POST", null, null, HttpsURLConnection.HTTP_OK);
 
         Type type = new TypeToken<Map<String, Object>>() {
         }.getType();
@@ -138,14 +138,30 @@ public class ApiController {
         return sessionId;
     }
 
-    String executeCompleteSession(String sessionId, String amount, String currency) throws Exception {
+    String executeCompleteSession(String sessionId, String orderId, String transactionId, String amount, String currency) throws Exception {
+        JsonObject order = new JsonObject();
+        order.addProperty("amount", amount);
+        order.addProperty("currency", currency);
+
+        JsonObject session = new JsonObject();
+        session.addProperty("id", sessionId);
+
+        JsonObject sourceOfFunds = new JsonObject();
+        sourceOfFunds.addProperty("type", "CARD");
+
+        JsonObject transaction = new JsonObject();
+        transaction.addProperty("frequency", "SINGLE");
+
         JsonObject json = new JsonObject();
-        json.addProperty("sessionId", sessionId);
-        json.addProperty("amount", amount);
-        json.addProperty("currency", currency);
+        json.addProperty("apiOperation", "PAY");
+        json.add("order", order);
+        json.add("session", session);
+        json.add("sourceOfFunds", sourceOfFunds);
+        json.add("transaction", transaction);
+
         String jsonString = GSON.toJson(json);
 
-        String jsonResponse = doJsonRequest(new URL(herokuUrl + "/session.php"), jsonString, "PUT", null, null, HttpsURLConnection.HTTP_OK);
+        String jsonResponse = doJsonRequest(new URL(merchantServiceUrl + "/transaction.php?order=" + orderId + "&transaction=" + transactionId), jsonString, "PUT", null, null, HttpsURLConnection.HTTP_OK);
 
         Type type = new TypeToken<Map<String, Object>>() {
         }.getType();
