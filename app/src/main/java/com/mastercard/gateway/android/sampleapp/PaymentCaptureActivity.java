@@ -57,8 +57,8 @@ public class PaymentCaptureActivity extends AbstractActivity {
         super.onCreate(savedInstanceState);
         prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
-        gateway.setRegion(BuildConfig.GATEWAY_REGION)
-                .setMerchantId(BuildConfig.GATEWAY_MERCHANT_ID);
+        gateway.setMerchantId(BuildConfig.GATEWAY_MERCHANT_ID)
+            .setRegion(BuildConfig.GATEWAY_REGION);
 
         sessionField.setText(getIntent().getStringExtra("SESSION_ID"));
         nameOnCardField.requestFocus();
