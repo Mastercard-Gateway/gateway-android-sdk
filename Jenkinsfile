@@ -15,7 +15,7 @@ node {
     sh "./gradlew gateway-android:generatePomFileForAarPublication gateway-android:artifactoryPublish"
 
     stage 'Archive'
-    androidLint canComputeNew: false, canRunOnFailed: true, defaultEncoding: '', failedNewHigh: '0', healthy: '', pattern: 'app/build/**/lint-*.xml', unHealthy: '', unstableTotalAll: '200'
+    androidLint canComputeNew: false, canRunOnFailed: true, defaultEncoding: '', failedNewHigh: '0', healthy: '', pattern: 'gateway-android/build/**/lint-*.xml', unHealthy: '', unstableTotalAll: '200'
     step([$class: 'JUnitResultArchiver', testResults: 'gateway-android/build/test-results/**/TEST-*.xml'])
     step([$class: 'ArtifactArchiver', artifacts: 'gateway-android/build/outputs/**/*.aar', fingerprint: true])
     properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactNumToKeepStr: '10', numToKeepStr: '10']]])
