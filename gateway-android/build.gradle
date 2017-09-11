@@ -40,7 +40,7 @@ android {
     }
 }
 
-// define an 'optional'
+// define an 'optional' dependency
 configurations {
     optional
     compile.extendsFrom optional
@@ -81,15 +81,15 @@ publishing {
                 root.appendNode('url', 'https://www.mastercard.com/gateway')
 
                 // adds license info
-//                def license = root.appendNode('licenses').appendNode('license')
-//                license.appendNode('name', 'The MIT License')
-//                license.appendNode('url', 'http://opensource.org/licenses/MIT')
-//                license.appendNode('distribution', 'repo')
+                def license = root.appendNode('licenses').appendNode('license')
+                license.appendNode('name', 'Apache License, Version 2.0')
+                license.appendNode('url', 'https://www.apache.org/licenses/LICENSE-2.0.txt')
+                license.appendNode('distribution', 'repo')
 
                 // adds source control info
-//                def scm = root.appendNode('scm')
-//                scm.appendNode('url', 'https://github.com/simplifycom/simplify-android-sample')
-//                scm.appendNode('connection', 'https://github.com/simplifycom/simplify-android-sample.git')
+                def scm = root.appendNode('scm')
+                scm.appendNode('url', 'https://github.com/Mastercard/gateway-android-sdk-sample')
+                scm.appendNode('connection', 'https://github.com/Mastercard/gateway-android-sdk-sample.git')
 
                 // adds dependencies
                 def dependenciesNode = root.appendNode('dependencies')
@@ -107,19 +107,11 @@ publishing {
                 }
 
                 // adds developer info
-//                def developers = root.appendNode('developers')
-//                def dev = developers.appendNode('developer')
-//                dev.appendNode('id', 'nak5ive')
-//                dev.appendNode('name', 'Nevada Kent')
-//                dev.appendNode('email', 'nak5ive@gmail.com')
-//                dev = developers.appendNode('developer')
-//                dev.appendNode('id', 'rubixhacker')
-//                dev.appendNode('name', 'Stewart Boling')
-//                dev.appendNode('email', 'rubixhacker@gmail.com')
-//                dev = developers.appendNode('developer')
-//                dev.appendNode('id', 'nitinshambhu')
-//                dev.appendNode('name', 'Nitin Shambhu')
-//                dev.appendNode('email', 'nitinshambhu@hotmail.com')
+                def developers = root.appendNode('developers')
+                def dev = developers.appendNode('developer')
+                dev.appendNode('id', 'nak5ive')
+                dev.appendNode('name', 'Nevada Kent')
+                dev.appendNode('email', 'nak5ive@gmail.com')
             }
         }
     }
