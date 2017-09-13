@@ -3,7 +3,6 @@ package com.mastercard.gateway.android.sdk;
 
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.VisibleForTesting;
 import android.util.Base64;
 import android.util.Log;
 
@@ -59,16 +58,9 @@ import io.reactivex.Single;
 @SuppressWarnings("unused,WeakerAccess")
 public class Gateway {
 
-    @VisibleForTesting
     int apiVersion = BuildConfig.DEFAULT_API_VERSION;
-
-    @VisibleForTesting
     Map<String, Certificate> certificates = new HashMap<>();
-
-    @VisibleForTesting
     String merchantId;
-
-    @VisibleForTesting
     URL baseUrl;
 
 
@@ -358,17 +350,14 @@ public class Gateway {
     }
 
 
-    @VisibleForTesting
     String getApiUrl() {
         return baseUrl.toString() + "/api/rest/version/" + apiVersion;
     }
 
-    @VisibleForTesting
     String getUpdateSessionUrl(String sessionId) {
         return getApiUrl() + "/merchant/" + merchantId + "/session/" + sessionId;
     }
 
-    @VisibleForTesting
     void runGatewayRequest(String url, GatewayRequest gatewayRequest, GatewayCallback callback) {
         // create handler on current thread
         Handler handler = new Handler(msg -> handleCallbackMessage(callback, msg.obj));
@@ -385,12 +374,10 @@ public class Gateway {
         }).start();
     }
 
-    @VisibleForTesting
     <T extends GatewayResponse> Single<T> runGatewayRequest(String url, GatewayRequest<T> gatewayRequest) {
         return Single.fromCallable(() -> executeGatewayRequest(url, gatewayRequest));
     }
 
-    @VisibleForTesting
     Card buildCard(String nameOnCard, String cardNumber, String securityCode, String expiryMM, String expiryYY) {
         return Card.builder()
                 .nameOnCard(nameOnCard)
@@ -404,7 +391,6 @@ public class Gateway {
                 .build();
     }
 
-    @VisibleForTesting
     UpdateSessionRequest buildUpdateSessionRequest(Card card) {
         return UpdateSessionRequest.builder()
                 .apiOperation("UPDATE_PAYER_DATA")
@@ -419,7 +405,6 @@ public class Gateway {
     }
 
     // handler callback method when executing a request on a new thread
-    @VisibleForTesting
     @SuppressWarnings("unchecked")
     <T extends GatewayResponse> boolean handleCallbackMessage(GatewayCallback<T> callback, Object arg) {
         if (callback != null) {
@@ -432,7 +417,23 @@ public class Gateway {
         return true;
     }
 
-    @VisibleForTesting
+    TrustManager[] createTrustManagers() {
+        try {
+            // create and initialize a KeyStore
+            KeyStore keyStore = createSSLKeyStore();
+
+            // create a TrustManager that trusts the INTERMEDIATE_CA in our KeyStore
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            tmf.init(keyStore);
+
+            return tmf.getTrustManagers();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new TrustManager[0];
+    }
+
     <T extends GatewayResponse> T executeGatewayRequest(String endpoint, GatewayRequest<T> gatewayRequest) throws Exception {
         // build the http request from the gateway request object
         HttpRequest httpRequest = gatewayRequest.buildHttpRequest().withEndpoint(endpoint);
@@ -499,25 +500,6 @@ public class Gateway {
         return gatewayRequest.getResponseTypeAdapter(gson).fromJson(response.getPayload());
     }
 
-    @VisibleForTesting
-    TrustManager[] createTrustManagers() {
-        try {
-            // create and initialize a KeyStore
-            KeyStore keyStore = createSSLKeyStore();
-
-            // create a TrustManager that trusts the INTERMEDIATE_CA in our KeyStore
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            tmf.init(keyStore);
-
-            return tmf.getTrustManagers();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return new TrustManager[0];
-    }
-
-    @VisibleForTesting
     KeyStore createSSLKeyStore() throws Exception {
         KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
         keyStore.load(null, null);
@@ -533,14 +515,12 @@ public class Gateway {
         return keyStore;
     }
 
-    @VisibleForTesting
     Certificate readPemCertificate(String pemCert) throws CertificateException {
         // add our trusted cert to the keystore
         ByteArrayInputStream is = new ByteArrayInputStream(Base64.decode(pemCert, Base64.DEFAULT));
         return CertificateFactory.getInstance("X.509").generateCertificate(is);
     }
 
-    @VisibleForTesting
     void logRequest(HttpURLConnection c, String data) {
         String log = "REQUEST: " + c.getRequestMethod() + " " + c.getURL().toString();
 
@@ -564,7 +544,6 @@ public class Gateway {
         }
     }
 
-    @VisibleForTesting
     void logResponse(HttpResponse response) {
         String log = "RESPONSE: ";
 
