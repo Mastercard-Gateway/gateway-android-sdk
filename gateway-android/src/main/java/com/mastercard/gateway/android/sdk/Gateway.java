@@ -521,7 +521,7 @@ public class Gateway {
         return CertificateFactory.getInstance("X.509").generateCertificate(is);
     }
 
-    void logRequest(HttpURLConnection c, String data) {
+    private void logRequest(HttpURLConnection c, String data) {
         String log = "REQUEST: " + c.getRequestMethod() + " " + c.getURL().toString();
 
         if (data != null) {
@@ -544,7 +544,7 @@ public class Gateway {
         }
     }
 
-    void logResponse(HttpResponse response) {
+    private void logResponse(HttpResponse response) {
         String log = "RESPONSE: ";
 
         // log response headers
