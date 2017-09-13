@@ -63,14 +63,31 @@ dependencies {
     testCompile 'org.mockito:mockito-core:2.0.54-beta'
 }
 
+task androidJavadocs(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    classifier = 'javadoc'
+    from androidJavadocs.destinationDir
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
 publishing {
     publications {
         aar(MavenPublication) {
             groupId = 'com.mastercard.gateway'
             artifactId project.name
             version = artifactVersion
-            artifact "${project.buildDir}/outputs/aar/${project.name}-release.aar"
 
+            artifact bundleRelease
+            artifact androidJavadocsJar
+            artifact androidSourcesJar
 
             pom.withXml {
                 def root = asNode()
