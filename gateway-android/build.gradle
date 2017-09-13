@@ -1,0 +1,161 @@
+def artifactVersion = properties.version
+
+// env variables defined in CI server
+def artifactoryUser = System.getenv('bamboo_artifactory_publisher_user')
+def artifactoryPassword = System.getenv('bamboo_artifactory_publisher_password')
+
+
+apply plugin: 'com.android.library'
+apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'com.jfrog.artifactory'
+apply plugin: 'maven-publish'
+
+android {
+
+    compileSdkVersion 26
+    buildToolsVersion '26.0.1'
+
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 26
+        versionName version
+
+        consumerProguardFiles 'proguard.pro'
+
+        buildConfigField "Integer", "DEFAULT_API_VERSION", defaultApiVersion
+        buildConfigField "String", "INTERMEDIATE_CA", '"' + intermediateCa + '"'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    buildTypes {
+        release
+    }
+}
+
+// define an 'optional' dependency
+configurations {
+    optional
+    compile.extendsFrom optional
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.google.code.gson:gson:2.8.1'
+    optional 'io.reactivex.rxjava2:rxjava:2.1.3'
+    provided 'com.android.support:support-annotations:26.0.0'
+
+    //AutoValue
+    provided 'com.google.auto.value:auto-value:1.3'
+    annotationProcessor 'com.ryanharter.auto.value:auto-value-parcel:0.2.5'
+    annotationProcessor 'com.ryanharter.auto.value:auto-value-gson:0.5.0'
+    provided 'com.ryanharter.auto.value:auto-value-gson:0.5.0'
+    annotationProcessor 'com.gabrielittner.auto.value:auto-value-with:1.0.0'
+
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-core:2.0.54-beta'
+}
+
+task androidJavadocs(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    classifier = 'javadoc'
+    from androidJavadocs.destinationDir
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+publishing {
+    publications {
+        aar(MavenPublication) {
+            groupId = 'com.mastercard.gateway'
+            artifactId project.name
+            version = artifactVersion
+
+            artifact bundleRelease
+            artifact androidJavadocsJar
+            artifact androidSourcesJar
+
+            pom.withXml {
+                def root = asNode()
+
+                // adds basic info
+                root.appendNode('name', 'Mastercard Payment Gateway Android SDK')
+                root.appendNode('description', 'The Android SDK for Mastercard Payment Gateway')
+                root.appendNode('url', 'https://www.mastercard.com/gateway')
+
+                // adds license info
+                def license = root.appendNode('licenses').appendNode('license')
+                license.appendNode('name', 'Apache License, Version 2.0')
+                license.appendNode('url', 'https://www.apache.org/licenses/LICENSE-2.0.txt')
+                license.appendNode('distribution', 'repo')
+
+                // adds source control info
+                def scm = root.appendNode('scm')
+                scm.appendNode('url', 'https://github.com/Mastercard/gateway-android-sdk-sample')
+                scm.appendNode('connection', 'https://github.com/Mastercard/gateway-android-sdk-sample.git')
+
+                // adds dependencies
+                def dependenciesNode = root.appendNode('dependencies')
+                configurations.compile.allDependencies.each { dp ->
+                    if (dp.group) {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', dp.group)
+                        dependencyNode.appendNode('artifactId', dp.name)
+                        dependencyNode.appendNode('version', dp.version)
+
+                        if (configurations.optional.allDependencies.contains(dp)) {
+                            dependencyNode.appendNode('optional', true)
+                        }
+                    }
+                }
+
+                // adds developer info
+                def developers = root.appendNode('developers')
+                def dev = developers.appendNode('developer')
+                dev.appendNode('id', 'nak5ive')
+                dev.appendNode('name', 'Nevada Kent')
+                dev.appendNode('email', 'nak5ive@gmail.com')
+            }
+        }
+    }
+}
+
+artifactory {
+    contextUrl = 'http://tools.labs.mastercard.com/artifactory'
+    publish {
+        repository {
+            // The Artifactory repository key to publish to
+            repoKey = artifactVersion.endsWith('SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local'
+            username = artifactoryUser // The publisher user name
+            password = artifactoryPassword // The publisher password
+            maven = true
+        }
+        defaults {
+            publishArtifacts = true
+            publications('aar')
+            publishPom = true //Publish generated POM files to Artifactory (true by default)
+            publishIvy = false //Publish generated Ivy descriptor files to Artifactory (true by default)
+        }
+    }
+    resolve {
+        repository {
+            repoKey = 'repo'
+            username = artifactoryUser // The resolver user name
+            password = artifactoryPassword // The resolver password
+        }
+    }
+}

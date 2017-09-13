@@ -1,9 +1,0 @@
-{
-  "error": {
-    "cause": "INVALID_REQUEST",
-    "explanation": "Value '4' is invalid.",
-    "field": "sourceOfFunds.provided.card.number",
-    "validationType": "INVALID"
-  },
-  "result": "ERROR"
-}
