@@ -11,12 +11,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URL;
+import java.security.KeyStore;
 import java.security.cert.Certificate;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -244,5 +246,28 @@ public class GatewayTest {
         gateway.handleCallbackMessage(callback, arg);
 
         verify(callback).onSuccess(arg);
+    }
+
+    @Test
+    public void testCreateSslKeystoreContainsInternalCertificate() throws Exception {
+        doReturn(mock(Certificate.class)).when(gateway).readPemCertificate(any());
+
+        KeyStore keyStore = gateway.createSslKeyStore();
+
+        assertTrue(keyStore.containsAlias("gateway.mastercard.com"));
+    }
+
+    @Test
+    public void testCreateSslKeystoreContainsAdditionalTrustedCertificates() throws Exception {
+        doReturn(mock(Certificate.class)).when(gateway).readPemCertificate(any());
+
+        gateway.addTrustedCertificate("alias1", mock(Certificate.class));
+        gateway.addTrustedCertificate("alias2", mock(Certificate.class));
+
+        KeyStore keyStore = gateway.createSslKeyStore();
+
+        assertEquals(3, keyStore.size());
+        assertTrue(keyStore.containsAlias("custom.alias1"));
+        assertTrue(keyStore.containsAlias("custom.alias2"));
     }
 }

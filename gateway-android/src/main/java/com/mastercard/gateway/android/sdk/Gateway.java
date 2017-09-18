@@ -417,30 +417,12 @@ public class Gateway {
         return true;
     }
 
-    TrustManager[] createTrustManagers() {
-        try {
-            // create and initialize a KeyStore
-            KeyStore keyStore = createSSLKeyStore();
-
-            // create a TrustManager that trusts the INTERMEDIATE_CA in our KeyStore
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            tmf.init(keyStore);
-
-            return tmf.getTrustManagers();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return new TrustManager[0];
-    }
-
     <T extends GatewayResponse> T executeGatewayRequest(String endpoint, GatewayRequest<T> gatewayRequest) throws Exception {
         // build the http request from the gateway request object
         HttpRequest httpRequest = gatewayRequest.buildHttpRequest().withEndpoint(endpoint);
 
         // init ssl context with limiting trust managers
-        SSLContext context = SSLContext.getInstance("TLS");
-        context.init(null, createTrustManagers(), null);
+        SSLContext context = createSslContext();
 
         // init connection
         URL url = new URL(httpRequest.endpoint());
@@ -500,7 +482,28 @@ public class Gateway {
         return gatewayRequest.getResponseTypeAdapter(gson).fromJson(response.getPayload());
     }
 
-    KeyStore createSSLKeyStore() throws Exception {
+    SSLContext createSslContext() throws Exception {
+        TrustManager[] trustManagers = new TrustManager[0];
+        try {
+            // create and initialize a KeyStore
+            KeyStore keyStore = createSslKeyStore();
+
+            // create a TrustManager that trusts the INTERMEDIATE_CA in our KeyStore
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            tmf.init(keyStore);
+
+            trustManagers = tmf.getTrustManagers();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        SSLContext context = SSLContext.getInstance("TLS");
+        context.init(null, trustManagers, null);
+
+        return context;
+    }
+
+    KeyStore createSslKeyStore() throws Exception {
         KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
         keyStore.load(null, null);
 
@@ -509,7 +512,7 @@ public class Gateway {
 
         // add user-provided trusted certs to keystore
         for (String alias : certificates.keySet()) {
-            keyStore.setCertificateEntry(alias, certificates.get(alias));
+            keyStore.setCertificateEntry("custom." + alias, certificates.get(alias));
         }
 
         return keyStore;
