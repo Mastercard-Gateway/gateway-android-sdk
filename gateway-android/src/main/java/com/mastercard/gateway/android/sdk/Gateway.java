@@ -3,7 +3,6 @@ package com.mastercard.gateway.android.sdk;
 
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.VisibleForTesting;
 import android.util.Base64;
 import android.util.Log;
 
@@ -16,7 +15,6 @@ import com.mastercard.gateway.android.sdk.api.GatewayRequest;
 import com.mastercard.gateway.android.sdk.api.GatewayResponse;
 import com.mastercard.gateway.android.sdk.api.HttpRequest;
 import com.mastercard.gateway.android.sdk.api.HttpResponse;
-import com.mastercard.gateway.android.sdk.api.Region;
 import com.mastercard.gateway.android.sdk.api.UpdateSessionRequest;
 import com.mastercard.gateway.android.sdk.api.UpdateSessionResponse;
 import com.mastercard.gateway.android.sdk.api.model.Card;
@@ -27,6 +25,7 @@ import com.mastercard.gateway.android.sdk.api.model.SourceOfFunds;
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
@@ -45,31 +44,24 @@ import javax.net.ssl.TrustManagerFactory;
 import io.reactivex.Single;
 
 /**
- * The public interface to the Mastercard Payment Gateway SDK.
+ * The public interface to the Gateway SDK.
  * <p>
  * Example use case:
  * <p>
  * <code>
  * Gateway gateway = new Gateway();
- * gateway.setRegion(Gateway.Region.TEST);
- * gateway.setMerchantId("your_merchant_id");
+ * gateway.setBaseUrl("https://your-gateway-url.com");
+ * gateway.setMerchantId("your-merchant-id");
  * gateway.
  * </code>
  */
 @SuppressWarnings("unused,WeakerAccess")
 public class Gateway {
 
-    @VisibleForTesting
-    Region region = Region.TEST;
-
-    @VisibleForTesting
     int apiVersion = BuildConfig.DEFAULT_API_VERSION;
-
-    @VisibleForTesting
     Map<String, Certificate> certificates = new HashMap<>();
-
-    @VisibleForTesting
     String merchantId;
+    URL baseUrl;
 
 
     /**
@@ -79,45 +71,55 @@ public class Gateway {
     }
 
     /**
-     * Gets the current <tt>Region</tt>.
+     * Gets the current base url for the Gateway
      *
-     * @return The current region
+     * @return The base url
      */
-    public Region getRegion() {
-        return region;
+    public URL getBaseUrl() {
+        return baseUrl;
     }
 
     /**
-     * Sets the current <tt>Region</tt>.
+     * Sets the base url for the Gateway.
+     * <p>
+     * Example:
+     * <code>
+     * gateway.setBaseUrl("https://some-gateway-url.com")
+     * </code>
      *
-     * @param region A region
+     * @param url The Gateway url
      * @return The <tt>Gateway</tt> instance
-     * @throws IllegalArgumentException If the region provided is null
      */
-    public Gateway setRegion(Region region) {
-        if (region == null) {
-            throw new IllegalArgumentException("Region may not be null");
+    public Gateway setBaseUrl(String url) {
+        if (url == null) {
+            throw new IllegalArgumentException("Url may not be null");
         }
-        this.region = region;
+
+        try {
+            setBaseUrl(new URL(url));
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Incorrect url format", e);
+        }
+
         return this;
     }
 
     /**
-     * Sets the current region. If no matching <tt>Region</tt> is found,
-     * {@link Region#TEST} will be used.
+     * Sets the base url for the Gateway
      *
-     * @param regionName The name of a valid <tt>Region</tt>
+     * @param url The Gateway url
      * @return The <tt>Gateway</tt> instance
-     * @see Region
      */
-    public Gateway setRegion(String regionName) {
-        this.region = Region.TEST;
+    public Gateway setBaseUrl(URL url) {
+        if (url == null) {
+            throw new IllegalArgumentException("Url may not be null");
+        }
 
-        for (Region region : Region.values()) {
-            if (region.name().equalsIgnoreCase(regionName)) {
-                this.region = region;
-                break;
-            }
+        try {
+            // store updated baseUrl with only protocol/host from original
+            this.baseUrl = new URL("https", url.getHost(), "");
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Incorrect url format", e);
         }
 
         return this;
@@ -349,7 +351,7 @@ public class Gateway {
 
 
     String getApiUrl() {
-        return "https://" + region.getUrlPrefix() + "-gateway.mastercard.com/api/rest/version/" + apiVersion;
+        return baseUrl.toString() + "/api/rest/version/" + apiVersion;
     }
 
     String getUpdateSessionUrl(String sessionId) {
@@ -420,8 +422,7 @@ public class Gateway {
         HttpRequest httpRequest = gatewayRequest.buildHttpRequest().withEndpoint(endpoint);
 
         // init ssl context with limiting trust managers
-        SSLContext context = SSLContext.getInstance("TLS");
-        context.init(null, createTrustManagers(), null);
+        SSLContext context = createSslContext();
 
         // init connection
         URL url = new URL(httpRequest.endpoint());
@@ -481,24 +482,28 @@ public class Gateway {
         return gatewayRequest.getResponseTypeAdapter(gson).fromJson(response.getPayload());
     }
 
-    TrustManager[] createTrustManagers() {
+    SSLContext createSslContext() throws Exception {
+        TrustManager[] trustManagers = new TrustManager[0];
         try {
             // create and initialize a KeyStore
-            KeyStore keyStore = createSSLKeyStore();
+            KeyStore keyStore = createSslKeyStore();
 
             // create a TrustManager that trusts the INTERMEDIATE_CA in our KeyStore
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init(keyStore);
 
-            return tmf.getTrustManagers();
+            trustManagers = tmf.getTrustManagers();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return new TrustManager[0];
+        SSLContext context = SSLContext.getInstance("TLS");
+        context.init(null, trustManagers, null);
+
+        return context;
     }
 
-    KeyStore createSSLKeyStore() throws Exception {
+    KeyStore createSslKeyStore() throws Exception {
         KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
         keyStore.load(null, null);
 
@@ -507,7 +512,7 @@ public class Gateway {
 
         // add user-provided trusted certs to keystore
         for (String alias : certificates.keySet()) {
-            keyStore.setCertificateEntry(alias, certificates.get(alias));
+            keyStore.setCertificateEntry("custom." + alias, certificates.get(alias));
         }
 
         return keyStore;
@@ -519,7 +524,7 @@ public class Gateway {
         return CertificateFactory.getInstance("X.509").generateCertificate(is);
     }
 
-    void logRequest(HttpURLConnection c, String data) {
+    private void logRequest(HttpURLConnection c, String data) {
         String log = "REQUEST: " + c.getRequestMethod() + " " + c.getURL().toString();
 
         if (data != null) {
@@ -542,7 +547,7 @@ public class Gateway {
         }
     }
 
-    void logResponse(HttpResponse response) {
+    private void logResponse(HttpResponse response) {
         String log = "RESPONSE: ";
 
         // log response headers

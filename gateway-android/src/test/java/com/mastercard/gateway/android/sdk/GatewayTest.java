@@ -3,7 +3,6 @@ package com.mastercard.gateway.android.sdk;
 
 import com.mastercard.gateway.android.sdk.api.GatewayCallback;
 import com.mastercard.gateway.android.sdk.api.GatewayResponse;
-import com.mastercard.gateway.android.sdk.api.Region;
 import com.mastercard.gateway.android.sdk.api.UpdateSessionRequest;
 import com.mastercard.gateway.android.sdk.api.UpdateSessionResponse;
 import com.mastercard.gateway.android.sdk.api.model.Card;
@@ -11,12 +10,15 @@ import com.mastercard.gateway.android.sdk.api.model.Card;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.net.URL;
+import java.security.KeyStore;
 import java.security.cert.Certificate;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -32,39 +34,49 @@ public class GatewayTest {
     }
 
     @Test
-    public void testSetRegionThrowsExceptionIfNull() throws Exception {
+    public void testSetBaseUrlThrowsExceptionIfNull() throws Exception {
         try {
-            gateway.setRegion((Region) null);
+            gateway.setBaseUrl((String) null);
 
-            fail("Null Region should throw a exception");
+            fail("Null url should throw exception");
+        } catch (Exception e) {
+            // success
+        }
+
+        try {
+            gateway.setBaseUrl((URL) null);
+
+            fail("Null url should throw exception");
         } catch (Exception e) {
             // success
         }
     }
 
     @Test
-    public void testSetRegionWorksAsIntended() throws Exception {
-        gateway.setRegion(Region.EUROPE);
+    public void testSetBaseUrlWithStringThrowsExceptionIfInvalidFormat() throws Exception {
+        try {
+            gateway.setBaseUrl("i am not a url");
 
-        assertEquals(gateway.region, Region.EUROPE);
+            fail("Invalid baseUrl format should throw exception");
+        } catch (Exception e) {
+            // success
+        }
     }
 
     @Test
-    public void testSetRegionCorrectlyMatchesStringName() throws Exception {
-        gateway.setRegion("NORTH_AMERICA");
+    public void testSetBaseUrlWorksAsIntended() throws Exception {
+        gateway.setBaseUrl("https://gateway.somebank.com");
 
-        assertEquals(gateway.region, Region.NORTH_AMERICA);
-
-        gateway.setRegion("europe");
-
-        assertEquals(gateway.region, Region.EUROPE);
+        URL url = gateway.getBaseUrl();
+        assertEquals("https://gateway.somebank.com", url.toString());
     }
 
     @Test
-    public void setRegionDefaultsToTestIfNoStringNameMatches() throws Exception {
-        gateway.setRegion("BANANA");
+    public void testSetBaseUrlOnlyKeepsHostnameFromOriginal() throws Exception {
+        gateway.setBaseUrl("http://gateway.somebank.com/a/path/to/nowhere?query=somequery");
 
-        assertEquals(gateway.region, Region.TEST);
+        URL url = gateway.getBaseUrl();
+        assertEquals("https://gateway.somebank.com", url.toString());
     }
 
     @Test
@@ -132,7 +144,7 @@ public class GatewayTest {
 
         gateway.addTrustedCertificate("alias", certificate);
 
-        assertEquals(gateway.certificates.size(), 1);
+        assertEquals(1, gateway.certificates.size());
         assertTrue(gateway.certificates.containsKey("alias"));
     }
 
@@ -146,7 +158,7 @@ public class GatewayTest {
 
         gateway.removeTrustedCertificate("alias");
 
-        assertEquals(gateway.certificates.size(), 0);
+        assertEquals(0, gateway.certificates.size());
     }
 
     @Test
@@ -155,32 +167,32 @@ public class GatewayTest {
         gateway.addTrustedCertificate("alias1", certificate);
         gateway.addTrustedCertificate("alias2", certificate);
 
-        assertEquals(gateway.certificates.size(), 2);
+        assertEquals(2, gateway.certificates.size());
 
         gateway.clearTrustedCertificates();
 
-        assertEquals(gateway.certificates.size(), 0);
+        assertEquals(0, gateway.certificates.size());
     }
 
 
     @Test
     public void testGetApiUrlWorksAsIntended() throws Exception {
-        String expectedUrl = "https://eu-gateway.mastercard.com/api/rest/version/40";
+        String expectedUrl = "https://somegatewayurl.com/api/rest/version/40";
 
-        gateway.setRegion(Region.EUROPE).setApiVersion(40);
+        gateway.setBaseUrl("https://somegatewayurl.com").setApiVersion(40);
 
-        assertEquals(gateway.getApiUrl(), expectedUrl);
+        assertEquals(expectedUrl, gateway.getApiUrl());
     }
 
     @Test
     public void testGetUpdateSessionUrlWorksAsIntended() throws Exception {
-        String expectedUrl = "https://eu-gateway.mastercard.com/api/rest/version/40/merchant/somemerchant/session/sess1234";
+        String expectedUrl = "https://somegatewayurl.com/api/rest/version/40/merchant/somemerchant/session/sess1234";
 
         gateway.setMerchantId("somemerchant")
-                .setRegion(Region.EUROPE)
+                .setBaseUrl("https://somegatewayurl.com")
                 .setApiVersion(40);
 
-        assertEquals(gateway.getUpdateSessionUrl("sess1234"), expectedUrl);
+        assertEquals(expectedUrl, gateway.getUpdateSessionUrl("sess1234"));
     }
 
     @Test
@@ -193,11 +205,11 @@ public class GatewayTest {
 
         Card card = gateway.buildCard(nameOnCard, number, cvc, expiryMM, expiryYY);
 
-        assertEquals(card.nameOnCard(), nameOnCard);
-        assertEquals(card.number(), number);
-        assertEquals(card.securityCode(), cvc);
-        assertEquals(card.expiry().month(), expiryMM);
-        assertEquals(card.expiry().year(), expiryYY);
+        assertEquals(nameOnCard, card.nameOnCard());
+        assertEquals(number, card.number());
+        assertEquals(cvc, card.securityCode());
+        assertEquals(expiryMM, card.expiry().month());
+        assertEquals(expiryYY, card.expiry().year());
     }
 
     @Test
@@ -212,8 +224,8 @@ public class GatewayTest {
 
         UpdateSessionRequest request = gateway.buildUpdateSessionRequest(card);
 
-        assertEquals(request.apiOperation(), "UPDATE_PAYER_DATA");
-        assertEquals(request.sourceOfFunds().provided().card(), card);
+        assertEquals("UPDATE_PAYER_DATA", request.apiOperation());
+        assertEquals(card, request.sourceOfFunds().provided().card());
     }
 
     @Test
@@ -234,5 +246,28 @@ public class GatewayTest {
         gateway.handleCallbackMessage(callback, arg);
 
         verify(callback).onSuccess(arg);
+    }
+
+    @Test
+    public void testCreateSslKeystoreContainsInternalCertificate() throws Exception {
+        doReturn(mock(Certificate.class)).when(gateway).readPemCertificate(any());
+
+        KeyStore keyStore = gateway.createSslKeyStore();
+
+        assertTrue(keyStore.containsAlias("gateway.mastercard.com"));
+    }
+
+    @Test
+    public void testCreateSslKeystoreContainsAdditionalTrustedCertificates() throws Exception {
+        doReturn(mock(Certificate.class)).when(gateway).readPemCertificate(any());
+
+        gateway.addTrustedCertificate("alias1", mock(Certificate.class));
+        gateway.addTrustedCertificate("alias2", mock(Certificate.class));
+
+        KeyStore keyStore = gateway.createSslKeyStore();
+
+        assertEquals(3, keyStore.size());
+        assertTrue(keyStore.containsAlias("custom.alias1"));
+        assertTrue(keyStore.containsAlias("custom.alias2"));
     }
 }
