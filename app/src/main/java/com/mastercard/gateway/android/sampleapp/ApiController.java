@@ -38,7 +38,7 @@ public class ApiController {
 
     static final Gson GSON = new GsonBuilder().create();
 
-    String merchantServiceUrl;
+    String merchantServerUrl;
 
 
     interface CreateSessionCallback {
@@ -60,8 +60,8 @@ public class ApiController {
         return INSTANCE;
     }
 
-    public void setMerchantServiceUrl(String url) {
-        merchantServiceUrl = url;
+    public void setMerchantServerUrl(String url) {
+        merchantServerUrl = url;
     }
 
     public void createSession(final CreateSessionCallback callback) {
@@ -123,7 +123,7 @@ public class ApiController {
     }
 
     String executeCreateSession() throws Exception {
-        String jsonResponse = doJsonRequest(new URL(merchantServiceUrl + "/session.php"), "", "POST", null, null, HttpsURLConnection.HTTP_OK);
+        String jsonResponse = doJsonRequest(new URL(merchantServerUrl + "/session.php"), "", "POST", null, null, HttpsURLConnection.HTTP_OK);
 
         Type type = new TypeToken<Map<String, Object>>() {
         }.getType();
@@ -161,14 +161,14 @@ public class ApiController {
 
         String jsonString = GSON.toJson(json);
 
-        String jsonResponse = doJsonRequest(new URL(merchantServiceUrl + "/transaction.php?order=" + orderId + "&transaction=" + transactionId), jsonString, "PUT", null, null, HttpsURLConnection.HTTP_OK);
+        String jsonResponse = doJsonRequest(new URL(merchantServerUrl + "/transaction.php?order=" + orderId + "&transaction=" + transactionId), jsonString, "PUT", null, null, HttpsURLConnection.HTTP_OK);
 
         Type type = new TypeToken<Map<String, Object>>() {
         }.getType();
         Map<String, Object> map = GSON.fromJson(jsonResponse, type);
 
         if (!map.containsKey("result") || !"SUCCESS".equalsIgnoreCase((String) map.get("result"))) {
-            throw new RuntimeException("Payment result: " + map.get("result"));
+            throw new RuntimeException("Payment result: " + map.get("result") + "; Payload: " + jsonResponse);
         }
 
         return (String) map.get("result");

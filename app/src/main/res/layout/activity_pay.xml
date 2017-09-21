@@ -1,88 +1,73 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/main_bg"
-    android:id="@+id/payView"
-    android:padding="20dp"
-    android:gravity="center_horizontal"
-    tools:context=".PayActivity">
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/prompt_pay_confirm"/>
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="@dimen/material_baseline_grid_2x"
+        tools:context=".PayActivity">
 
-    <TableLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="25dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="Please confirm the following\npayment information."
+            android:textColor="@color/material_color_black"
+            android:textSize="@dimen/material_typography_regular_title_text_size"
+            android:textStyle="bold" />
 
-        <TableRow android:layout_marginTop="10dp">
-            <TextView
-                android:layout_height="wrap_content"
-                android:gravity="end"
-                android:paddingStart="0dp"
-                android:paddingEnd="15dp"
-                android:paddingLeft="0dp"
-                android:paddingRight="15dp"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="@string/prompt_cardnumber"/>
+        <android.support.v4.widget.Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
-            <TextView
-                android:layout_height="wrap_content"
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/material_baseline_grid_1x"
+            android:textColorHint="@color/coral">
+
+            <android.support.design.widget.TextInputEditText
                 android:id="@+id/confirmCardNo"
-                android:textAppearance="?android:attr/textAppearanceMedium"/>
-        </TableRow>
-
-        <TableRow>
-            <TextView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="end"
-                android:paddingStart="0dp"
-                android:paddingEnd="15dp"
-                android:paddingLeft="0dp"
-                android:paddingRight="15dp"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="@string/prompt_amount"/>
+                android:focusable="false"
+                android:gravity="center_horizontal"
+                android:hint="Card number"
+                android:inputType="none" />
 
-            <TextView
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/material_baseline_grid_1x"
+            android:textColorHint="@color/coral">
+
+            <android.support.design.widget.TextInputEditText
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/confirmAmount"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="@string/main_activity_price"/>
-        </TableRow>
+                android:focusable="false"
+                android:gravity="center_horizontal"
+                android:hint="Amount"
+                android:inputType="none"
+                android:text="$250.00" />
 
-        <TableRow>
-            <TextView
-                android:layout_height="wrap_content"
-                android:gravity="end"
-                android:paddingStart="0dp"
-                android:paddingEnd="15dp"
-                android:paddingLeft="0dp"
-                android:paddingRight="15dp"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="@string/prompt_currency"/>
+        </android.support.design.widget.TextInputLayout>
 
-            <TextView
-                android:layout_height="wrap_content"
-                android:id="@+id/confirmCurrency"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="@string/main_activity_currency"/>
-        </TableRow>
-    </TableLayout>
+        <android.support.v4.widget.Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
-    <Button
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_marginTop="40dp"
-        android:layout_gravity="end"
-        android:text="@string/pay_button"
-        android:id="@+id/confirmBtn"
-        android:textSize="18sp"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"/>
-</LinearLayout>
+        <Button
+            android:id="@+id/confirmBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Confirm and Pay" />
+    </LinearLayout>
+
+</layout>

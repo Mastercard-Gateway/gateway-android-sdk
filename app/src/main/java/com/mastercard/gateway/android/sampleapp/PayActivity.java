@@ -1,23 +1,19 @@
 package com.mastercard.gateway.android.sampleapp;
 
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.TextView;
+import android.view.View;
+
+import com.mastercard.gateway.android.sampleapp.databinding.ActivityPayBinding;
 
 import java.util.UUID;
-
-import butterknife.Bind;
-import butterknife.OnClick;
 
 /**
  * Display a payment confirmation screen and send the final pay request
  */
 public class PayActivity extends AbstractActivity {
-    @Bind(R.id.confirmCardNo)
-    TextView cardNumber;
 
-    @Bind(R.id.confirmBtn)
-    Button confirmBtn;
+    ActivityPayBinding binding;
 
     String sessionId;
 
@@ -25,18 +21,21 @@ public class PayActivity extends AbstractActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        cardNumber.setText(getIntent().getStringExtra("PAN_MASK"));
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_pay);
+
+        binding.confirmCardNo.setText(getIntent().getStringExtra("PAN_MASK"));
         sessionId = getIntent().getStringExtra("SESSION_ID");
+
+        binding.confirmBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                doConfirm();
+            }
+        });
     }
 
-    @Override
-    protected int getContentView() {
-        return R.layout.activity_pay;
-    }
-
-    @OnClick(R.id.confirmBtn)
     protected void doConfirm() {
-        confirmBtn.setEnabled(false);
+        binding.confirmBtn.setEnabled(false);
 
         // random order/txn IDs for example purposes
         String orderId = UUID.randomUUID().toString();
@@ -44,21 +43,21 @@ public class PayActivity extends AbstractActivity {
         String transactionId = UUID.randomUUID().toString();
         transactionId = transactionId.substring(0, transactionId.indexOf('-'));
 
-        apiController.completeSession(sessionId, orderId, transactionId, getResources().getString(R.string.main_activity_price), "USD", new CompleteSessionCallback());
+        apiController.completeSession(sessionId, orderId, transactionId, "250.00", "USD", new CompleteSessionCallback());
     }
 
     class CompleteSessionCallback implements ApiController.CompleteSessionCallback {
         @Override
         public void onSuccess(String result) {
             startResultActivity(R.string.pay_successful_text, "", R.color.success_bg);
-            confirmBtn.setEnabled(true);
+            binding.confirmBtn.setEnabled(true);
         }
 
         @Override
         public void onError(Throwable throwable) {
             throwable.printStackTrace();
             startResultActivity(R.string.pay_error_text, R.string.pay_error_explanation);
-            confirmBtn.setEnabled(true);
+            binding.confirmBtn.setEnabled(true);
         }
     }
 }

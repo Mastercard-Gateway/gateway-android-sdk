@@ -1,49 +1,44 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/in_progress_bg"
-    android:gravity="bottom"
-    android:id="@+id/resultView"
-    tools:context=".ResultActivity">
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
-        android:orientation="vertical"
+        android:id="@+id/resultView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
-        android:gravity="center">
+        android:gravity="center_horizontal"
+        android:padding="@dimen/material_baseline_grid_2x"
+        android:orientation="vertical"
+        tools:context=".ResultActivity">
+
+        <android.support.v4.widget.Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
 
         <TextView
             android:id="@+id/resultText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:textColor="@android:color/black"
-            android:textSize="50sp"
-            android:textStyle="bold" />
+            android:textColor="@color/material_color_black"
+            android:textSize="@dimen/material_typography_regular_title_text_size"
+            android:textStyle="bold"
+            tools:text="Your payment was successful!"/>
 
-        <TextView
-            android:id="@+id/resultExplanation"
+
+
+        <android.support.v4.widget.Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/continueBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:textSize="18sp"
-            android:layout_marginTop="12dp" />
+            android:text="@string/result_button" />
 
     </LinearLayout>
 
-    <Button
-        android:layout_width="166dp"
-        android:layout_height="match_parent"
-        android:layout_weight="2"
-        android:layout_marginBottom="50dp"
-        android:text="@string/result_button"
-        android:id="@+id/continueBtn"
-        android:layout_gravity="center_horizontal" />
-
-</LinearLayout>
+</layout>

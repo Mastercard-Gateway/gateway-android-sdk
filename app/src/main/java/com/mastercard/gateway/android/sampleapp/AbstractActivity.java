@@ -5,23 +5,16 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import butterknife.ButterKnife;
-
 public abstract class AbstractActivity extends AppCompatActivity {
     protected ApiController apiController = ApiController.getInstance();
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
         super.onCreate( savedInstanceState );
-        setContentView( getContentView() );
         Log.i( getClass().getSimpleName(), "Displaying" );
 
-        apiController.setMerchantServiceUrl(BuildConfig.MERCHANT_SERVICE_URL);
-
-        ButterKnife.bind( this );
+        apiController.setMerchantServerUrl(BuildConfig.MERCHANT_SERVER_URL);
     }
-
-    protected abstract int getContentView();
 
     /**
      * Start the "result" activity to show the final result of a checkout flow

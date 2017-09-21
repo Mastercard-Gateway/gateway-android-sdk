@@ -2,15 +2,16 @@ package com.mastercard.gateway.android.sampleapp;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 
 import com.google.gson.JsonParseException;
+import com.mastercard.gateway.android.sampleapp.databinding.ActivityCapturePaymentDetailsBinding;
 import com.mastercard.gateway.android.sdk.Gateway;
 import com.mastercard.gateway.android.sdk.api.GatewayCallback;
 import com.mastercard.gateway.android.sdk.api.UpdateSessionResponse;
@@ -18,73 +19,57 @@ import com.mastercard.gateway.android.sdk.api.UpdateSessionResponse;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 
-import butterknife.Bind;
-import butterknife.OnClick;
-import butterknife.OnTextChanged;
-
 import static android.text.TextUtils.isEmpty;
 
 public class PaymentCaptureActivity extends AbstractActivity {
-    @Bind(R.id.sessionText)
-    TextView sessionField;
 
-    @Bind(R.id.nameOnCard)
-    EditText nameOnCardField;
-
-    @Bind(R.id.cardnumber)
-    EditText cardNumberField;
-
-    @Bind(R.id.expiry_month)
-    EditText expiryMonthField;
-
-    @Bind(R.id.expiry_year)
-    EditText expiryYearField;
-
-    @Bind(R.id.cvv)
-    EditText cvvField;
-
-    @Bind(R.id.submitButton)
-    Button submitButton;
-
-    Gateway gateway = new Gateway();
+    ActivityCapturePaymentDetailsBinding binding;
 
     private SharedPreferences prefs = null;
 
-    protected String productId, nameOnCard, cardNumber, expiryMM, expiryYY, cvv, sessionId;
+    protected String nameOnCard, cardNumber, expiryMM, expiryYY, cvv, sessionId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_capture_payment_details);
+
+        sessionId = getIntent().getStringExtra("SESSION_ID");
+
         prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
-        gateway.setMerchantId(BuildConfig.GATEWAY_MERCHANT_ID)
-                .setBaseUrl(BuildConfig.GATEWAY_BASE_URL);
+        binding.nameOnCard.requestFocus();
+        binding.nameOnCard.addTextChangedListener(new TextChangeListener());
+        binding.cardnumber.addTextChangedListener(new TextChangeListener());
+        binding.expiryMonth.addTextChangedListener(new TextChangeListener());
+        binding.expiryYear.addTextChangedListener(new TextChangeListener());
+        binding.cvv.addTextChangedListener(new TextChangeListener());
 
-        sessionField.setText(getIntent().getStringExtra("SESSION_ID"));
-        nameOnCardField.requestFocus();
-
-        submitButton.setEnabled(false);
+        binding.submitButton.setEnabled(false);
+        binding.submitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                buyClicked(view);
+            }
+        });
     }
 
-    @Override
-    protected int getContentView() {
-        return R.layout.activity_capture_payment_details;
-    }
-
-    @OnClick(R.id.submitButton)
     public void buyClicked(View submitButton) {
-        productId = getIntent().getStringExtra("PRODUCT_ID");
-        nameOnCard = this.nameOnCardField.getText().toString();
-        cardNumber = this.cardNumberField.getText().toString();
-        expiryMM = this.expiryMonthField.getText().toString();
-        expiryYY = this.expiryYearField.getText().toString();
-        cvv = this.cvvField.getText().toString();
-        sessionId = sessionField.getText().toString();
+        nameOnCard = binding.nameOnCard.getText().toString();
+        cardNumber = binding.cardnumber.getText().toString();
+        expiryMM = binding.expiryMonth.getText().toString();
+        expiryYY = binding.expiryYear.getText().toString();
+        cvv = binding.cvv.getText().toString();
 
         Log.i(getClass().getSimpleName(), "Making purchase");
-        Log.i("Product ID", productId);
 
         submitButton.setEnabled(false);
+
+        Gateway gateway = new Gateway()
+                .setMerchantId(BuildConfig.GATEWAY_MERCHANT_ID)
+                .setBaseUrl(BuildConfig.GATEWAY_BASE_URL);
+
         gateway.updateSessionWithCardInfo(sessionId, nameOnCard, cardNumber, cvv, expiryMM, expiryYY, new UpdateSessionCallback());
     }
 
@@ -101,9 +86,8 @@ public class PaymentCaptureActivity extends AbstractActivity {
         @Override
         public void onSuccess(UpdateSessionResponse updateSessionResponse) {
             Intent intent = new Intent(PaymentCaptureActivity.this, PayActivity.class);
-            intent.putExtra("PRODUCT_ID", productId);
             intent.putExtra("PAN_MASK", maskedCardNumber());
-            intent.putExtra("SESSION_ID", sessionField.getText().toString());
+            intent.putExtra("SESSION_ID", sessionId);
             Log.i(PaymentCaptureActivity.class.getSimpleName(), "Successful pay");
 
             startActivity(intent);
@@ -129,16 +113,31 @@ public class PaymentCaptureActivity extends AbstractActivity {
         }
     }
 
-    @OnTextChanged({R.id.nameOnCard, R.id.cardnumber, R.id.expiry_month, R.id.expiry_year, R.id.cvv})
+    class TextChangeListener implements TextWatcher {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            enableSubmitButton();
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+
+        }
+    }
+
     public void enableSubmitButton() {
-        if (isEmpty(nameOnCardField.getText()) || isEmpty(cardNumberField.getText())
-                || isEmpty(expiryMonthField.getText()) || isEmpty(expiryYearField.getText())
-                || isEmpty(cvvField.getText()) || (cvvField.getText().toString().length() < 3)) {
+        if (isEmpty(binding.nameOnCard.getText()) || isEmpty(binding.cardnumber.getText())
+                || isEmpty(binding.expiryMonth.getText()) || isEmpty(binding.expiryYear.getText())
+                || isEmpty(binding.cvv.getText()) || (binding.cvv.getText().toString().length() < 3)) {
 
-            submitButton.setEnabled(false);
+            binding.submitButton.setEnabled(false);
         } else {
-
-            submitButton.setEnabled(true);
+            binding.submitButton.setEnabled(true);
         }
     }
 }

@@ -18,12 +18,16 @@ android {
         all {
             buildConfigField 'String', 'GATEWAY_MERCHANT_ID', '"' + gatewayMerchantId + '"'
             buildConfigField 'String', 'GATEWAY_BASE_URL', '"' + gatewayBaseUrl + '"'
-            buildConfigField 'String', 'MERCHANT_SERVICE_URL', '"' + merchantServiceUrl + '"'
+            buildConfigField 'String', 'MERCHANT_SERVER_URL', '"' + merchantServerUrl + '"'
         }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+
+    dataBinding {
+        enabled = true
     }
 
     lintOptions {
@@ -34,22 +38,15 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
 
-    compile 'com.jakewharton:butterknife:7.0.0'
-
     compile 'com.google.code.gson:gson:2.8.1'
-
-    compile 'com.google.android.gms:play-services-appindexing:9.8.0'
 
     compile 'com.android.support:appcompat-v7:26.0.0'
     compile 'com.android.support:design:26.0.0'
     compile 'com.android.support:support-v4:26.0.0'
 
-    compile 'com.nineoldandroids:library:2.4.0'
+    compile 'blue.aodev:material-values:1.1.1'
 
-    compile 'com.daimajia.easing:library:1.0.1@aar'
-    compile 'com.daimajia.androidanimations:library:1.1.3@aar'
-
-    compile 'com.mastercard.gateway:gateway-android:0.2.0-SNAPSHOT'
+    compile 'com.mastercard.gateway:gateway-android:0.3.0-SNAPSHOT'
 
 
     // Espresso testing
