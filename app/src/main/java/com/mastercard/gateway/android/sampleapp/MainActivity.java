@@ -5,6 +5,7 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.mastercard.gateway.android.sampleapp.databinding.ActivityMainBinding;
 
@@ -46,7 +47,7 @@ public class MainActivity extends AbstractActivity {
 
         @Override
         public void onError(Throwable throwable) {
-            startResultActivity(R.string.create_unrecognised_text, throwable.getMessage());
+            Toast.makeText(MainActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
 
             binding.buyButton.setEnabled(true);
         }

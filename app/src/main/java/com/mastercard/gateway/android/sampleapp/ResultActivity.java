@@ -16,19 +16,15 @@ public class ResultActivity extends AbstractActivity {
     ActivityResultBinding binding;
 
     @Override
-    protected void onCreate( Bundle savedInstanceState ) {
-        super.onCreate( savedInstanceState );
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_result);
 
-        int colour = getIntent().getIntExtra( "COLOUR", R.color.in_progress_bg );
-        String text = getIntent().getStringExtra( "TEXT" );
-        String explanation = getIntent().getStringExtra( "EXPLANATION" );
+        boolean success = getIntent().getBooleanExtra("SUCCESS", false);
 
-        binding.resultView.setBackgroundColor( ContextCompat.getColor( getBaseContext(), colour ) );
-        binding.resultText.setText( text != null ? text : "" );
-        binding.resultExplanation.setText( explanation != null ? explanation : "" );
-
+        binding.resultText.setText(getString(success ? R.string.result_you_payment_was_successful : R.string.result_error_processing_your_payment));
+        binding.resultIcon.setImageDrawable(ContextCompat.getDrawable(this, success ? R.drawable.success : R.drawable.failed));
         binding.continueBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -38,8 +34,8 @@ public class ResultActivity extends AbstractActivity {
     }
 
     protected void doContinue() {
-        Intent intent = new Intent( this, MainActivity.class );
-        intent.addFlags( Intent.FLAG_ACTIVITY_CLEAR_TOP );
-        startActivity( intent );
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 }

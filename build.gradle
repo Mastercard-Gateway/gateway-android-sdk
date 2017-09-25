@@ -1,7 +1,6 @@
 buildscript {
     repositories {
         jcenter()
-
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.3.3'
@@ -14,12 +13,6 @@ allprojects {
     repositories {
         jcenter()
         google()
-        maven {
-            url 'http://tools.labs.mastercard.com/artifactory/libs-release-local'
-        }
-        maven {
-            url 'http://tools.labs.mastercard.com/artifactory/libs-snapshot-local'
-        }
     }
 }
 

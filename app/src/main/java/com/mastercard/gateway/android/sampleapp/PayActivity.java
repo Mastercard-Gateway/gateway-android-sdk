@@ -1,5 +1,6 @@
 package com.mastercard.gateway.android.sampleapp;
 
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.view.View;
@@ -46,17 +47,23 @@ public class PayActivity extends AbstractActivity {
         apiController.completeSession(sessionId, orderId, transactionId, "250.00", "USD", new CompleteSessionCallback());
     }
 
+    void startResultActivity(boolean success) {
+        Intent intent = new Intent(this, ResultActivity.class);
+        intent.putExtra("SUCCESS", success);
+        startActivity(intent);
+    }
+
     class CompleteSessionCallback implements ApiController.CompleteSessionCallback {
         @Override
         public void onSuccess(String result) {
-            startResultActivity(R.string.pay_successful_text, "", R.color.success_bg);
+            startResultActivity(true);
             binding.confirmBtn.setEnabled(true);
         }
 
         @Override
         public void onError(Throwable throwable) {
             throwable.printStackTrace();
-            startResultActivity(R.string.pay_error_text, R.string.pay_error_explanation);
+            startResultActivity(false);
             binding.confirmBtn.setEnabled(true);
         }
     }

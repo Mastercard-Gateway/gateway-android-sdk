@@ -10,9 +10,10 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity
             android:name=".MainActivity"
-            android:label="@string/title_activity_main">
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -22,12 +23,16 @@
 
         <activity
             android:name=".PaymentCaptureActivity"
-            android:label="@string/title_activity_capture_payment_details" />
+            android:label="@string/app_name" />
+
         <activity
             android:name=".PayActivity"
-            android:label="@string/title_activity_pay" />
+            android:label="@string/app_name" />
+
         <activity
             android:name=".ResultActivity"
-            android:label="@string/title_activity_result" />
+            android:label="@string/app_name" />
+
     </application>
+
 </manifest>

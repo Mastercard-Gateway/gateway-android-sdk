@@ -2,9 +2,9 @@
 
 Our Android SDK allows you to easily integrate payments into your Android app. By updating a checkout session directly with the Gateway, you avoid the risk of handling sensitive card details on your server.
 
-## Import the Dependency [![bintray](https://img.shields.io/bintray/v/mpgs/Android/gateway-android-sdk.svg)](https://bintray.com/mpgs/Android/gateway-android-sdk)
+## Import the Dependency [![Download](https://api.bintray.com/packages/mpgs/Android/gateway-android-sdk/images/download.svg)](https://bintray.com/mpgs/Android/gateway-android-sdk/_latestVersion)
 
-To import the Android SDK, include it as a dependency in your build.gradle file
+This library is hosted in the jCenter repository. To import the Android SDK, include it as a dependency in your build.gradle file
 
     compile 'com.mastercard.gateway:gateway-android:X.X.X'
 

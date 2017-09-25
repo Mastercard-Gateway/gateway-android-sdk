@@ -9,6 +9,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.gson.JsonParseException;
 import com.mastercard.gateway.android.sampleapp.databinding.ActivityCapturePaymentDetailsBinding;
@@ -97,18 +98,16 @@ public class PaymentCaptureActivity extends AbstractActivity {
         public void onError(Throwable throwable) {
             Log.e(PaymentCaptureActivity.class.getSimpleName(), throwable.getMessage(), throwable);
 
+
+
             if (throwable instanceof MalformedURLException) {
-                startResultActivity(R.string.update_commserror_text,
-                        R.string.update_commserror_explanation_badurl);
+                Toast.makeText(PaymentCaptureActivity.this, R.string.update_commserror_explanation_badurl, Toast.LENGTH_SHORT).show();
             } else if (throwable instanceof JsonParseException) {
-                startResultActivity(R.string.update_malformed_text,
-                        R.string.update_malformed_explanation_parse);
+                Toast.makeText(PaymentCaptureActivity.this, R.string.update_malformed_explanation_parse, Toast.LENGTH_SHORT).show();
             } else {
                 Log.e(PaymentCaptureActivity.class.getSimpleName(),
                         "Unexpected error type " + throwable.getClass().getName());
-
-                startResultActivity(R.string.update_unknown_error_text,
-                        R.string.update_unknown_error_explanation);
+                Toast.makeText(PaymentCaptureActivity.this, R.string.update_unknown_error_explanation, Toast.LENGTH_SHORT).show();
             }
         }
     }

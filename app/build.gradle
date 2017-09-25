@@ -46,7 +46,7 @@ dependencies {
 
     compile 'blue.aodev:material-values:1.1.1'
 
-    compile 'com.mastercard.gateway:gateway-android:0.3.0-SNAPSHOT'
+    compile 'com.mastercard.gateway:gateway-android:0.2.1'
 
 
     // Espresso testing
