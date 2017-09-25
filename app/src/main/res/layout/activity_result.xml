@@ -29,7 +29,8 @@
             android:id="@+id/resultIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:src="@drawable/success" />
+            tools:src="@drawable/success"
+            android:contentDescription="@string/result"/>
 
         <android.support.v4.widget.Space
             android:layout_width="match_parent"

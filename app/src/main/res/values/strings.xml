@@ -1,12 +1,31 @@
 <resources>
     <string name="app_name">Gateway SDK Sample App</string>
 
-    <!-- Strings related to session update outcomes -->
+    <string name="main_simple_store">Simple Store</string>
+    <string name="main_modern_green_lounge_chair">Modern Green Lounge Chair</string>
+    <string name="main_250">$250</string>
+    <string name="main_check_out">Check out</string>
+
+    <string name="pay_enter_payment_details">Enter payment details</string>
+    <string name="pay_name_on_card">Name on card</string>
+    <string name="pay_card_number">Card number</string>
+    <string name="pay_expiry_month">Expiry month (MM)</string>
+    <string name="pay_expiry_year">Expiry year (YY)</string>
+    <string name="pay_cvv">CVV</string>
+    <string name="pay_continue">Continue</string>
+
+    <string name="confirm_please_confirm_the_following_payment_information">Please confirm the following\npayment information.</string>
+    <string name="confirm_card_number">Card number</string>
+    <string name="confirm_amount">Amount</string>
+    <string name="confirm_250_00">$250.00</string>
+    <string name="confirm_and_pay">Confirm and Pay</string>
+
     <string name="update_commserror_explanation_badurl">Could not connect to payment gateway - bad URL</string>
     <string name="update_malformed_explanation_parse">Payment gateway reply malformed - unparseable</string>
     <string name="update_unknown_error_explanation">The payment gateway responded with an unrecognised response</string>
 
     <!-- Strings related to result screen -->
+    <string name="result">Result</string>
     <string name="result_start_again">Start again</string>
     <string name="result_you_payment_was_successful">Your payment was successful!</string>
     <string name="result_error_processing_your_payment">Error processing your payment!</string>

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.mastercard.gateway.android.sampleapp.databinding.ActivityResultBinding;
@@ -11,7 +12,7 @@ import com.mastercard.gateway.android.sampleapp.databinding.ActivityResultBindin
 /**
  * Show a screen which displays a payment status
  */
-public class ResultActivity extends AbstractActivity {
+public class ResultActivity extends AppCompatActivity {
 
     ActivityResultBinding binding;
 
