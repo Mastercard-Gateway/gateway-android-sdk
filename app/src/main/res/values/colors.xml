@@ -3,8 +3,4 @@
 
     <color name="coral">#FF5B5D</color>
 
-
-    <color name="in_progress_bg">#cccccc</color>
-    <color name="success_bg">#ccffcc</color>
-    <color name="failed_bg">#ffcccc</color>
 </resources>

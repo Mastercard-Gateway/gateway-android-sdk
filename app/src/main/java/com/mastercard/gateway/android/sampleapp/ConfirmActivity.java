@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
-import com.mastercard.gateway.android.sampleapp.databinding.ActivityPayBinding;
+import com.mastercard.gateway.android.sampleapp.databinding.ActivityConfirmBinding;
 
 import java.util.UUID;
 
@@ -15,7 +15,7 @@ import java.util.UUID;
  */
 public class ConfirmActivity extends AppCompatActivity {
 
-    ActivityPayBinding binding;
+    ActivityConfirmBinding binding;
     ApiController apiController = ApiController.getInstance();
     String sessionId;
 
@@ -36,7 +36,7 @@ public class ConfirmActivity extends AppCompatActivity {
         });
     }
 
-    protected void doConfirm() {
+    void doConfirm() {
         binding.confirmBtn.setEnabled(false);
 
         // random order/txn IDs for example purposes
@@ -53,6 +53,7 @@ public class ConfirmActivity extends AppCompatActivity {
         intent.putExtra("SUCCESS", success);
         startActivity(intent);
     }
+
 
     class CompleteSessionCallback implements ApiController.CompleteSessionCallback {
         @Override

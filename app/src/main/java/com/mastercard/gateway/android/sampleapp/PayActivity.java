@@ -12,41 +12,42 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.google.gson.JsonParseException;
-import com.mastercard.gateway.android.sampleapp.databinding.ActivityCapturePaymentDetailsBinding;
+import com.mastercard.gateway.android.sampleapp.databinding.ActivityPayBinding;
 import com.mastercard.gateway.android.sdk.Gateway;
 import com.mastercard.gateway.android.sdk.api.GatewayCallback;
 import com.mastercard.gateway.android.sdk.api.UpdateSessionResponse;
 
-import java.net.MalformedURLException;
 import java.util.Arrays;
 
 import static android.text.TextUtils.isEmpty;
 
 public class PayActivity extends AppCompatActivity {
 
-    ActivityCapturePaymentDetailsBinding binding;
+    ActivityPayBinding binding;
 
-    private SharedPreferences prefs = null;
-
-    protected String nameOnCard, cardNumber, expiryMM, expiryYY, cvv, sessionId;
+    SharedPreferences prefs = null;
+    String nameOnCard, cardNumber, expiryMM, expiryYY, cvv, sessionId;
+    Gateway gateway = new Gateway();
+    TextChangeListener textChangeListener = new TextChangeListener();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_pay);
+        prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
         sessionId = getIntent().getStringExtra("SESSION_ID");
 
-        prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        gateway.setMerchantId(BuildConfig.GATEWAY_MERCHANT_ID);
+        gateway.setBaseUrl(BuildConfig.GATEWAY_BASE_URL);
 
         binding.nameOnCard.requestFocus();
-        binding.nameOnCard.addTextChangedListener(new TextChangeListener());
-        binding.cardnumber.addTextChangedListener(new TextChangeListener());
-        binding.expiryMonth.addTextChangedListener(new TextChangeListener());
-        binding.expiryYear.addTextChangedListener(new TextChangeListener());
-        binding.cvv.addTextChangedListener(new TextChangeListener());
+        binding.nameOnCard.addTextChangedListener(textChangeListener);
+        binding.cardnumber.addTextChangedListener(textChangeListener);
+        binding.expiryMonth.addTextChangedListener(textChangeListener);
+        binding.expiryYear.addTextChangedListener(textChangeListener);
+        binding.cvv.addTextChangedListener(textChangeListener);
 
         binding.submitButton.setEnabled(false);
         binding.submitButton.setOnClickListener(new View.OnClickListener() {
@@ -57,7 +58,7 @@ public class PayActivity extends AppCompatActivity {
         });
     }
 
-    public void buyClicked(View submitButton) {
+    void buyClicked(View submitButton) {
         nameOnCard = binding.nameOnCard.getText().toString();
         cardNumber = binding.cardnumber.getText().toString();
         expiryMM = binding.expiryMonth.getText().toString();
@@ -68,18 +69,25 @@ public class PayActivity extends AppCompatActivity {
 
         submitButton.setEnabled(false);
 
-        Gateway gateway = new Gateway()
-                .setMerchantId(BuildConfig.GATEWAY_MERCHANT_ID)
-                .setBaseUrl(BuildConfig.GATEWAY_BASE_URL);
-
         gateway.updateSessionWithCardInfo(sessionId, nameOnCard, cardNumber, cvv, expiryMM, expiryYY, new UpdateSessionCallback());
     }
 
-    private String maskedCardNumber() {
+    String maskedCardNumber() {
         int maskLen = cardNumber.length() - 4;
         char[] mask = new char[maskLen];
         Arrays.fill(mask, '*');
         return new String(mask) + cardNumber.substring(maskLen);
+    }
+
+    void enableSubmitButton() {
+        if (isEmpty(binding.nameOnCard.getText()) || isEmpty(binding.cardnumber.getText())
+                || isEmpty(binding.expiryMonth.getText()) || isEmpty(binding.expiryYear.getText())
+                || isEmpty(binding.cvv.getText()) || (binding.cvv.getText().toString().length() < 3)) {
+
+            binding.submitButton.setEnabled(false);
+        } else {
+            binding.submitButton.setEnabled(true);
+        }
     }
 
 
@@ -87,11 +95,11 @@ public class PayActivity extends AppCompatActivity {
 
         @Override
         public void onSuccess(UpdateSessionResponse updateSessionResponse) {
+            Log.i(PayActivity.class.getSimpleName(), "Successful pay");
+
             Intent intent = new Intent(PayActivity.this, ConfirmActivity.class);
             intent.putExtra("PAN_MASK", maskedCardNumber());
             intent.putExtra("SESSION_ID", sessionId);
-            Log.i(PayActivity.class.getSimpleName(), "Successful pay");
-
             startActivity(intent);
         }
 
@@ -99,17 +107,7 @@ public class PayActivity extends AppCompatActivity {
         public void onError(Throwable throwable) {
             Log.e(PayActivity.class.getSimpleName(), throwable.getMessage(), throwable);
 
-
-
-            if (throwable instanceof MalformedURLException) {
-                Toast.makeText(PayActivity.this, R.string.update_commserror_explanation_badurl, Toast.LENGTH_SHORT).show();
-            } else if (throwable instanceof JsonParseException) {
-                Toast.makeText(PayActivity.this, R.string.update_malformed_explanation_parse, Toast.LENGTH_SHORT).show();
-            } else {
-                Log.e(PayActivity.class.getSimpleName(),
-                        "Unexpected error type " + throwable.getClass().getName());
-                Toast.makeText(PayActivity.this, R.string.update_unknown_error_explanation, Toast.LENGTH_SHORT).show();
-            }
+            Toast.makeText(PayActivity.this, R.string.pay_error_could_not_update_session, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -127,17 +125,6 @@ public class PayActivity extends AppCompatActivity {
         @Override
         public void afterTextChanged(Editable editable) {
 
-        }
-    }
-
-    public void enableSubmitButton() {
-        if (isEmpty(binding.nameOnCard.getText()) || isEmpty(binding.cardnumber.getText())
-                || isEmpty(binding.expiryMonth.getText()) || isEmpty(binding.expiryYear.getText())
-                || isEmpty(binding.cvv.getText()) || (binding.cvv.getText().toString().length() < 3)) {
-
-            binding.submitButton.setEnabled(false);
-        } else {
-            binding.submitButton.setEnabled(true);
         }
     }
 }

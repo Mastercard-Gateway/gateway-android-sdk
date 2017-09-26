@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void buyClicked(View v) {
+    void buyClicked(View v) {
         binding.buyButton.setEnabled(false);
 
         apiController.createSession(new CreateSessionCallback());

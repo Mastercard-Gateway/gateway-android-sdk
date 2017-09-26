@@ -34,6 +34,7 @@ import static android.text.TextUtils.isEmpty;
  * pattern.
  */
 public class ApiController {
+
     private static final ApiController INSTANCE = new ApiController();
 
     static final Gson GSON = new GsonBuilder().create();
@@ -182,7 +183,7 @@ public class ApiController {
      * @throws NoSuchAlgorithmException if the algorithm is not supported by the android platform
      * @throws KeyManagementException   if initialization of the context fails
      */
-    public void initialiseSslContext() throws NoSuchAlgorithmException, KeyManagementException {
+    void initialiseSslContext() throws NoSuchAlgorithmException, KeyManagementException {
         SSLContext context = SSLContext.getInstance("TLS");
         context.init(null, null, null);
         HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
@@ -198,7 +199,7 @@ public class ApiController {
      * @throws MalformedURLException    if the address was not in the HTTP or HTTPS scheme
      * @throws IOException              if the connection could not be opened
      */
-    public HttpURLConnection openConnection(URL address)
+    HttpURLConnection openConnection(URL address)
             throws KeyManagementException, NoSuchAlgorithmException, IOException {
 
         switch (address.getProtocol().toUpperCase()) {
@@ -228,7 +229,7 @@ public class ApiController {
      * @return an HTTP response code
      * @throws IOException if the connection could not be written to
      */
-    public int makeJsonRequest(HttpURLConnection connection, String method, String json,
+    int makeJsonRequest(HttpURLConnection connection, String method, String json,
                                String username, String password) throws IOException {
 
         connection.setDoOutput(true);
@@ -257,7 +258,7 @@ public class ApiController {
      * @return a json object in string form
      * @throws IOException if the connection could not be read from
      */
-    public String getJsonResponse(HttpURLConnection connection) throws IOException {
+    String getJsonResponse(HttpURLConnection connection) throws IOException {
         StringBuilder responseOutput = new StringBuilder();
         String line;
         BufferedReader br = null;
@@ -297,7 +298,7 @@ public class ApiController {
      * @param expectResponseCodes permitted HTTP response codes, e.g. HTTP_OK (200)
      * @return a json response object in string form
      */
-    public String doJsonRequest(URL address, String jsonRequest, String httpMethod, String username, String password, int... expectResponseCodes) {
+    String doJsonRequest(URL address, String jsonRequest, String httpMethod, String username, String password, int... expectResponseCodes) {
 
         HttpURLConnection connection;
         int responseCode;

@@ -13,16 +13,13 @@
     <string name="pay_expiry_year">Expiry year (YY)</string>
     <string name="pay_cvv">CVV</string>
     <string name="pay_continue">Continue</string>
+    <string name="pay_error_could_not_update_session">Could not update session</string>
 
     <string name="confirm_please_confirm_the_following_payment_information">Please confirm the following\npayment information.</string>
     <string name="confirm_card_number">Card number</string>
     <string name="confirm_amount">Amount</string>
     <string name="confirm_250_00">$250.00</string>
     <string name="confirm_and_pay">Confirm and Pay</string>
-
-    <string name="update_commserror_explanation_badurl">Could not connect to payment gateway - bad URL</string>
-    <string name="update_malformed_explanation_parse">Payment gateway reply malformed - unparseable</string>
-    <string name="update_unknown_error_explanation">The payment gateway responded with an unrecognised response</string>
 
     <!-- Strings related to result screen -->
     <string name="result">Result</string>
