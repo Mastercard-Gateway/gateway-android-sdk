@@ -1,0 +1,61 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 26
+    buildToolsVersion '26.0.1'
+
+    defaultConfig {
+        applicationId 'com.mastercard.gateway.android.sampleapp'
+        minSdkVersion 19
+        targetSdkVersion 26
+        versionCode 1
+        versionName '0.1.0'
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        all {
+            buildConfigField 'String', 'GATEWAY_MERCHANT_ID', '"' + gatewayMerchantId + '"'
+            buildConfigField 'String', 'GATEWAY_BASE_URL', '"' + gatewayBaseUrl + '"'
+            buildConfigField 'String', 'MERCHANT_SERVER_URL', '"' + merchantServerUrl + '"'
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    dataBinding {
+        enabled = true
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+
+    compile 'com.google.code.gson:gson:2.8.1'
+
+    compile 'com.android.support:appcompat-v7:26.0.0'
+    compile 'com.android.support:design:26.0.0'
+    compile 'com.android.support:support-v4:26.0.0'
+
+    compile 'blue.aodev:material-values:1.1.1'
+
+    compile 'com.mastercard.gateway:gateway-android:0.2.1'
+
+
+    // Espresso testing
+    androidTestCompile 'junit:junit:4.12'
+
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2') {
+        exclude module: 'support-annotations'
+    }
+    androidTestCompile('com.android.support.test:runner:0.5') {
+        exclude module: 'support-annotations'
+    }
+}

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="@dimen/material_baseline_grid_2x"
+        tools:context=".MainActivity">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="@dimen/material_typography_regular_title_text_size"
+            android:textColor="@color/material_color_black"
+            android:text="@string/main_simple_store"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:src="@drawable/chair"
+            android:contentDescription="@string/main_modern_green_lounge_chair"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/material_baseline_grid_1x"
+            android:textSize="@dimen/material_typography_regular_subheading_text_size"
+            android:textAllCaps="true"
+            android:text="@string/main_modern_green_lounge_chair"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/material_baseline_grid_4x"
+            android:textSize="@dimen/material_typography_regular_headline_text_size"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/coral"
+            android:text="@string/main_250"/>
+
+        <Button
+            android:id="@+id/buyButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/main_check_out"/>
+
+    </LinearLayout>
+</layout>
