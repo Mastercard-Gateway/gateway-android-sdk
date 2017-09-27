@@ -8,6 +8,7 @@ def artifactoryPassword = System.getenv('bamboo_artifactory_publisher_password')
 apply plugin: 'com.android.library'
 apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.jfrog.artifactory'
+apply plugin: 'com.jfrog.bintray'
 apply plugin: 'maven-publish'
 
 android {
@@ -127,9 +128,26 @@ publishing {
                 def developers = root.appendNode('developers')
                 def dev = developers.appendNode('developer')
                 dev.appendNode('id', 'nak5ive')
-                dev.appendNode('name', 'Nevada Kent')
-                dev.appendNode('email', 'nak5ive@gmail.com')
+                dev.appendNode('name', 'Al Kent')
+                dev.appendNode('email', 'al.kent@mastercard.com')
             }
+        }
+    }
+}
+
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_API_KEY')
+    publications = ['aar']
+    pkg {
+        repo = 'Android'
+        name = 'gateway-android-sdk'
+        userOrg = 'mpgs'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/Mastercard/gateway-android-sdk-sample.git'
+        version {
+            name = artifactVersion
         }
     }
 }

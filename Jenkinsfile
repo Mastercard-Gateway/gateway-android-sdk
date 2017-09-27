@@ -11,8 +11,13 @@ node {
     stage 'Test'
     sh "./gradlew lint test"
 
-    stage 'Deploy'
-    sh "./gradlew gateway-android:androidSourcesJar gateway-android:androidJavadocsJar gateway-android:generatePomFileForAarPublication gateway-android:artifactoryPublish"
+    stage('Deploy') {
+        sh "./gradlew gateway-android:androidSourcesJar gateway-android:androidJavadocsJar gateway-android:generatePomFileForAarPublication gateway-android:artifactoryPublish"
+
+        if (env.BRANCH_NAME == 'master') {
+            sh "./gradlew bintrayUpload"
+        }
+    }
 
     stage 'Archive'
     androidLint canComputeNew: false, canRunOnFailed: true, defaultEncoding: '', failedNewHigh: '0', healthy: '', pattern: 'gateway-android/build/**/lint-*.xml', unHealthy: '', unstableTotalAll: '200'
