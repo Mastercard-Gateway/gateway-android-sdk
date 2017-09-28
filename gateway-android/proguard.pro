@@ -1,17 +1,22 @@
-# Add project specific ProGuard rules here.
-# By default, the flags in this file are appended to flags specified
-# in C:\Users\e037525\AppData\Local\Android\Sdk/tools/proguard/proguard-android.txt
-# You can edit the include path and order by changing the proguardFiles
-# directive in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+## proguard
+-dontwarn java.lang.invoke.*
+-dontwarn **$$Lambda$*
 
-# Add any project specific keep options here:
+## GSON ##
+# Gson uses generic type information stored in a class file when working with fields. Proguard
+# removes such information by default, so configure it to keep all of it.
+-keepattributes Signature
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# For using GSON @Expose annotation
+-keepattributes *Annotation*
+
+# Gson specific classes
+-dontwarn sun.misc.**
+#-keep class com.google.gson.stream.** { *; }
+
+# keep api contract and enums
+-keep class com.mastercard.gateway.android.sdk.api.** { *; }
+-keep enum com.mastercard.gateway.android.sdk.** { *; }
+
+# Optional libraries will warn on missing classes
+-dontwarn io.reactivex.**
