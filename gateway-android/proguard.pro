@@ -14,6 +14,13 @@
 -dontwarn sun.misc.**
 #-keep class com.google.gson.stream.** { *; }
 
+# Prevent proguard from stripping interface information from TypeAdapterFactory,
+# JsonSerializer, JsonDeserializer instances (so they can be used in @JsonAdapter)
+-keep class * implements com.google.gson.TypeAdapterFactory
+-keep class * implements com.google.gson.JsonSerializer
+-keep class * implements com.google.gson.JsonDeserializer
+
+
 # keep api contract and enums
 -keep class com.mastercard.gateway.android.sdk.api.** { *; }
 -keep enum com.mastercard.gateway.android.sdk.** { *; }
