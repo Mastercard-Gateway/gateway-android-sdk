@@ -14,8 +14,9 @@
 -dontwarn sun.misc.**
 #-keep class com.google.gson.stream.** { *; }
 
-# keep enums
--keep public enum com.mastercard.gateway.android.sdk.** { *; }
+# keep api contract and enums
+-keep class com.mastercard.gateway.android.sdk.api.** { *; }
+-keep enum com.mastercard.gateway.android.sdk.** { *; }
 
 # Optional libraries will warn on missing classes
 -dontwarn io.reactivex.**
