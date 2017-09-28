@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion '26.0.1'
+    buildToolsVersion '26.0.2'
 
     defaultConfig {
         applicationId 'com.mastercard.gateway.android.sampleapp'
@@ -46,7 +46,7 @@ dependencies {
 
     compile 'blue.aodev:material-values:1.1.1'
 
-    compile 'com.mastercard.gateway:gateway-android:0.2.1'
+    compile 'com.mastercard.gateway:gateway-android:0.3.1'
 
 
     // Espresso testing
