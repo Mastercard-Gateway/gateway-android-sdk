@@ -23,7 +23,7 @@ android {
 
         consumerProguardFiles 'proguard.pro'
 
-        buildConfigField "Integer", "DEFAULT_API_VERSION", defaultApiVersion
+        buildConfigField "Integer", "API_VERSION", apiVersion
         buildConfigField "String", "INTERMEDIATE_CA", '"' + intermediateCa + '"'
     }
 
@@ -37,6 +37,7 @@ android {
     }
 
     buildTypes {
+        debug
         release
     }
 }
