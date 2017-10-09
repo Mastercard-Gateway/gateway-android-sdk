@@ -128,9 +128,9 @@ publishing {
                 // adds developer info
                 def developers = root.appendNode('developers')
                 def dev = developers.appendNode('developer')
-                dev.appendNode('id', 'nak5ive')
-                dev.appendNode('name', 'Al Kent')
-                dev.appendNode('email', 'al.kent@mastercard.com')
+                dev.appendNode('id', 'gateway')
+                dev.appendNode('name', 'Mastercard Payment Gateway Services')
+                dev.appendNode('email', 'gateway@mastercard.com')
             }
         }
     }
