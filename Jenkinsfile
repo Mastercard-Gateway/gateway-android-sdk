@@ -9,7 +9,7 @@ node {
     sh "./gradlew assembleRelease"
 
     stage 'Test'
-    sh "./gradlew lint test"
+    sh "./gradlew lintRelease testReleaseUnitTest"
 
     stage('Deploy') {
         sh "./gradlew gateway-android:androidSourcesJar gateway-android:androidJavadocsJar gateway-android:generatePomFileForAarPublication gateway-android:artifactoryPublish"

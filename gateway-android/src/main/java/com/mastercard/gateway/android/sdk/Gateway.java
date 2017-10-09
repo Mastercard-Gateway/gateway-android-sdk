@@ -4,7 +4,6 @@ package com.mastercard.gateway.android.sdk;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Base64;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -32,9 +31,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -58,7 +55,6 @@ import io.reactivex.Single;
 @SuppressWarnings("unused,WeakerAccess")
 public class Gateway {
 
-    int apiVersion = BuildConfig.DEFAULT_API_VERSION;
     Map<String, Certificate> certificates = new HashMap<>();
     String merchantId;
     URL baseUrl;
@@ -122,27 +118,6 @@ public class Gateway {
             throw new IllegalArgumentException("Incorrect url format", e);
         }
 
-        return this;
-    }
-
-    /**
-     * Gets the current API version.
-     *
-     * @return The current API version
-     */
-    public int getApiVersion() {
-        return apiVersion;
-    }
-
-    /**
-     * Sets the current API version.
-     *
-     * @param version A valid API version
-     * @return The <tt>Gateway</tt> instance
-     * @see <a href="https://test-gateway.mastercard.com/api/documentation/apiDocumentation/rest-json/index.html">Gateway API Versions</a> for a list of available version numbers
-     */
-    public Gateway setApiVersion(int version) {
-        apiVersion = version;
         return this;
     }
 
@@ -351,7 +326,7 @@ public class Gateway {
 
 
     String getApiUrl() {
-        return baseUrl.toString() + "/api/rest/version/" + apiVersion;
+        return baseUrl.toString() + "/api/rest/version/" + BuildConfig.API_VERSION;
     }
 
     String getUpdateSessionUrl(String sessionId) {
@@ -443,8 +418,10 @@ public class Gateway {
 
         String payload = httpRequest.payload();
 
+        Logger logger = new BaseLogger();
+
         // log request
-        logRequest(c, payload);
+        logger.logRequest(c, payload);
 
         // write data
         if (payload != null) {
@@ -460,7 +437,7 @@ public class Gateway {
         c.disconnect();
 
         // log response
-        logResponse(response);
+        logger.logResponse(response);
 
         // if response contains exception, rethrow it
         if (response.hasException()) {
@@ -522,59 +499,5 @@ public class Gateway {
         // add our trusted cert to the keystore
         ByteArrayInputStream is = new ByteArrayInputStream(Base64.decode(pemCert, Base64.DEFAULT));
         return CertificateFactory.getInstance("X.509").generateCertificate(is);
-    }
-
-    private void logRequest(HttpURLConnection c, String data) {
-        String log = "REQUEST: " + c.getRequestMethod() + " " + c.getURL().toString();
-
-        if (data != null) {
-            log += "\n-- Data: " + data;
-        }
-
-        // log request headers
-        Map<String, List<String>> properties = c.getRequestProperties();
-        Set<String> keys = properties.keySet();
-        for (String key : keys) {
-            List<String> values = properties.get(key);
-            for (String value : values) {
-                log += "\n-- " + key + ": " + value;
-            }
-        }
-
-        String[] parts = log.split("\n");
-        for (String part : parts) {
-            Log.d(Gateway.class.getSimpleName(), part);
-        }
-    }
-
-    private void logResponse(HttpResponse response) {
-        String log = "RESPONSE: ";
-
-        // log response headers
-        Map<String, List<String>> headers = response.getConnection().getHeaderFields();
-        Set<String> keys = headers.keySet();
-
-        int i = 0;
-        for (String key : keys) {
-            List<String> values = headers.get(key);
-            for (String value : values) {
-                if (i == 0 && key == null) {
-                    log += value;
-
-                    String payload = response.getPayload();
-                    if (payload.length() > 0) {
-                        log += "\n-- Data: " + payload;
-                    }
-                } else {
-                    log += "\n-- " + (key == null ? "" : key + ": ") + value;
-                }
-                i++;
-            }
-        }
-
-        String[] parts = log.split("\n");
-        for (String part : parts) {
-            Log.d(Gateway.class.getSimpleName(), part);
-        }
     }
 }

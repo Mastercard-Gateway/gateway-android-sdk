@@ -80,13 +80,6 @@ public class GatewayTest {
     }
 
     @Test
-    public void setApiVersionWorksAsIntended() throws Exception {
-        gateway.setApiVersion(40);
-
-        assertEquals(gateway.apiVersion, 40);
-    }
-
-    @Test
     public void testSetMerchantIdThrowsExceptionIfNull() throws Exception {
         try {
             gateway.setMerchantId(null);
@@ -177,20 +170,19 @@ public class GatewayTest {
 
     @Test
     public void testGetApiUrlWorksAsIntended() throws Exception {
-        String expectedUrl = "https://somegatewayurl.com/api/rest/version/40";
+        String expectedUrl = "https://somegatewayurl.com/api/rest/version/" + BuildConfig.API_VERSION;
 
-        gateway.setBaseUrl("https://somegatewayurl.com").setApiVersion(40);
+        gateway.setBaseUrl("https://somegatewayurl.com");
 
         assertEquals(expectedUrl, gateway.getApiUrl());
     }
 
     @Test
     public void testGetUpdateSessionUrlWorksAsIntended() throws Exception {
-        String expectedUrl = "https://somegatewayurl.com/api/rest/version/40/merchant/somemerchant/session/sess1234";
+        String expectedUrl = "https://somegatewayurl.com/api/rest/version/" + BuildConfig.API_VERSION + "/merchant/somemerchant/session/sess1234";
 
         gateway.setMerchantId("somemerchant")
-                .setBaseUrl("https://somegatewayurl.com")
-                .setApiVersion(40);
+                .setBaseUrl("https://somegatewayurl.com");
 
         assertEquals(expectedUrl, gateway.getUpdateSessionUrl("sess1234"));
     }
