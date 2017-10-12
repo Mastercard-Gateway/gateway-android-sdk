@@ -1,10 +1,8 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-
     repositories {
         jcenter()
-        google()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.3.3'
@@ -17,14 +15,7 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
-        mavenCentral()
         google()
-        maven {
-            url 'http://tools.labs.mastercard.com/artifactory/libs-release-local'
-        }
-        maven {
-            url 'http://tools.labs.mastercard.com/artifactory/libs-snapshot-local'
-        }
     }
 }
 
