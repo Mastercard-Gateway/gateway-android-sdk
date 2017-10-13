@@ -37,7 +37,7 @@ gateway.addTrustedCertificate(alias, customCert);
 To help alleviate the worry of passing card information through your servers, the SDK provides a method to update a session with card data directly with the Gateway. Using an existing session ID, you can do so in a couple different ways:
 
 ```java
-GatewayCallback<UpdateSessionResponse> callback = new GatewayCallback<>() {
+GatewayCallback<UpdateSessionResponse> callback = new GatewayCallback<UpdateSessionResponse>() {
     @Override
     public void onSuccess(UpdateSessionResponse response) {
         // TODO handle success
@@ -61,7 +61,8 @@ Card card = Card.builder()
     .securityCode("100")
     .expiry(Expiry.builder()
         .month("05")
-        .year("21"))
+        .year("21")
+        .build())
     .build();
 
 gateway.updateSessionWithCardInfo(sessionId, card, callback);
