@@ -102,4 +102,6 @@ If being reactive is your thing, then we've got you covered. Include the **[RxJa
 Single<UpdateSessionResponse> single = gateway.updateSessionWithCardInfo(session, card);
 ```
 
+---
+
 For more information, visit [https://na-gateway.mastercard.com/api/documentation/integrationGuidelines/index.html](https://test-gateway.mastercard.com/api/documentation/integrationGuidelines/index.html)
