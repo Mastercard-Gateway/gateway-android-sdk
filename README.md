@@ -21,8 +21,6 @@ gatewayBaseUrl=
 merchantServerUrl=
 ```
 
-Once completed, you may run the sample app on your device.
-
 ## Integrating with Your App
 
 ### Import the Dependency [![Download](https://api.bintray.com/packages/mpgs/Android/gateway-android-sdk/images/download.svg)](https://bintray.com/mpgs/Android/gateway-android-sdk/_latestVersion)
