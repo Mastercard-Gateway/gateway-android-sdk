@@ -4,7 +4,7 @@ Our Android SDK allows you to easily integrate payments into your Android app. B
 
 ## Initialize the Sample App
 
-This sample app requires a running instance of our [Gateway Test Merchant Server](https://github.com/Mastercard/gateway-test-merchant-server). Follow the instructions for that project and copy the resulting URL of the instance you create.
+This sample app requires a running instance of our [**Gateway Test Merchant Server**](https://github.com/Mastercard/gateway-test-merchant-server). Follow the instructions for that project and copy the resulting URL of the instance you create.
 
 After you pull this sample app code down, open the *gradle.properties* file. There are three fields which must be completed in order for the sample app to run a test transaction.
 
@@ -20,6 +20,8 @@ gatewayBaseUrl=
 # ex: https://{your-app-name}.herokuapp.com
 merchantServerUrl=
 ```
+
+Once completed, you may run the sample app on your device.
 
 ## Integrating with Your App
 
@@ -94,7 +96,7 @@ Once card details have been sent, you can complete the Gateway session on your s
 
 ### Rx-Enabled
 
-If being reactive is your thing, then we've got you covered. Include the [RxJava2](https://github.com/ReactiveX/RxJava) library in your project and utilize the appropriate methods provided in the `Gateway` class.
+If being reactive is your thing, then we've got you covered. Include the [**RxJava2**](https://github.com/ReactiveX/RxJava) library in your project and utilize the appropriate methods provided in the `Gateway` class.
 
 ```java
 Single<UpdateSessionResponse> single = gateway.updateSessionWithCardInfo(session, card);
