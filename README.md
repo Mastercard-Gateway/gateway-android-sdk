@@ -27,9 +27,9 @@ merchantServerUrl=
 
 ---
 
-## Integrating with Your App
+# Integrating with Your App
 
-### Import the Dependency [![Download](https://api.bintray.com/packages/mpgs/Android/gateway-android-sdk/images/download.svg)](https://bintray.com/mpgs/Android/gateway-android-sdk/_latestVersion)
+## Import the Dependency [![Download](https://api.bintray.com/packages/mpgs/Android/gateway-android-sdk/images/download.svg)](https://bintray.com/mpgs/Android/gateway-android-sdk/_latestVersion)
 
 This library is hosted in the jCenter repository. To import the Android SDK, include it as a dependency in your build.gradle file. Be sure to replace `{X.X.X}` with the version number in the shield above.
 
@@ -37,7 +37,7 @@ This library is hosted in the jCenter repository. To import the Android SDK, inc
 compile 'com.mastercard.gateway:gateway-android:{X.X.X}'
 ```
 
-### Configuring the SDK
+## Configuring the SDK
 
 In order to use the SDK, you must initialize the Gateway object with your merchant ID and the base URL of the API.
 
@@ -59,7 +59,7 @@ String customCert = "MIIFAzCCA+ugAwIBAgIEUdNg7jANBgkq...";
 gateway.addTrustedCertificate(alias, customCert);
 ```
 
-### Updating a Session with Card Information
+## Updating a Session with Card Information
 
 To help alleviate the worry of passing card information through your servers, the SDK provides a method to update a session with card data directly with the Gateway. Using an existing session ID, you can do so in a couple different ways:
 
@@ -98,7 +98,7 @@ gateway.updateSessionWithCardInfo(sessionId, card, callback);
 Once card details have been sent, you can complete the Gateway session on your servers with the private API password.
 
 
-### Rx-Enabled
+## Rx-Enabled
 
 If being reactive is your thing, then we've got you covered. Include the **[RxJava2](https://github.com/ReactiveX/RxJava)** library in your project and utilize the appropriate methods provided in the `Gateway` class.
 
