@@ -34,6 +34,7 @@ import com.mastercard.gateway.android.sdk.api.HttpResponse;
 import com.mastercard.gateway.android.sdk.api.UpdateSessionRequest;
 import com.mastercard.gateway.android.sdk.api.UpdateSessionResponse;
 import com.mastercard.gateway.android.sdk.api.model.Card;
+import com.mastercard.gateway.android.sdk.api.model.Error;
 import com.mastercard.gateway.android.sdk.api.model.Expiry;
 import com.mastercard.gateway.android.sdk.api.model.Provided;
 import com.mastercard.gateway.android.sdk.api.model.SourceOfFunds;
@@ -468,8 +469,9 @@ public class Gateway {
         // if response has bad status code, create a gateway exception and throw it
         if (!response.isOk()) {
             ErrorResponse errorResponse = gson.fromJson(response.getPayload(), ErrorResponse.class);
+            Error error = errorResponse.error();
 
-            GatewayException exception = new GatewayException();
+            GatewayException exception = new GatewayException(error == null ? null : error.explanation());
             exception.setStatusCode(response.getStatusCode());
             exception.setErrorResponse(errorResponse);
 

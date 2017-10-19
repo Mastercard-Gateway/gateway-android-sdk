@@ -22,6 +22,14 @@ public class GatewayException extends Exception {
     ErrorResponse error;
 
 
+    public GatewayException() {
+    }
+
+    public GatewayException(String message) {
+        super(message);
+    }
+
+
     public int getStatusCode() {
         return statusCode;
     }
