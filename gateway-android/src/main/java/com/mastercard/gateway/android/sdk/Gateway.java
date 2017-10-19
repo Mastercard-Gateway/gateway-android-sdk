@@ -23,6 +23,7 @@ import android.util.Base64;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.mastercard.gateway.android.sdk.api.GatewayTypeAdapterFactory;
 import com.mastercard.gateway.android.sdk.api.ErrorResponse;
 import com.mastercard.gateway.android.sdk.api.GatewayCallback;
 import com.mastercard.gateway.android.sdk.api.GatewayException;
@@ -460,19 +461,23 @@ public class Gateway {
             throw response.getException();
         }
 
-        Gson gson = new GsonBuilder().create();
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapterFactory(GatewayTypeAdapterFactory.create())
+                .create();
 
         // if response has bad status code, create a gateway exception and throw it
         if (!response.isOk()) {
+            ErrorResponse errorResponse = gson.fromJson(response.getPayload(), ErrorResponse.class);
+
             GatewayException exception = new GatewayException();
             exception.setStatusCode(response.getStatusCode());
-            exception.setErrorResponse(ErrorResponse.typeAdapter(gson).fromJson(response.getPayload()));
+            exception.setErrorResponse(errorResponse);
 
             throw exception;
         }
 
         // build the response object from the payload
-        return gatewayRequest.getResponseTypeAdapter(gson).fromJson(response.getPayload());
+        return gson.fromJson(response.getPayload(), gatewayRequest.getResponseClass());
     }
 
     SSLContext createSslContext() throws Exception {
