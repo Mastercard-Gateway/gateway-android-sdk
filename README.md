@@ -1,4 +1,4 @@
-# Gateway Android SDK Sample App
+# Gateway Android SDK Sample App [![Build Status](https://travis-ci.org/Mastercard/gateway-android-sdk-sample.svg?branch=master)](https://travis-ci.org/Mastercard/gateway-android-sdk-sample)
 
 Our Android SDK allows you to easily integrate payments into your Android app. By updating a checkout session directly with the Gateway, you avoid the risk of handling sensitive card details on your server. This sample app demonstrates the basics of installing and configuring the SDK to complete a simple transaction.
 
@@ -29,7 +29,7 @@ merchantServerUrl=
 
 # Integrating with Your App
 
-## Import the Dependency [![Download](https://api.bintray.com/packages/mpgs/Android/gateway-android-sdk/images/download.svg)](https://bintray.com/mpgs/Android/gateway-android-sdk/_latestVersion)
+## Import the Dependency [![Download](https://api.bintray.com/packages/mpgs/Android/gateway-android-sdk/images/download.svg)](https://bintray.com/mpgs/Android/gateway-android-sdk/_latestVersion) 
 
 This library is hosted in the jCenter repository. To import the Android SDK, include it as a dependency in your build.gradle file. Be sure to replace `{X.X.X}` with the version number in the shield above.
 
