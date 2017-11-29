@@ -34,7 +34,7 @@ merchantServerUrl=
 This library is hosted in the jCenter repository. To import the Android SDK, include it as a dependency in your build.gradle file. Be sure to replace `{X.X.X}` with the version number in the shield above.
 
 ```groovy
-compile 'com.mastercard.gateway:gateway-android:{X.X.X}'
+implementation 'com.mastercard.gateway:gateway-android:{X.X.X}'
 ```
 
 ## Configuring the SDK
@@ -43,7 +43,7 @@ In order to use the SDK, you must initialize the Gateway object with your mercha
 
 ```java
 String merchantId = "YOUR_MERCHANT_ID";
-String baseUrl    = "https://na-gateway.mastercard.com";
+String baseUrl    = "YOUR_GATEWAY_BASE_URL"; // ex: "https://na-gateway.mastercard.com"
 
 Gateway gateway = new Gateway();
 gateway.setMerchantId(merchantId);
@@ -108,4 +108,4 @@ Single<UpdateSessionResponse> single = gateway.updateSessionWithCardInfo(session
 
 ---
 
-For more information, visit [https://na-gateway.mastercard.com/api/documentation/integrationGuidelines/index.html](https://test-gateway.mastercard.com/api/documentation/integrationGuidelines/index.html)
+For more information, visit [https://na-gateway.mastercard.com/api/documentation/integrationGuidelines/index.html](https://na-gateway.mastercard.com/api/documentation/integrationGuidelines/index.html)

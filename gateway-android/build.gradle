@@ -43,7 +43,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.google.code.gson:gson:2.8.2'
     optional 'io.reactivex.rxjava2:rxjava:2.1.5'
-    compileOnly 'com.android.support:support-annotations:27.0.1'
+    compileOnly 'com.android.support:support-annotations:27.0.2'
 
     //AutoValue
     compileOnly 'com.google.auto.value:auto-value:1.4.1'
