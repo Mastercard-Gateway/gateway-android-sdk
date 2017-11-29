@@ -12,6 +12,7 @@ script: ./gradlew clean --refresh-dependencies gateway-android:lintRelease gatew
 
 deploy:
   provider: script
+  skip_cleanup: true
   script: ./gradlew gateway-android:bintrayUpload
   on:
     branch: master
