@@ -8,8 +8,8 @@ android {
         applicationId 'com.mastercard.gateway.android.sampleapp'
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode sampleVersionCode
-        versionName sampleVersionName
+        versionCode 1
+        versionName '1.0.0'
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
