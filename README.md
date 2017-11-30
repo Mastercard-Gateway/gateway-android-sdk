@@ -8,7 +8,7 @@ Our Android SDK allows you to easily integrate payments into your Android app. B
 
 ## Initialize the Sample App
 
-This sample app requires a running instance of our **[Gateway Test Merchant Server](https://github.com/Mastercard/gateway-test-merchant-server)**. Follow the instructions for that project and copy the resulting URL of the instance you create.
+This sample app requires a running instance of our **[Gateway Test Merchant Server]**. Follow the instructions for that project and copy the resulting URL of the instance you create.
 
 After you pull this sample app code down, open the *gradle.properties* file. There are three fields which must be completed in order for the sample app to run a test transaction.
 
@@ -50,7 +50,7 @@ gateway.setMerchantId(merchantId);
 gateway.setBaseUrl(baseUrl);
 ```
 
-The SDK strictly enforces certificate pinning for added security. If you have a custom base URL (ie. **NOT** a *mastercard.com* domain), you will also need to provide the PEM-encoded SSL public certificate for that domain. We recommend using the intermediate certificate since it typically has a longer life-span than server certificates.
+The SDK strictly enforces [certificate pinning] for added security. If you have a custom base URL (ie. **NOT** a *mastercard.com* domain), you will also need to provide the PEM-encoded SSL public certificate for your domain. We recommend using the intermediate certificate since it typically has a longer life-span than server certificates. Read more about how to obtain this certificate in the **Certificate Pinning** section.
 
 ```java
 String alias      = "mycustomcert";
@@ -100,12 +100,35 @@ Once card details have been sent, you can complete the Gateway session on your s
 
 ## Rx-Enabled
 
-If being reactive is your thing, then we've got you covered. Include the **[RxJava2](https://github.com/ReactiveX/RxJava)** library in your project and utilize the appropriate methods provided in the `Gateway` class.
+If being reactive is your thing, then we've got you covered. Include the **[RxJava2]** library in your project and utilize the appropriate methods provided in the `Gateway` class.
 
 ```java
 Single<UpdateSessionResponse> single = gateway.updateSessionWithCardInfo(session, card);
 ```
 
----
 
-For more information, visit [https://na-gateway.mastercard.com/api/documentation/integrationGuidelines/index.html](https://na-gateway.mastercard.com/api/documentation/integrationGuidelines/index.html)
+## Certificate Pinning
+
+[Certificate pinning] is a security measure used to prevent man-in-the-middle attacks by reducing the number of trusted certificate authorities from the default list to only those you provide. If your gateway instance is not a *mastercard.com* URL, then you will need to provide a base64-encoded (PEM) public certificate for that domain. We recommend using the 'intermediate' certificate, as it typically has a much longer life-span than the 'leaf' certificate issued for your domain.
+
+One easy method of retrieving this certificate is to download it through your browser.
+1. In the **Chrome** browser, navigate to your gateway integration guide. (ie. https://<your-gateway-domain>/api/documentation)
+1. Right-click on the page and click *Inspect* in the menu
+1. Select the *Security* tab in the inspector
+1. Click *View Certificate*
+1. In the popup window, click on the certificate below the root (most likely the middle certificate in the chain)
+1. In the info window below, drag the large certificate icon onto the desktop, downloading the *.cer* file to your machine
+1. This CER file needs to be converted to PEM format (base64) before it can be used. Execute the following terminal command to convert it:
+    ```
+    openssl x509 -inform der -in <downloaded-certificate.cer> -out new-cert.pem
+    ```
+1. In a text editor, open this new PEM file and remove the `----- [BEGIN/END] CERTIFICATE -----` lines and all new line characters.
+
+The resulting file should contain a single-line, base64 encoded public certificate. This value should be stored in your application and added as a parameter using the *Gateway.addTrustedCertificate()* method.
+ 
+
+
+[Gateway Test Merchant Server]: https://github.com/Mastercard/gateway-test-merchant-server
+[certificate pinning]: https://en.wikipedia.org/wiki/HTTP_Public_Key_Pinning
+[RxJava2]: https://github.com/ReactiveX/RxJava
+[integration guidelines]: https://na-gateway.mastercard.com/api/documentation/integrationGuidelines/index.html
