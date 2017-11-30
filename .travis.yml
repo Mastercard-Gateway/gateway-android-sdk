@@ -15,4 +15,4 @@ deploy:
   skip_cleanup: true
   script: ./gradlew gateway-android:bintrayUpload
   on:
-    branch: master
+    tags: true
