@@ -109,23 +109,24 @@ Single<UpdateSessionResponse> single = gateway.updateSessionWithCardInfo(session
 
 ## Certificate Pinning
 
-[Certificate pinning] is a security measure used to prevent man-in-the-middle attacks by reducing the number of trusted certificate authorities from the default list to only those you provide. If your gateway instance is not a *mastercard.com* URL, then you will need to provide a base64-encoded (PEM) public certificate for that domain. We recommend using the 'intermediate' certificate, as it typically has a much longer life-span than the 'leaf' certificate issued for your domain.
+[Certificate pinning] is a security measure used to prevent man-in-the-middle attacks by reducing the number of trusted certificate authorities from the default list to only those you provide. If your gateway instance is not a *mastercard.com* URL, then you will need to provide a valid X.509 certificate for that domain. We recommend using the 'intermediate' certificate, as it typically has a much longer life-span than the 'leaf' certificate issued for your domain.
 
 One easy method of retrieving this certificate is to download it through your browser.
 1. In the **Chrome** browser, navigate to your gateway integration guide. (ie. https://<your-gateway-domain>/api/documentation)
 1. Right-click on the page and click *Inspect* in the menu
-1. Select the *Security* tab in the inspector
-1. Click *View Certificate*
-1. In the popup window, click on the certificate below the root (most likely the middle certificate in the chain)
-1. In the info window below, drag the large certificate icon onto the desktop, downloading the *.cer* file to your machine
-1. This CER file needs to be converted to PEM format (base64) before it can be used. Execute the following terminal command to convert it:
-    ```
-    openssl x509 -inform der -in <downloaded-certificate.cer> -out new-cert.pem
-    ```
-1. In a text editor, open this new PEM file and remove the `----- [BEGIN/END] CERTIFICATE -----` lines and all new line characters.
+1. Select the *Security* tab in the inspector and click *View certificate*
+1. In the popup window, click on the intermediate certificate (most likely the middle certificate in the chain)
+1. In the info window below, drag the large certificate icon onto your desktop, downloading the *.cer* file to your machine
+1. Rename this file to something simple, like *gateway.cer*, and copy it into your project's *assets* or *raw* directory
 
-The resulting file should contain a single-line, base64 encoded public certificate. This value should be stored in your application and added as a parameter using the *Gateway.addTrustedCertificate()* method.
- 
+With the certificate now stored in your app, you can add it as a parameter to the Gateway SDK as an InputStream.
+
+If you prefer to store the certificate as a String constant rather than a resource file, you can convert the certificate to PEM format using the following command:
+```
+openssl x509 -inform der -in <downloaded-certificate.cer> -out gateway.pem
+```
+The entire content of this generated PEM file (including header, footer, and new line characters) should be provided as a parameter to the Gateway SDK.
+
 
 
 [Gateway Test Merchant Server]: https://github.com/Mastercard/gateway-test-merchant-server
