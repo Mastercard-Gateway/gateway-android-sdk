@@ -66,12 +66,7 @@ public class PayActivity extends AppCompatActivity {
         binding.cvv.addTextChangedListener(textChangeListener);
 
         binding.submitButton.setEnabled(false);
-        binding.submitButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                buyClicked(view);
-            }
-        });
+        binding.submitButton.setOnClickListener(this::buyClicked);
     }
 
     void buyClicked(View submitButton) {

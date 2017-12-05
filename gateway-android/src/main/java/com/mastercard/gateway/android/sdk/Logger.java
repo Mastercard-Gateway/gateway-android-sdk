@@ -23,4 +23,5 @@ import java.net.HttpURLConnection;
 interface Logger {
     void logRequest(HttpURLConnection c, String data);
     void logResponse(HttpResponse response);
+    void logDebug(String message);
 }

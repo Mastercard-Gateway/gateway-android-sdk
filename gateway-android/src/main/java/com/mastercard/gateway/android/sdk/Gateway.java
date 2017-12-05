@@ -40,6 +40,7 @@ import com.mastercard.gateway.android.sdk.api.model.Provided;
 import com.mastercard.gateway.android.sdk.api.model.SourceOfFunds;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -48,6 +49,7 @@ import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,19 +63,52 @@ import io.reactivex.Single;
 /**
  * The public interface to the Gateway SDK.
  * <p>
- * Example use case:
+ * Example set up:
  * <p>
  * <code>
  * Gateway gateway = new Gateway();
  * gateway.setBaseUrl("https://your-gateway-url.com");
  * gateway.setMerchantId("your-merchant-id");
- * gateway.
+ * gateway.addTrustedCertificate("my-cert", "-----BEGIN CERTIFICATE-----\n...");
  * </code>
  */
 @SuppressWarnings("unused,WeakerAccess")
 public class Gateway {
 
+    static final int API_VERSION = 44;
+
+    static final String INTERMEDIATE_CA = "-----BEGIN CERTIFICATE-----\n" +
+            "MIIFAzCCA+ugAwIBAgIEUdNg7jANBgkqhkiG9w0BAQsFADCBvjELMAkGA1UEBhMC\n" +
+            "VVMxFjAUBgNVBAoTDUVudHJ1c3QsIEluYy4xKDAmBgNVBAsTH1NlZSB3d3cuZW50\n" +
+            "cnVzdC5uZXQvbGVnYWwtdGVybXMxOTA3BgNVBAsTMChjKSAyMDA5IEVudHJ1c3Qs\n" +
+            "IEluYy4gLSBmb3IgYXV0aG9yaXplZCB1c2Ugb25seTEyMDAGA1UEAxMpRW50cnVz\n" +
+            "dCBSb290IENlcnRpZmljYXRpb24gQXV0aG9yaXR5IC0gRzIwHhcNMTQxMDIyMTcw\n" +
+            "NTE0WhcNMjQxMDIzMDczMzIyWjCBujELMAkGA1UEBhMCVVMxFjAUBgNVBAoTDUVu\n" +
+            "dHJ1c3QsIEluYy4xKDAmBgNVBAsTH1NlZSB3d3cuZW50cnVzdC5uZXQvbGVnYWwt\n" +
+            "dGVybXMxOTA3BgNVBAsTMChjKSAyMDEyIEVudHJ1c3QsIEluYy4gLSBmb3IgYXV0\n" +
+            "aG9yaXplZCB1c2Ugb25seTEuMCwGA1UEAxMlRW50cnVzdCBDZXJ0aWZpY2F0aW9u\n" +
+            "IEF1dGhvcml0eSAtIEwxSzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB\n" +
+            "ANo/ltBNuS9E59s5XptQ7lylYdpBZ1MJqgCajld/KWvbx+EhJKo60I1HI9Ltchbw\n" +
+            "kSHSXbe4S6iDj7eRMmjPziWTLLJ9l8j+wbQXugmeA5CTe3xJgyJoipveR8MxmHou\n" +
+            "fUAL0u8+07KMqo9Iqf8A6ClYBve2k1qUcyYmrVgO5UK41epzeWRoUyW4hM+Ueq4G\n" +
+            "RQyja03Qxr7qGKQ28JKyuhyIjzpSf/debYMcnfAf5cPW3aV4kj2wbSzqyc+UQRlx\n" +
+            "RGi6RzwE6V26PvA19xW2nvIuFR4/R8jIOKdzRV1NsDuxjhcpN+rdBQEiu5Q2Ko1b\n" +
+            "Nf5TGS8IRsEqsxpiHU4r2RsCAwEAAaOCAQkwggEFMA4GA1UdDwEB/wQEAwIBBjAP\n" +
+            "BgNVHRMECDAGAQH/AgEAMDMGCCsGAQUFBwEBBCcwJTAjBggrBgEFBQcwAYYXaHR0\n" +
+            "cDovL29jc3AuZW50cnVzdC5uZXQwMAYDVR0fBCkwJzAloCOgIYYfaHR0cDovL2Ny\n" +
+            "bC5lbnRydXN0Lm5ldC9nMmNhLmNybDA7BgNVHSAENDAyMDAGBFUdIAAwKDAmBggr\n" +
+            "BgEFBQcCARYaaHR0cDovL3d3dy5lbnRydXN0Lm5ldC9ycGEwHQYDVR0OBBYEFIKi\n" +
+            "cHTdvFM/z3vU981/p2DGCky/MB8GA1UdIwQYMBaAFGpyJnrQHu995ztpUdRsjZ+Q\n" +
+            "EmarMA0GCSqGSIb3DQEBCwUAA4IBAQA/HBpb/0AiHY81DC2qmSerwBEycNc2KGml\n" +
+            "jbEnmUK+xJPrSFdDcSPE5U6trkNvknbFGe/KvG9CTBaahqkEOMdl8PUM4ErfovrO\n" +
+            "GhGonGkvG9/q4jLzzky8RgzAiYDRh2uiz2vUf/31YFJnV6Bt0WRBFG00Yu0GbCTy\n" +
+            "BrwoAq8DLcIzBfvLqhboZRBD9Wlc44FYmc1r07jHexlVyUDOeVW4c4npXEBmQxJ/\n" +
+            "B7hlVtWNw6f1sbZlnsCDNn8WRTx0S5OKPPEr9TVwc3vnggSxGJgO1JxvGvz8pzOl\n" +
+            "u7sY82t6XTKH920l5OJ2hiEeEUbNdg5vT6QhcQqEpy02qUgiUX6C\n" +
+            "-----END CERTIFICATE-----\n";
+
     Map<String, Certificate> certificates = new HashMap<>();
+    Logger logger = new BaseLogger();
     String merchantId;
     URL baseUrl;
 
@@ -164,29 +199,26 @@ public class Gateway {
     }
 
     /**
-     * Adds a PEM-encoded certificate to the trust store.
+     * Adds a certificate to the trust store.
      * <p>
      * The Mastercard Gateway certificate is already
      * registered and can not be removed. However, if you require another certificate
      * to be trusted, you may use this method to add additional certificates to the trust store.
      *
      * @param alias       An alias for the certificate
-     * @param certificate A valid PEM-encoded X509 certificate
+     * @param certificate A string containing valid X.509 certificate data
      * @return The <tt>Gateway</tt> instance
      * @throws IllegalArgumentException If either the alias or certificate is null, or the certificate can not be read
      */
     public Gateway addTrustedCertificate(String alias, String certificate) {
-        // parse and validate PEM cert
-        Certificate cert;
         try {
-            cert = readPemCertificate(certificate);
+            Certificate cert = readCertificate(certificate);
+            addTrustedCertificate(alias, cert);
+
+            return this;
         } catch (Exception e) {
-            throw new IllegalArgumentException("Unable to read PEM certificate", e);
+            throw new IllegalArgumentException("Unable to read certificate", e);
         }
-
-        addTrustedCertificate(alias, cert);
-
-        return this;
     }
 
     /**
@@ -197,7 +229,30 @@ public class Gateway {
      * to be trusted, you may use this method to add additional certificates to the trust store.
      *
      * @param alias       An alias for the certificate
-     * @param certificate An X509 certificate
+     * @param inputStream An input stream containing valid X.509 certificate data
+     * @return The <tt>Gateway</tt> instance
+     * @throws IllegalArgumentException If either the alias or certificate is null, or the certificate can not be read
+     */
+    public Gateway addTrustedCertificate(String alias, InputStream inputStream) {
+        try {
+            Certificate cert = readCertificate(inputStream);
+            addTrustedCertificate(alias, cert);
+
+            return this;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Unable to read certificate", e);
+        }
+    }
+
+    /**
+     * Adds a certificate to the trust store.
+     * <p>
+     * The Mastercard Gateway certificate is already
+     * registered and can not be removed. However, if you require another certificate
+     * to be trusted, you may use this method to add additional certificates to the trust store.
+     *
+     * @param alias       An alias for the certificate
+     * @param certificate A certificate
      * @return The <tt>Gateway</tt> instance
      * @throws IllegalArgumentException If either the alias or certificate is null
      */
@@ -207,8 +262,10 @@ public class Gateway {
         }
 
         if (certificate == null) {
-            throw new IllegalArgumentException("Certificate may not be null");
+            throw new IllegalArgumentException("Certificate is null, or was provided in an invalid format");
         }
+
+        logger.logDebug("Adding trusted certificate: " + alias);
 
         certificates.put(alias, certificate);
 
@@ -344,7 +401,7 @@ public class Gateway {
 
 
     String getApiUrl() {
-        return baseUrl.toString() + "/api/rest/version/" + BuildConfig.API_VERSION;
+        return baseUrl.toString() + "/api/rest/version/" + API_VERSION;
     }
 
     String getUpdateSessionUrl(String sessionId) {
@@ -436,8 +493,6 @@ public class Gateway {
 
         String payload = httpRequest.payload();
 
-        Logger logger = new BaseLogger();
-
         // log request
         logger.logRequest(c, payload);
 
@@ -508,7 +563,7 @@ public class Gateway {
         keyStore.load(null, null);
 
         // add our trusted cert to the keystore
-        keyStore.setCertificateEntry("gateway.mastercard.com", readPemCertificate(BuildConfig.INTERMEDIATE_CA));
+        keyStore.setCertificateEntry("gateway.mastercard.com", readCertificate(INTERMEDIATE_CA));
 
         // add user-provided trusted certs to keystore
         for (String alias : certificates.keySet()) {
@@ -518,9 +573,20 @@ public class Gateway {
         return keyStore;
     }
 
-    Certificate readPemCertificate(String pemCert) throws CertificateException {
-        // add our trusted cert to the keystore
-        ByteArrayInputStream is = new ByteArrayInputStream(Base64.decode(pemCert, Base64.DEFAULT));
-        return CertificateFactory.getInstance("X.509").generateCertificate(is);
+    X509Certificate readCertificate(String cert) throws CertificateException {
+        // first, attempt to parse string as-is
+        byte[] bytes = cert.getBytes();
+        X509Certificate certificate = readCertificate(new ByteArrayInputStream(bytes));
+        if (certificate == null) {
+            // attempt to decode the DER data directly
+            bytes = Base64.decode(cert, Base64.DEFAULT);
+            certificate = readCertificate(new ByteArrayInputStream(bytes));
+        }
+
+        return certificate;
+    }
+
+    X509Certificate readCertificate(InputStream inputStream) throws CertificateException {
+        return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(inputStream);
     }
 }
