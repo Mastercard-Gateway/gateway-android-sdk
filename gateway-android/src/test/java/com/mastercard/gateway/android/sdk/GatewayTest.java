@@ -1,6 +1,8 @@
 package com.mastercard.gateway.android.sdk;
 
 
+import android.util.Base64;
+
 import com.mastercard.gateway.android.sdk.api.GatewayCallback;
 import com.mastercard.gateway.android.sdk.api.GatewayResponse;
 import com.mastercard.gateway.android.sdk.api.UpdateSessionRequest;
@@ -9,12 +11,19 @@ import com.mastercard.gateway.android.sdk.api.model.Card;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.net.URL;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -24,6 +33,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+@RunWith(RobolectricTestRunner.class)
+@Config(manifest=Config.NONE)
 public class GatewayTest {
 
     Gateway gateway;
@@ -99,10 +110,18 @@ public class GatewayTest {
 
     @Test
     public void testAddTrustedCertificateThrowsExceptionOnParseError() throws Exception {
-        doThrow(IllegalArgumentException.class).when(gateway).readPemCertificate(any());
+        doThrow(IllegalArgumentException.class).when(gateway).readCertificate((String) any());
 
         try {
             gateway.addTrustedCertificate("alias", "bogus cert data");
+
+            fail("A failure to parse the certificate should throw an exception");
+        } catch (Exception e) {
+            // success
+        }
+
+        try {
+            gateway.addTrustedCertificate("alias", getResourceInputStream("boguscert.txt"));
 
             fail("A failure to parse the certificate should throw an exception");
         } catch (Exception e) {
@@ -170,7 +189,7 @@ public class GatewayTest {
 
     @Test
     public void testGetApiUrlWorksAsIntended() throws Exception {
-        String expectedUrl = "https://somegatewayurl.com/api/rest/version/" + BuildConfig.API_VERSION;
+        String expectedUrl = "https://somegatewayurl.com/api/rest/version/" + Gateway.API_VERSION;
 
         gateway.setBaseUrl("https://somegatewayurl.com");
 
@@ -179,7 +198,7 @@ public class GatewayTest {
 
     @Test
     public void testGetUpdateSessionUrlWorksAsIntended() throws Exception {
-        String expectedUrl = "https://somegatewayurl.com/api/rest/version/" + BuildConfig.API_VERSION + "/merchant/somemerchant/session/sess1234";
+        String expectedUrl = "https://somegatewayurl.com/api/rest/version/" + Gateway.API_VERSION + "/merchant/somemerchant/session/sess1234";
 
         gateway.setMerchantId("somemerchant")
                 .setBaseUrl("https://somegatewayurl.com");
@@ -242,7 +261,7 @@ public class GatewayTest {
 
     @Test
     public void testCreateSslKeystoreContainsInternalCertificate() throws Exception {
-        doReturn(mock(Certificate.class)).when(gateway).readPemCertificate(any());
+        doReturn(mock(X509Certificate.class)).when(gateway).readCertificate((String) any());
 
         KeyStore keyStore = gateway.createSslKeyStore();
 
@@ -251,7 +270,7 @@ public class GatewayTest {
 
     @Test
     public void testCreateSslKeystoreContainsAdditionalTrustedCertificates() throws Exception {
-        doReturn(mock(Certificate.class)).when(gateway).readPemCertificate(any());
+        doReturn(mock(X509Certificate.class)).when(gateway).readCertificate((String) any());
 
         gateway.addTrustedCertificate("alias1", mock(Certificate.class));
         gateway.addTrustedCertificate("alias2", mock(Certificate.class));
@@ -261,5 +280,78 @@ public class GatewayTest {
         assertEquals(3, keyStore.size());
         assertTrue(keyStore.containsAlias("custom.alias1"));
         assertTrue(keyStore.containsAlias("custom.alias2"));
+    }
+
+    @Test
+    public void testReadCertificateFromStringWorksAsExpected() throws Exception {
+        // test valid PEM data
+        String cert = getPemCertString();
+        X509Certificate certificate = gateway.readCertificate(cert);
+
+        assertNotNull(certificate);
+        assertEquals("1372807406", certificate.getSerialNumber().toString());
+
+        // test base64 encoded DER data
+        cert = getBase64DerCert();
+        certificate = gateway.readCertificate(cert);
+
+        assertNotNull(certificate);
+        assertEquals("1372807406", certificate.getSerialNumber().toString());
+    }
+
+    @Test
+    public void testReadCertificateFromInputStreamWorksAsExpected() throws Exception {
+        // test input stream from raw DER file
+        InputStream is = getResourceInputStream("testcert.cer");
+        X509Certificate certificate = gateway.readCertificate(is);
+        is.close();
+
+        assertNotNull(certificate);
+        assertEquals("1372807406", certificate.getSerialNumber().toString());
+
+        // test input stream from raw PEM file
+        is = getResourceInputStream("testcert.pem");
+        certificate = gateway.readCertificate(is);
+        is.close();
+
+        assertNotNull(certificate);
+        assertEquals("1372807406", certificate.getSerialNumber().toString());
+    }
+
+
+    String getBase64DerCert() throws Exception {
+        InputStream is = getResourceInputStream("testcert.cer");
+
+        // base64 encode the DER data
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int read;
+        byte[] data = new byte[1024];
+        while ((read = is.read(data, 0, data.length)) != -1) {
+            buffer.write(data, 0, read);
+        }
+        buffer.flush();
+        byte[] bytes = buffer.toByteArray();
+
+        return Base64.encodeToString(bytes, Base64.DEFAULT);
+    }
+
+    String getPemCertString() throws Exception {
+        InputStream is = getResourceInputStream("testcert.pem");
+
+        // base64 encode the DER data
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int read;
+        byte[] data = new byte[1024];
+        while ((read = is.read(data, 0, data.length)) != -1) {
+            buffer.write(data, 0, read);
+        }
+        buffer.flush();
+        byte[] bytes = buffer.toByteArray();
+
+        return new String(bytes, "UTF-8");
+    }
+
+    InputStream getResourceInputStream(String name) {
+        return getClass().getResourceAsStream(name);
     }
 }

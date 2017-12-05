@@ -12,6 +12,7 @@ import java.util.Set;
 
 class BaseLogger implements Logger {
 
+    @Override
     public void logRequest(HttpURLConnection c, String data) {
         String log = "REQUEST: " + c.getRequestMethod() + " " + c.getURL().toString();
 
@@ -35,6 +36,7 @@ class BaseLogger implements Logger {
         }
     }
 
+    @Override
     public void logResponse(HttpResponse response) {
         String log = "RESPONSE: ";
 
@@ -64,5 +66,10 @@ class BaseLogger implements Logger {
         for (String part : parts) {
             Log.d(Gateway.class.getSimpleName(), part);
         }
+    }
+
+    @Override
+    public void logDebug(String message) {
+        Log.d(Gateway.class.getSimpleName(), message);
     }
 }
