@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -33,6 +34,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 @RunWith(RobolectricTestRunner.class)
+@Config(manifest=Config.NONE)
 public class GatewayTest {
 
     Gateway gateway;
@@ -300,7 +302,7 @@ public class GatewayTest {
     @Test
     public void testReadCertificateFromInputStreamWorksAsExpected() throws Exception {
         // test input stream from raw DER file
-        InputStream is = getResourceInputStream("gateway.cer");
+        InputStream is = getResourceInputStream("testcert.cer");
         X509Certificate certificate = gateway.readCertificate(is);
         is.close();
 
@@ -308,7 +310,7 @@ public class GatewayTest {
         assertEquals("1372807406", certificate.getSerialNumber().toString());
 
         // test input stream from raw PEM file
-        is = getResourceInputStream("gateway.pem");
+        is = getResourceInputStream("testcert.pem");
         certificate = gateway.readCertificate(is);
         is.close();
 
@@ -318,7 +320,7 @@ public class GatewayTest {
 
 
     String getBase64DerCert() throws Exception {
-        InputStream is = getResourceInputStream("gateway.cer");
+        InputStream is = getResourceInputStream("testcert.cer");
 
         // base64 encode the DER data
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -334,7 +336,7 @@ public class GatewayTest {
     }
 
     String getPemCertString() throws Exception {
-        InputStream is = getResourceInputStream("gateway.pem");
+        InputStream is = getResourceInputStream("testcert.pem");
 
         // base64 encode the DER data
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();

@@ -108,6 +108,7 @@ public class Gateway {
             "-----END CERTIFICATE-----\n";
 
     Map<String, Certificate> certificates = new HashMap<>();
+    Logger logger = new BaseLogger();
     String merchantId;
     URL baseUrl;
 
@@ -261,8 +262,10 @@ public class Gateway {
         }
 
         if (certificate == null) {
-            throw new IllegalArgumentException("Certificate may not be null");
+            throw new IllegalArgumentException("Certificate is null, or was provided in an invalid format");
         }
+
+        logger.logDebug("Adding trusted certificate: " + alias);
 
         certificates.put(alias, certificate);
 
@@ -491,7 +494,6 @@ public class Gateway {
         String payload = httpRequest.payload();
 
         // log request
-        Logger logger = new BaseLogger();
         logger.logRequest(c, payload);
 
         // write data
