@@ -1,4 +1,4 @@
-# Gateway Android SDK Sample App [![Build Status](https://travis-ci.org/Mastercard/gateway-android-sdk.svg?branch=master)](https://travis-ci.org/Mastercard/gateway-android-sdk)
+# Gateway Android SDK [![Build Status](https://travis-ci.org/Mastercard/gateway-android-sdk.svg?branch=master)](https://travis-ci.org/Mastercard/gateway-android-sdk)
 
 Our Android SDK allows you to easily integrate payments into your Android app. By updating a checkout session directly with the Gateway, you avoid the risk of handling sensitive card details on your server. This sample app demonstrates the basics of installing and configuring the SDK to complete a simple transaction.
 
@@ -101,7 +101,7 @@ Single<UpdateSessionResponse> single = gateway.updateSessionWithCardInfo(session
 [Certificate pinning] is a security measure used to prevent man-in-the-middle attacks by reducing the number of trusted certificate authorities from the default list to only those you provide. If your gateway instance is not a *mastercard.com* URL, then you will need to provide a valid X.509 certificate for that domain. We recommend using the 'intermediate' certificate, as it typically has a much longer life-span than the 'leaf' certificate issued for your domain.
 
 One easy method of retrieving this certificate is to download it through your browser.
-1. In the **Chrome** browser, navigate to your gateway integration guide. (ie. https://<your-gateway-domain>/api/documentation)
+1. In the **Chrome** browser, navigate to your gateway integration guide. (ie. https://your-gateway-domain.com/api/documentation)
 1. Right-click on the page and click *Inspect* in the menu
 1. Select the *Security* tab in the inspector and click *View certificate*
 1. In the popup window, click on the intermediate certificate (most likely the middle certificate in the chain)
