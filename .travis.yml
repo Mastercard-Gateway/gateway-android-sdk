@@ -8,6 +8,9 @@ android:
     - build-tools-27.0.2
     - android-27
 
+before_install:
+  - yes | sdkmanager "platforms;android-27"
+
 script: ./gradlew clean --refresh-dependencies gateway-android:lintRelease gateway-android:testReleaseUnitTest gateway-android:assembleRelease gateway-android:androidSourcesJar gateway-android:androidJavadocsJar gateway-android:generatePomFileForAarPublication
 
 deploy:
