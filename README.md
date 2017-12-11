@@ -1,10 +1,10 @@
 # Gateway Android SDK [![Build Status](https://travis-ci.org/Mastercard/gateway-android-sdk.svg?branch=master)](https://travis-ci.org/Mastercard/gateway-android-sdk)
 
-Our Android SDK allows you to easily integrate payments into your Android app. By updating a checkout session directly with the Gateway, you avoid the risk of handling sensitive card details on your server. This sample app demonstrates the basics of installing and configuring the SDK to complete a simple transaction.
+Our Android SDK allows you to easily integrate payments into your Android app. By updating a checkout session directly with the Gateway, you avoid the risk of handling sensitive card details on your server. This sample app demonstrates the basics of installing and configuring the SDK to complete a simple payment.
 
-## Basic Transaction Flow Diagram
+## Basic Payment Flow Diagram
 
-![Transaction Flow](./transaction-flow.png "Transaction Flow")
+![Payment Flow](./payment-flow.png "payment Flow")
 
 # Integrating with Your App
 
@@ -89,7 +89,7 @@ Once card details have been sent, you can complete the Gateway session on your s
 
 ## Rx-Enabled
 
-If being reactive is your thing, then we've got you covered. Include the **[RxJava2]** library in your project and utilize the appropriate methods provided in the `Gateway` class.
+You may optionally include the **[RxJava2]** library in your project and utilize the appropriate methods provided in the `Gateway` class.
 
 ```java
 Single<UpdateSessionResponse> single = gateway.updateSessionWithCardInfo(session, card);
@@ -129,7 +129,7 @@ Making a payment with the Gateway SDK is a three step process.
 
 ## Initialize the Sample App
 
-To configure the sample app, open the *gradle.properties* file. There are three fields which must be completed in order for the sample app to run a test transaction.
+To configure the sample app, open the *gradle.properties* file. There are three fields which must be completed in order for the sample app to run a test payment.
 
 ```properties
 # TEST Gateway Merchant ID
