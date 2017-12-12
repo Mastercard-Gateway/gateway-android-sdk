@@ -43,7 +43,7 @@ public class PayActivity extends AppCompatActivity {
 
     SharedPreferences prefs = null;
     String nameOnCard, cardNumber, expiryMM, expiryYY, cvv, sessionId;
-    Gateway gateway = new Gateway();
+    Gateway gateway;
     TextChangeListener textChangeListener = new TextChangeListener();
 
     @Override
@@ -55,8 +55,21 @@ public class PayActivity extends AppCompatActivity {
 
         sessionId = getIntent().getStringExtra("SESSION_ID");
 
+        // ========================================================
+        // Configure the Gateway object
+        // ========================================================
+
+        gateway = new Gateway();
         gateway.setMerchantId(BuildConfig.GATEWAY_MERCHANT_ID);
-        gateway.setBaseUrl(BuildConfig.GATEWAY_BASE_URL);
+
+        try {
+            Gateway.Region region = Gateway.Region.valueOf(BuildConfig.GATEWAY_REGION);
+            gateway.setRegion(region);
+        } catch (Exception e) {
+            Log.e(PayActivity.class.getSimpleName(), "Invalid Gateway region value provided", e);
+        }
+
+        // ========================================================
 
         binding.nameOnCard.requestFocus();
         binding.nameOnCard.addTextChangedListener(textChangeListener);
