@@ -75,7 +75,8 @@ public class Gateway {
     public enum Region {
         ASIA_PACIFIC("ap"),
         EUROPE("eu"),
-        NORTH_AMERICA("na");
+        NORTH_AMERICA("na"),
+        TEST("test");
 
         String prefix;
 
