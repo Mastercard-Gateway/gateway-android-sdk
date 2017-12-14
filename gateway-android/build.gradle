@@ -55,8 +55,14 @@ dependencies {
 }
 
 task androidJavadocs(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    android.libraryVariants.all { variant ->
+        if (variant.name == 'release') {
+            owner.classpath += variant.javaCompile.classpath
+        }
+    }
+    source = android.sourceSets.main.java.srcDirs
+    exclude '**/R.html', '**/R.*.html', '**/index.html'
 }
 
 task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {

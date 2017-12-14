@@ -18,34 +18,12 @@ implementation 'com.mastercard.gateway:gateway-android:{X.X.X}'
 
 ## Configuring the SDK
 
-In order to use the SDK, you must initialize the Gateway object with your merchant ID and the base URL of the API.
+In order to use the SDK, you must initialize the Gateway object with your merchant ID and your gateway's region. If you are unsure about which region to select, please direct your inquiry to your gateway support team.
 
 ```java
-String merchantId = "YOUR_MERCHANT_ID";
-String baseUrl    = "YOUR_GATEWAY_BASE_URL"; // ex: "https://na-gateway.mastercard.com"
-
 Gateway gateway = new Gateway();
-gateway.setMerchantId(merchantId);
-gateway.setBaseUrl(baseUrl);
-```
-
-The SDK strictly enforces [certificate pinning] for added security. If you have a custom base URL (ie. **NOT** a *mastercard.com* domain), you will also need to provide a valid X.509 certificate for your domain. We recommend using the intermediate certificate since it typically has a longer life-span than server certificates. Read more about how to obtain this certificate in the **Certificate Pinning** section below.
-
-You can provide the certificate as a valid PEM-format certificate string:
-
-```java
-String customCert = "-----BEGIN CERTIFICATE-----\nMIIFAzCCA+ugAwIBAgIEUdNg7jANBgkq ... UgiUX6C\n-----END CERTIFICATE-----\n";
-
-gateway.addTrustedCertificate("my-cert-alias", customCert);
-```
-
-Or read in a valid X.509 certificate file as an input stream from your *raw* (or *assets*) resource directory:
-
-```java
-InputStream inputStream = getResources().openRawResource(R.raw.gateway_cert);
-
-gateway.addTrustedCertificate("my-cert-alias", inputStream);
-
+gateway.setMerchantId("YOUR_MERCHANT_ID");
+gateway.setRegion(Gateway.Region.YOUR_REGION);
 ```
 
 ## Updating a Session with Card Information
@@ -84,7 +62,21 @@ Card card = Card.builder()
 gateway.updateSessionWithCardInfo(sessionId, card, callback);
 ```
 
-Once card details have been sent, you can complete the Gateway session on your servers with the private API password.
+You may also include additional information such as shipping/billing addresses, customer info, and device data by manually building the `UpdateSessionRequest` object and providing that to the SDK.
+
+```java
+UpdateSessionRequest request = UpdateSessionRequest.builder()
+    .sourceOfFunds(SourceOfFunds.builder()...)
+    .customer(Customer.buider()...)
+    .shipping(Shipping.builder()...)
+    .billing(Billing.builder()...)
+    .device(Device.builder()...)
+    .build();
+
+gateway.updateSession(sessionId, request, callback);
+```
+
+Once payer data has been sent, you can complete the Gateway session on your servers with the private API password.
 
 
 ## Rx-Enabled
@@ -94,28 +86,6 @@ You may optionally include the **[RxJava2]** library in your project and utilize
 ```java
 Single<UpdateSessionResponse> single = gateway.updateSessionWithCardInfo(session, card);
 ```
-
-
-## Certificate Pinning
-
-[Certificate pinning] is a security measure used to prevent man-in-the-middle attacks by reducing the number of trusted certificate authorities from the default list to only those you provide. If your gateway instance is not a *mastercard.com* URL, then you will need to provide a valid X.509 certificate for that domain. We recommend using the 'intermediate' certificate, as it typically has a much longer life-span than the 'leaf' certificate issued for your domain.
-
-One easy method of retrieving this certificate is to download it through your browser.
-1. In the **Chrome** browser, navigate to your gateway integration guide. (ie. https://your-gateway-domain.com/api/documentation)
-1. Right-click on the page and click *Inspect* in the menu
-1. Select the *Security* tab in the inspector and click *View certificate*
-1. In the popup window, click on the intermediate certificate (most likely the middle certificate in the chain)
-1. In the info window below, drag the large certificate icon onto your desktop, downloading the *.cer* file to your machine
-1. Rename this file to something simple, like *gateway_cert.cer*, and copy it into your project's *raw* (or *assets*) directory
-
-With the certificate now stored in your app, you can add it as a parameter to the Gateway SDK as an InputStream.
-
-If you prefer to store the certificate as a String constant rather than a resource file, you can convert the certificate to PEM format using the following command:
-```
-openssl x509 -inform der -in gateway_cert.cer -out gateway_cert.pem
-```
-Open this PEM file in a text editor and copy the entire contents to a static variable in your project. You can reference this variable when adding an additional trusted certificate to the SDK. 
-
 
 # Sample App
 
@@ -135,8 +105,9 @@ To configure the sample app, open the *gradle.properties* file. There are three 
 # TEST Gateway Merchant ID
 gatewayMerchantId=
 
-# Gateway Base URL
-gatewayBaseUrl=
+# Gateway Region
+#   options include: ASIA_PACIFIC, EUROPE, or NORTH_AMERICA
+gatewayRegion=
 
 # TEST Merchant Server URL (test server app deployed to Heroku)
 # For more information, see: https://github.com/Mastercard/gateway-test-merchant-server
@@ -146,7 +117,5 @@ merchantServerUrl=
 
 
 
-[Gateway Test Merchant Server]: https://github.com/Mastercard/gateway-test-merchant-server
-[certificate pinning]: https://en.wikipedia.org/wiki/HTTP_Public_Key_Pinning
 [RxJava2]: https://github.com/ReactiveX/RxJava
-[integration guidelines]: https://na-gateway.mastercard.com/api/documentation/integrationGuidelines/index.html
+[Gateway Test Merchant Server]: https://github.com/Mastercard/gateway-test-merchant-server
