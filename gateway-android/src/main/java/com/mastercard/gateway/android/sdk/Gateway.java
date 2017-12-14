@@ -76,7 +76,7 @@ public class Gateway {
         ASIA_PACIFIC("ap"),
         EUROPE("eu"),
         NORTH_AMERICA("na"),
-        TEST("test");
+        MTF("test");
 
         String prefix;
 
