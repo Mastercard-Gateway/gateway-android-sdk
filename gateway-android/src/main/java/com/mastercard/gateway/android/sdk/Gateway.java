@@ -19,7 +19,6 @@ package com.mastercard.gateway.android.sdk;
 
 import android.os.Handler;
 import android.os.Message;
-import android.util.Base64;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -43,15 +42,11 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyStore;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -67,13 +62,33 @@ import io.reactivex.Single;
  * <p>
  * <code>
  * Gateway gateway = new Gateway();
- * gateway.setBaseUrl("https://your-gateway-url.com");
  * gateway.setMerchantId("your-merchant-id");
- * gateway.addTrustedCertificate("my-cert", "-----BEGIN CERTIFICATE-----\n...");
+ * gateway.setRegion(Gateway.Region.NORTH_AMERICA);
  * </code>
  */
 @SuppressWarnings("unused,WeakerAccess")
 public class Gateway {
+
+    /**
+     * The available gateway regions
+     */
+    public enum Region {
+        ASIA_PACIFIC("ap"),
+        EUROPE("eu"),
+        NORTH_AMERICA("na"),
+        MTF("test");
+
+        String prefix;
+
+        Region(String prefix) {
+            this.prefix = prefix;
+        }
+
+        String getPrefix() {
+            return prefix;
+        }
+    }
+
 
     static final int API_VERSION = 44;
 
@@ -107,71 +122,16 @@ public class Gateway {
             "u7sY82t6XTKH920l5OJ2hiEeEUbNdg5vT6QhcQqEpy02qUgiUX6C\n" +
             "-----END CERTIFICATE-----\n";
 
-    Map<String, Certificate> certificates = new HashMap<>();
+
     Logger logger = new BaseLogger();
     String merchantId;
-    URL baseUrl;
+    Region region;
 
 
     /**
      * Constructs a new instance.
      */
     public Gateway() {
-    }
-
-    /**
-     * Gets the current base url for the Gateway
-     *
-     * @return The base url
-     */
-    public URL getBaseUrl() {
-        return baseUrl;
-    }
-
-    /**
-     * Sets the base url for the Gateway.
-     * <p>
-     * Example:
-     * <code>
-     * gateway.setBaseUrl("https://some-gateway-url.com")
-     * </code>
-     *
-     * @param url The Gateway url
-     * @return The <tt>Gateway</tt> instance
-     */
-    public Gateway setBaseUrl(String url) {
-        if (url == null) {
-            throw new IllegalArgumentException("Url may not be null");
-        }
-
-        try {
-            setBaseUrl(new URL(url));
-        } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("Incorrect url format", e);
-        }
-
-        return this;
-    }
-
-    /**
-     * Sets the base url for the Gateway
-     *
-     * @param url The Gateway url
-     * @return The <tt>Gateway</tt> instance
-     */
-    public Gateway setBaseUrl(URL url) {
-        if (url == null) {
-            throw new IllegalArgumentException("Url may not be null");
-        }
-
-        try {
-            // store updated baseUrl with only protocol/host from original
-            this.baseUrl = new URL("https", url.getHost(), "");
-        } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("Incorrect url format", e);
-        }
-
-        return this;
     }
 
     /**
@@ -199,98 +159,29 @@ public class Gateway {
     }
 
     /**
-     * Adds a certificate to the trust store.
-     * <p>
-     * The Mastercard Gateway certificate is already
-     * registered and can not be removed. However, if you require another certificate
-     * to be trusted, you may use this method to add additional certificates to the trust store.
+     * Gets the current {@link Region}
      *
-     * @param alias       An alias for the certificate
-     * @param certificate A string containing valid X.509 certificate data
-     * @return The <tt>Gateway</tt> instance
-     * @throws IllegalArgumentException If either the alias or certificate is null, or the certificate can not be read
+     * @return The region
      */
-    public Gateway addTrustedCertificate(String alias, String certificate) {
-        try {
-            Certificate cert = readCertificate(certificate);
-            addTrustedCertificate(alias, cert);
-
-            return this;
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Unable to read certificate", e);
-        }
+    public Region getRegion() {
+        return region;
     }
 
     /**
-     * Adds a certificate to the trust store.
-     * <p>
-     * The Mastercard Gateway certificate is already
-     * registered and can not be removed. However, if you require another certificate
-     * to be trusted, you may use this method to add additional certificates to the trust store.
+     * Sets the current {@link Region} to target
      *
-     * @param alias       An alias for the certificate
-     * @param inputStream An input stream containing valid X.509 certificate data
+     * @param region The region
      * @return The <tt>Gateway</tt> instance
-     * @throws IllegalArgumentException If either the alias or certificate is null, or the certificate can not be read
+     * @throws IllegalArgumentException If the provided Merchant ID is null
      */
-    public Gateway addTrustedCertificate(String alias, InputStream inputStream) {
-        try {
-            Certificate cert = readCertificate(inputStream);
-            addTrustedCertificate(alias, cert);
-
-            return this;
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Unable to read certificate", e);
-        }
-    }
-
-    /**
-     * Adds a certificate to the trust store.
-     * <p>
-     * The Mastercard Gateway certificate is already
-     * registered and can not be removed. However, if you require another certificate
-     * to be trusted, you may use this method to add additional certificates to the trust store.
-     *
-     * @param alias       An alias for the certificate
-     * @param certificate A certificate
-     * @return The <tt>Gateway</tt> instance
-     * @throws IllegalArgumentException If either the alias or certificate is null
-     */
-    public Gateway addTrustedCertificate(String alias, Certificate certificate) {
-        if (alias == null) {
-            throw new IllegalArgumentException("Alias may not be null");
+    public Gateway setRegion(Region region) {
+        if (region == null) {
+            throw new IllegalArgumentException("Region may not be null");
         }
 
-        if (certificate == null) {
-            throw new IllegalArgumentException("Certificate is null, or was provided in an invalid format");
-        }
-
-        logger.logDebug("Adding trusted certificate: " + alias);
-
-        certificates.put(alias, certificate);
+        this.region = region;
 
         return this;
-    }
-
-
-    /**
-     * Removes a trusted certificate from the trust store.
-     * <p>
-     * The Mastercard Gateway certificate can not be removed.
-     *
-     * @param alias The alias of the certificate
-     */
-    public void removeTrustedCertificate(String alias) {
-        certificates.remove(alias);
-    }
-
-    /**
-     * Clears all additional trusted certificates.
-     * <p>
-     * The Mastercard Gateway certificate can not be removed.
-     */
-    public void clearTrustedCertificates() {
-        certificates.clear();
     }
 
     /**
@@ -338,8 +229,13 @@ public class Gateway {
      * @param sessionId A session ID from the Mastercard Gateway
      * @param request   The request object
      * @param callback  A callback to handle success and error messages
+     * @throws IllegalArgumentException If the provided session id is null
      */
     public void updateSession(String sessionId, UpdateSessionRequest request, GatewayCallback<UpdateSessionResponse> callback) {
+        if (sessionId == null) {
+            throw new IllegalArgumentException("Session Id may not be null");
+        }
+
         runGatewayRequest(getUpdateSessionUrl(sessionId), request, callback);
     }
 
@@ -393,18 +289,31 @@ public class Gateway {
      * @param sessionId A session ID from the Mastercard Gateway
      * @param request   The request object
      * @return A <tt>Single</tt> of the response object
+     * @throws IllegalArgumentException If the provided session id is null
      * @see <a href="http://reactivex.io/RxJava/javadoc/io/reactivex/Single.html">RxJava: Single</a>
      */
     public Single<UpdateSessionResponse> updateSession(String sessionId, UpdateSessionRequest request) {
+        if (sessionId == null) {
+            throw new IllegalArgumentException("Session Id may not be null");
+        }
+
         return runGatewayRequest(getUpdateSessionUrl(sessionId), request);
     }
 
 
     String getApiUrl() {
-        return baseUrl.toString() + "/api/rest/version/" + API_VERSION;
+        if (region == null) {
+            throw new IllegalStateException("You must initialize the the Gateway instance with a Region before use");
+        }
+
+        return "https://" + region.getPrefix() + "-gateway.mastercard.com/api/rest/version/" + API_VERSION;
     }
 
     String getUpdateSessionUrl(String sessionId) {
+        if (merchantId == null) {
+            throw new IllegalStateException("You must initialize the the Gateway instance with a Merchant Id before use");
+        }
+
         return getApiUrl() + "/merchant/" + merchantId + "/session/" + sessionId;
     }
 
@@ -538,19 +447,14 @@ public class Gateway {
     }
 
     SSLContext createSslContext() throws Exception {
-        TrustManager[] trustManagers = new TrustManager[0];
-        try {
-            // create and initialize a KeyStore
-            KeyStore keyStore = createSslKeyStore();
+        // create and initialize a KeyStore
+        KeyStore keyStore = createSslKeyStore();
 
-            // create a TrustManager that trusts the INTERMEDIATE_CA in our KeyStore
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            tmf.init(keyStore);
+        // create a TrustManager that trusts the INTERMEDIATE_CA in our KeyStore
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        tmf.init(keyStore);
 
-            trustManagers = tmf.getTrustManagers();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        TrustManager[] trustManagers = tmf.getTrustManagers();
 
         SSLContext context = SSLContext.getInstance("TLS");
         context.init(null, trustManagers, null);
@@ -565,28 +469,13 @@ public class Gateway {
         // add our trusted cert to the keystore
         keyStore.setCertificateEntry("gateway.mastercard.com", readCertificate(INTERMEDIATE_CA));
 
-        // add user-provided trusted certs to keystore
-        for (String alias : certificates.keySet()) {
-            keyStore.setCertificateEntry("custom." + alias, certificates.get(alias));
-        }
-
         return keyStore;
     }
 
     X509Certificate readCertificate(String cert) throws CertificateException {
-        // first, attempt to parse string as-is
         byte[] bytes = cert.getBytes();
-        X509Certificate certificate = readCertificate(new ByteArrayInputStream(bytes));
-        if (certificate == null) {
-            // attempt to decode the DER data directly
-            bytes = Base64.decode(cert, Base64.DEFAULT);
-            certificate = readCertificate(new ByteArrayInputStream(bytes));
-        }
+        InputStream is = new ByteArrayInputStream(bytes);
 
-        return certificate;
-    }
-
-    X509Certificate readCertificate(InputStream inputStream) throws CertificateException {
-        return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(inputStream);
+        return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
     }
 }

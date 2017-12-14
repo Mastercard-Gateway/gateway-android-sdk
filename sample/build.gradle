@@ -17,7 +17,7 @@ android {
     buildTypes {
         all {
             buildConfigField 'String', 'GATEWAY_MERCHANT_ID', '"' + gatewayMerchantId + '"'
-            buildConfigField 'String', 'GATEWAY_BASE_URL', '"' + gatewayBaseUrl + '"'
+            buildConfigField 'String', 'GATEWAY_REGION', '"' + gatewayRegion + '"'
             buildConfigField 'String', 'MERCHANT_SERVER_URL', '"' + merchantServerUrl + '"'
         }
         release {
