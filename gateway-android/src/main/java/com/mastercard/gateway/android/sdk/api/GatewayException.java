@@ -16,10 +16,13 @@
 
 package com.mastercard.gateway.android.sdk.api;
 
+import java.util.Map;
+
 public class GatewayException extends Exception {
 
     int statusCode;
     ErrorResponse error;
+    Map<String, Object> errorMap;
 
 
     public GatewayException() {
@@ -38,11 +41,21 @@ public class GatewayException extends Exception {
         this.statusCode = statusCode;
     }
 
+    @Deprecated
     public ErrorResponse getErrorResponse() {
         return error;
     }
 
+    @Deprecated
     public void setErrorResponse(ErrorResponse error) {
         this.error = error;
+    }
+
+    public Map<String, Object> getErrorResponseMap() {
+        return errorMap;
+    }
+
+    public void setErrorResponseMap(Map<String, Object> errorMap) {
+        this.errorMap = errorMap;
     }
 }

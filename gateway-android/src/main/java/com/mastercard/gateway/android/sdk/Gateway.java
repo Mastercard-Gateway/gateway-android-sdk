@@ -21,19 +21,13 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.mastercard.gateway.android.sdk.api.ErrorResponse;
+import com.google.gson.reflect.TypeToken;
 import com.mastercard.gateway.android.sdk.api.GatewayCallback;
 import com.mastercard.gateway.android.sdk.api.GatewayException;
-import com.mastercard.gateway.android.sdk.api.GatewayRequest;
-import com.mastercard.gateway.android.sdk.api.GatewayResponse;
-import com.mastercard.gateway.android.sdk.api.GatewayTypeAdapterFactory;
 import com.mastercard.gateway.android.sdk.api.HttpRequest;
 import com.mastercard.gateway.android.sdk.api.HttpResponse;
 import com.mastercard.gateway.android.sdk.api.UpdateSessionRequest;
-import com.mastercard.gateway.android.sdk.api.UpdateSessionResponse;
 import com.mastercard.gateway.android.sdk.api.model.Card;
-import com.mastercard.gateway.android.sdk.api.model.Error;
 import com.mastercard.gateway.android.sdk.api.model.Expiry;
 import com.mastercard.gateway.android.sdk.api.model.Provided;
 import com.mastercard.gateway.android.sdk.api.model.SourceOfFunds;
@@ -47,6 +41,7 @@ import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -184,41 +179,60 @@ public class Gateway {
         return this;
     }
 
-    /**
-     * Updates a Mastercard Gateway session with basic card information.
-     * <p>
-     * Creates a {@link Card} object from the card information and calls
-     * {@link Gateway#updateSessionWithCardInfo(String, Card, GatewayCallback)}
-     *
-     * @param sessionId    A session ID from the Mastercard Gateway
-     * @param nameOnCard   The cardholder's name
-     * @param cardNumber   The card number
-     * @param securityCode The card security code
-     * @param expiryMM     The card expiration month (format: MM)
-     * @param expiryYY     The card expiration year (format: YY)
-     * @param callback     A callback to handle success and error messages
-     * @see Card
-     */
-    public void updateSessionWithCardInfo(String sessionId, String nameOnCard, String cardNumber, String securityCode, String expiryMM, String expiryYY, GatewayCallback<UpdateSessionResponse> callback) {
-        Card card = buildCard(nameOnCard, cardNumber, securityCode, expiryMM, expiryYY);
-        updateSessionWithCardInfo(sessionId, card, callback);
-    }
+//    /**
+//     * Updates a Mastercard Gateway session with basic card information.
+//     * <p>
+//     * Creates a {@link Card} object from the card information and calls
+//     * {@link Gateway#updateSessionWithCardInfo(String, Card, GatewayCallback)}
+//     *
+//     * @param sessionId    A session ID from the Mastercard Gateway
+//     * @param nameOnCard   The cardholder's name
+//     * @param cardNumber   The card number
+//     * @param securityCode The card security code
+//     * @param expiryMM     The card expiration month (format: MM)
+//     * @param expiryYY     The card expiration year (format: YY)
+//     * @param callback     A callback to handle success and error messages
+//     * @see Card
+//     */
+//    public void updateSessionWithCardInfo(String sessionId, String nameOnCard, String cardNumber, String securityCode, String expiryMM, String expiryYY, GatewayCallback<UpdateSessionResponse> callback) {
+//        Card card = buildCard(nameOnCard, cardNumber, securityCode, expiryMM, expiryYY);
+//        updateSessionWithCardInfo(sessionId, card, callback);
+//    }
 
-    /**
-     * Updates a Mastercard Gateway session with the provided card information.
-     * <p>
-     * Creates an {@link UpdateSessionRequest} object from the <tt>Card</tt> and calls
-     * {@link Gateway#updateSession(String, UpdateSessionRequest, GatewayCallback)}
-     *
-     * @param sessionId A session ID from the Mastercard Gateway
-     * @param card      The card object
-     * @param callback  A callback to handle success and error messages
-     * @see UpdateSessionRequest
-     */
-    public void updateSessionWithCardInfo(String sessionId, Card card, GatewayCallback<UpdateSessionResponse> callback) {
-        UpdateSessionRequest request = buildUpdateSessionRequest(card);
-        updateSession(sessionId, request, callback);
-    }
+//    /**
+//     * Updates a Mastercard Gateway session with the provided card information.
+//     * <p>
+//     * Creates an {@link UpdateSessionRequest} object from the <tt>Card</tt> and calls
+//     * {@link Gateway#updateSession(String, UpdateSessionRequest, GatewayCallback)}
+//     *
+//     * @param sessionId A session ID from the Mastercard Gateway
+//     * @param card      The card object
+//     * @param callback  A callback to handle success and error messages
+//     * @see UpdateSessionRequest
+//     */
+//    public void updateSessionWithCardInfo(String sessionId, Card card, GatewayCallback<UpdateSessionResponse> callback) {
+//        UpdateSessionRequest request = buildUpdateSessionRequest(card);
+//        updateSession(sessionId, request, callback);
+//    }
+
+//    /**
+//     * Updates a Mastercard Gateway session with the provided information.
+//     * <p>
+//     * This will execute the necessary network request on a background thread
+//     * and return the response (or error) to the provided callback.
+//     *
+//     * @param sessionId A session ID from the Mastercard Gateway
+//     * @param request   The request object
+//     * @param callback  A callback to handle success and error messages
+//     * @throws IllegalArgumentException If the provided session id is null
+//     */
+//    public void updateSession(String sessionId, UpdateSessionRequest request, GatewayCallback<UpdateSessionResponse> callback) {
+//        if (sessionId == null) {
+//            throw new IllegalArgumentException("Session Id may not be null");
+//        }
+//
+//        runGatewayRequest(getUpdateSessionUrl(sessionId), request, callback);
+//    }
 
     /**
      * Updates a Mastercard Gateway session with the provided information.
@@ -227,59 +241,76 @@ public class Gateway {
      * and return the response (or error) to the provided callback.
      *
      * @param sessionId A session ID from the Mastercard Gateway
-     * @param request   The request object
+     * @param request   A map of the request data
      * @param callback  A callback to handle success and error messages
      * @throws IllegalArgumentException If the provided session id is null
      */
-    public void updateSession(String sessionId, UpdateSessionRequest request, GatewayCallback<UpdateSessionResponse> callback) {
-        if (sessionId == null) {
-            throw new IllegalArgumentException("Session Id may not be null");
-        }
-
-        runGatewayRequest(getUpdateSessionUrl(sessionId), request, callback);
+    public void updateSession(String sessionId, Map<String, Object> request, GatewayCallback callback) {
+        String url = getUpdateSessionUrl(sessionId);
+        request.put("apiOperation", "UPDATE_PAYER_DATA");
+        runGatewayRequest(url, HttpRequest.Method.PUT, request, callback);
     }
 
-    /**
-     * Updates a Mastercard Gateway session with basic card information.
-     * <p>
-     * Creates a {@link Card} object from the card information and calls
-     * {@link Gateway#updateSessionWithCardInfo(String, Card)}
-     * <p>
-     * Does not adhere to any particular scheduler
-     *
-     * @param sessionId    A session ID from the Mastercard Gateway
-     * @param nameOnCard   The cardholder's name
-     * @param cardNumber   The card number
-     * @param securityCode The card security code
-     * @param expiryMM     The card expiration month (format: MM)
-     * @param expiryYY     The card expiration year (format: YY)
-     * @return A <tt>Single</tt> of the response object
-     * @see Card
-     * @see <a href="http://reactivex.io/RxJava/javadoc/io/reactivex/Single.html">RxJava: Single</a>
-     */
-    public Single<UpdateSessionResponse> updateSessionWithCardInfo(String sessionId, String nameOnCard, String cardNumber, String securityCode, String expiryMM, String expiryYY) {
-        Card card = buildCard(nameOnCard, cardNumber, securityCode, expiryMM, expiryYY);
-        return updateSessionWithCardInfo(sessionId, card);
-    }
+//    /**
+//     * Updates a Mastercard Gateway session with basic card information.
+//     * <p>
+//     * Creates a {@link Card} object from the card information and calls
+//     * {@link Gateway#updateSessionWithCardInfo(String, Card)}
+//     * <p>
+//     * Does not adhere to any particular scheduler
+//     *
+//     * @param sessionId    A session ID from the Mastercard Gateway
+//     * @param nameOnCard   The cardholder's name
+//     * @param cardNumber   The card number
+//     * @param securityCode The card security code
+//     * @param expiryMM     The card expiration month (format: MM)
+//     * @param expiryYY     The card expiration year (format: YY)
+//     * @return A <tt>Single</tt> of the response object
+//     * @see Card
+//     * @see <a href="http://reactivex.io/RxJava/javadoc/io/reactivex/Single.html">RxJava: Single</a>
+//     */
+//    public Single<UpdateSessionResponse> updateSessionWithCardInfo(String sessionId, String nameOnCard, String cardNumber, String securityCode, String expiryMM, String expiryYY) {
+//        Card card = buildCard(nameOnCard, cardNumber, securityCode, expiryMM, expiryYY);
+//        return updateSessionWithCardInfo(sessionId, card);
+//    }
 
-    /**
-     * Updates a Mastercard Gateway session with the provided card information.
-     * <p>
-     * Creates an {@link UpdateSessionRequest} object from the <tt>Card</tt> and calls
-     * {@link Gateway#updateSession(String, UpdateSessionRequest, GatewayCallback)}
-     * <p>
-     * Does not adhere to any particular scheduler
-     *
-     * @param sessionId A session ID from the Mastercard Gateway
-     * @param card      The card object
-     * @return A <tt>Single</tt> of the response object
-     * @see UpdateSessionRequest
-     * @see <a href="http://reactivex.io/RxJava/javadoc/io/reactivex/Single.html">RxJava: Single</a>
-     */
-    public Single<UpdateSessionResponse> updateSessionWithCardInfo(String sessionId, Card card) {
-        UpdateSessionRequest request = buildUpdateSessionRequest(card);
-        return updateSession(sessionId, request);
-    }
+//    /**
+//     * Updates a Mastercard Gateway session with the provided card information.
+//     * <p>
+//     * Creates an {@link UpdateSessionRequest} object from the <tt>Card</tt> and calls
+//     * {@link Gateway#updateSession(String, UpdateSessionRequest, GatewayCallback)}
+//     * <p>
+//     * Does not adhere to any particular scheduler
+//     *
+//     * @param sessionId A session ID from the Mastercard Gateway
+//     * @param card      The card object
+//     * @return A <tt>Single</tt> of the response object
+//     * @see UpdateSessionRequest
+//     * @see <a href="http://reactivex.io/RxJava/javadoc/io/reactivex/Single.html">RxJava: Single</a>
+//     */
+//    public Single<UpdateSessionResponse> updateSessionWithCardInfo(String sessionId, Card card) {
+//        UpdateSessionRequest request = buildUpdateSessionRequest(card);
+//        return updateSession(sessionId, request);
+//    }
+
+//    /**
+//     * Updates a Mastercard Gateway session with the provided information.
+//     * <p>
+//     * Does not adhere to any particular scheduler
+//     *
+//     * @param sessionId A session ID from the Mastercard Gateway
+//     * @param request   The request object
+//     * @return A <tt>Single</tt> of the response object
+//     * @throws IllegalArgumentException If the provided session id is null
+//     * @see <a href="http://reactivex.io/RxJava/javadoc/io/reactivex/Single.html">RxJava: Single</a>
+//     */
+//    public Single<UpdateSessionResponse> updateSession(String sessionId, UpdateSessionRequest request) {
+//        if (sessionId == null) {
+//            throw new IllegalArgumentException("Session Id may not be null");
+//        }
+//
+//        return runGatewayRequest(getUpdateSessionUrl(sessionId), request);
+//    }
 
     /**
      * Updates a Mastercard Gateway session with the provided information.
@@ -287,17 +318,15 @@ public class Gateway {
      * Does not adhere to any particular scheduler
      *
      * @param sessionId A session ID from the Mastercard Gateway
-     * @param request   The request object
-     * @return A <tt>Single</tt> of the response object
+     * @param request   A map of the request data
+     * @return A <tt>Single</tt> of the response map
      * @throws IllegalArgumentException If the provided session id is null
      * @see <a href="http://reactivex.io/RxJava/javadoc/io/reactivex/Single.html">RxJava: Single</a>
      */
-    public Single<UpdateSessionResponse> updateSession(String sessionId, UpdateSessionRequest request) {
-        if (sessionId == null) {
-            throw new IllegalArgumentException("Session Id may not be null");
-        }
-
-        return runGatewayRequest(getUpdateSessionUrl(sessionId), request);
+    public Single<Map<String, Object>> updateSession(String sessionId, Map<String, Object> request) {
+        String url = getUpdateSessionUrl(sessionId);
+        request.put("apiOperation", "UPDATE_PAYER_DATA");
+        return runGatewayRequest(url, HttpRequest.Method.PUT, request);
     }
 
 
@@ -310,6 +339,10 @@ public class Gateway {
     }
 
     String getUpdateSessionUrl(String sessionId) {
+        if (sessionId == null) {
+            throw new IllegalArgumentException("Session Id may not be null");
+        }
+
         if (merchantId == null) {
             throw new IllegalStateException("You must initialize the the Gateway instance with a Merchant Id before use");
         }
@@ -317,14 +350,14 @@ public class Gateway {
         return getApiUrl() + "/merchant/" + merchantId + "/session/" + sessionId;
     }
 
-    void runGatewayRequest(String url, GatewayRequest gatewayRequest, GatewayCallback callback) {
+    void runGatewayRequest(String url, HttpRequest.Method method, Map<String, Object> payload, GatewayCallback callback) {
         // create handler on current thread
         Handler handler = new Handler(msg -> handleCallbackMessage(callback, msg.obj));
 
         new Thread(() -> {
             Message m = handler.obtainMessage();
             try {
-                m.obj = executeGatewayRequest(url, gatewayRequest);
+                m.obj = executeGatewayRequest(url, method, payload);
             } catch (Exception e) {
                 m.obj = e;
             }
@@ -333,8 +366,8 @@ public class Gateway {
         }).start();
     }
 
-    <T extends GatewayResponse> Single<T> runGatewayRequest(String url, GatewayRequest<T> gatewayRequest) {
-        return Single.fromCallable(() -> executeGatewayRequest(url, gatewayRequest));
+    Single<Map<String, Object>> runGatewayRequest(String url, HttpRequest.Method method, Map<String, Object> gatewayRequest) {
+        return Single.fromCallable(() -> executeGatewayRequest(url, method, gatewayRequest));
     }
 
     Card buildCard(String nameOnCard, String cardNumber, String securityCode, String expiryMM, String expiryYY) {
@@ -365,50 +398,46 @@ public class Gateway {
 
     // handler callback method when executing a request on a new thread
     @SuppressWarnings("unchecked")
-    <T extends GatewayResponse> boolean handleCallbackMessage(GatewayCallback<T> callback, Object arg) {
+    boolean handleCallbackMessage(GatewayCallback callback, Object arg) {
         if (callback != null) {
             if (arg instanceof Throwable) {
                 callback.onError((Throwable) arg);
             } else {
-                callback.onSuccess((T) arg);
+                callback.onSuccess((Map<String, Object>) arg);
             }
         }
         return true;
     }
 
-    <T extends GatewayResponse> T executeGatewayRequest(String endpoint, GatewayRequest<T> gatewayRequest) throws Exception {
-        // build the http request from the gateway request object
-        HttpRequest httpRequest = gatewayRequest.buildHttpRequest().withEndpoint(endpoint);
+    Map<String, Object> executeGatewayRequest(String endpoint, HttpRequest.Method method, Map<String, Object> payload) throws Exception {
+        // init gson
+        Gson gson = new Gson();
 
         // init ssl context with limiting trust managers
         SSLContext context = createSslContext();
 
         // init connection
-        URL url = new URL(httpRequest.endpoint());
+        URL url = new URL(endpoint);
         HttpURLConnection c = (HttpURLConnection) url.openConnection();
         if (url.getProtocol().startsWith("https")) {
             ((HttpsURLConnection) c).setSSLSocketFactory(context.getSocketFactory());
         }
         c.setConnectTimeout(15000);
         c.setReadTimeout(60000);
+        c.setRequestMethod(method.name());
         c.setRequestProperty("User-Agent", "Gateway-Android-SDK/" + BuildConfig.VERSION_NAME);
-        c.setRequestProperty("Content-Type", httpRequest.contentType());
+        c.setRequestProperty("Content-Type", "application/json");
         c.setDoOutput(true);
 
-        HttpRequest.Method method = httpRequest.method();
-        if (method != null) {
-            c.setRequestMethod(method.name());
-        }
-
-        String payload = httpRequest.payload();
+        String json = gson.toJson(payload);
 
         // log request
-        logger.logRequest(c, payload);
+        logger.logRequest(c, json);
 
         // write data
-        if (payload != null) {
+        if (json != null) {
             OutputStream os = c.getOutputStream();
-            os.write(payload.getBytes("UTF-8"));
+            os.write(json.getBytes("UTF-8"));
             os.close();
         }
 
@@ -426,25 +455,98 @@ public class Gateway {
             throw response.getException();
         }
 
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapterFactory(GatewayTypeAdapterFactory.create())
-                .create();
+        // parse the response body
+        Map<String, Object> responseMap = gson.fromJson(response.getPayload(), new TypeToken<Map<String, Object>>() {
+        }.getType());
 
         // if response has bad status code, create a gateway exception and throw it
         if (!response.isOk()) {
-            ErrorResponse errorResponse = gson.fromJson(response.getPayload(), ErrorResponse.class);
-            Error error = errorResponse.error();
+            String message = "An error occurred";
+            if (responseMap.containsKey("error")) {
+                Map<String, Object> error = (Map<String, Object>) responseMap.get("error");
+                message = (String) error.get("explanation");
+            }
 
-            GatewayException exception = new GatewayException(error == null ? null : error.explanation());
+            GatewayException exception = new GatewayException(message);
             exception.setStatusCode(response.getStatusCode());
-            exception.setErrorResponse(errorResponse);
+            exception.setErrorResponseMap(responseMap);
 
             throw exception;
         }
 
-        // build the response object from the payload
-        return gson.fromJson(response.getPayload(), gatewayRequest.getResponseClass());
+        return responseMap;
     }
+
+
+//    <T extends GatewayResponse> T executeGatewayRequest(String endpoint, GatewayRequest<T> gatewayRequest) throws Exception {
+//        // build the http request from the gateway request object
+//        HttpRequest httpRequest = gatewayRequest.buildHttpRequest().withEndpoint(endpoint);
+//
+//        // init ssl context with limiting trust managers
+//        SSLContext context = createSslContext();
+//
+//        // init connection
+//        URL url = new URL(httpRequest.endpoint());
+//        HttpURLConnection c = (HttpURLConnection) url.openConnection();
+//        if (url.getProtocol().startsWith("https")) {
+//            ((HttpsURLConnection) c).setSSLSocketFactory(context.getSocketFactory());
+//        }
+//        c.setConnectTimeout(15000);
+//        c.setReadTimeout(60000);
+//        c.setRequestProperty("User-Agent", "Gateway-Android-SDK/" + BuildConfig.VERSION_NAME);
+//        c.setRequestProperty("Content-Type", httpRequest.contentType());
+//        c.setDoOutput(true);
+//
+//        HttpRequest.Method method = httpRequest.method();
+//        if (method != null) {
+//            c.setRequestMethod(method.name());
+//        }
+//
+//        String payload = httpRequest.payload();
+//
+//        // log request
+//        logger.logRequest(c, payload);
+//
+//        // write data
+//        if (payload != null) {
+//            OutputStream os = c.getOutputStream();
+//            os.write(payload.getBytes("UTF-8"));
+//            os.close();
+//        }
+//
+//        c.connect();
+//
+//        HttpResponse response = new HttpResponse(c);
+//
+//        c.disconnect();
+//
+//        // log response
+//        logger.logResponse(response);
+//
+//        // if response contains exception, rethrow it
+//        if (response.hasException()) {
+//            throw response.getException();
+//        }
+//
+//        Gson gson = new GsonBuilder()
+//                .registerTypeAdapterFactory(GatewayTypeAdapterFactory.create())
+//                .create();
+//
+//        // if response has bad status code, create a gateway exception and throw it
+//        if (!response.isOk()) {
+//            ErrorResponse errorResponse = gson.fromJson(response.getPayload(), ErrorResponse.class);
+//            Error error = errorResponse.error();
+//
+//            GatewayException exception = new GatewayException(error == null ? null : error.explanation());
+//            exception.setStatusCode(response.getStatusCode());
+//            exception.setErrorResponse(errorResponse);
+//
+//            throw exception;
+//        }
+//
+//        // build the response object from the payload
+//        return gson.fromJson(response.getPayload(), gatewayRequest.getResponseClass());
+//    }
 
     SSLContext createSslContext() throws Exception {
         // create and initialize a KeyStore

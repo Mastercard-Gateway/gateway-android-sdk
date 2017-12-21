@@ -31,9 +31,10 @@ import android.widget.Toast;
 import com.mastercard.gateway.android.sampleapp.databinding.ActivityPayBinding;
 import com.mastercard.gateway.android.sdk.Gateway;
 import com.mastercard.gateway.android.sdk.api.GatewayCallback;
-import com.mastercard.gateway.android.sdk.api.UpdateSessionResponse;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import static android.text.TextUtils.isEmpty;
 
@@ -93,7 +94,27 @@ public class PayActivity extends AppCompatActivity {
 
         submitButton.setEnabled(false);
 
-        gateway.updateSessionWithCardInfo(sessionId, nameOnCard, cardNumber, cvv, expiryMM, expiryYY, new UpdateSessionCallback());
+
+        Map<String, Object> expiry = new HashMap<>();
+        expiry.put("month", expiryMM);
+        expiry.put("year", expiryYY);
+
+        Map<String, Object> card = new HashMap<>();
+        card.put("nameOnCard", nameOnCard);
+        card.put("number", cardNumber);
+        card.put("securityCode", cvv);
+        card.put("expiry", expiry);
+
+        Map<String, Object> provided = new HashMap<>();
+        provided.put("card", card);
+
+        Map<String, Object> sourceOfFunds = new HashMap<>();
+        sourceOfFunds.put("provided", provided);
+
+        Map<String, Object> request = new HashMap<>();
+        request.put("sourceOfFunds", sourceOfFunds);
+
+        gateway.updateSession(sessionId, request, new UpdateSessionCallback());
     }
 
     String maskedCardNumber() {
@@ -115,10 +136,10 @@ public class PayActivity extends AppCompatActivity {
     }
 
 
-    class UpdateSessionCallback implements GatewayCallback<UpdateSessionResponse> {
+    class UpdateSessionCallback implements GatewayCallback {
 
         @Override
-        public void onSuccess(UpdateSessionResponse updateSessionResponse) {
+        public void onSuccess(Map<String, Object> response) {
             Log.i(PayActivity.class.getSimpleName(), "Successful pay");
 
             Intent intent = new Intent(PayActivity.this, ConfirmActivity.class);

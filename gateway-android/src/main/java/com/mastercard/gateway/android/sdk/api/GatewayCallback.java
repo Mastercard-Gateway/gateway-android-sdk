@@ -17,7 +17,9 @@
 package com.mastercard.gateway.android.sdk.api;
 
 
-public interface GatewayCallback<T extends GatewayResponse> {
-    void onSuccess(T response);
+import java.util.Map;
+
+public interface GatewayCallback {
+    void onSuccess(Map<String, Object> response);
     void onError(Throwable throwable);
 }
