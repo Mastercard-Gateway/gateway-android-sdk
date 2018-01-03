@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package com.mastercard.gateway.android.sdk.api;
+package com.mastercard.gateway.android.sdk;
 
 
-public interface GatewayRequest<T extends GatewayResponse> {
-
-    HttpRequest buildHttpRequest();
-
-    Class<T> getResponseClass();
+public interface GatewayCallback {
+    void onSuccess(GatewayMap response);
+    void onError(Throwable throwable);
 }

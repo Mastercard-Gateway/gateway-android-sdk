@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package com.mastercard.gateway.android.sdk.api;
-
-import java.util.Map;
+package com.mastercard.gateway.android.sdk;
 
 public class GatewayException extends Exception {
 
     int statusCode;
-    ErrorResponse error;
-    Map<String, Object> errorMap;
-
+    GatewayMap error;
 
     public GatewayException() {
     }
@@ -41,21 +37,11 @@ public class GatewayException extends Exception {
         this.statusCode = statusCode;
     }
 
-    @Deprecated
-    public ErrorResponse getErrorResponse() {
+    public GatewayMap getErrorResponse() {
         return error;
     }
 
-    @Deprecated
-    public void setErrorResponse(ErrorResponse error) {
+    public void setErrorResponse(GatewayMap error) {
         this.error = error;
-    }
-
-    public Map<String, Object> getErrorResponseMap() {
-        return errorMap;
-    }
-
-    public void setErrorResponseMap(Map<String, Object> errorMap) {
-        this.errorMap = errorMap;
     }
 }

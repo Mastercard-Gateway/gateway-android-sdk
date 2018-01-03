@@ -30,11 +30,10 @@ import android.widget.Toast;
 
 import com.mastercard.gateway.android.sampleapp.databinding.ActivityPayBinding;
 import com.mastercard.gateway.android.sdk.Gateway;
-import com.mastercard.gateway.android.sdk.api.GatewayCallback;
+import com.mastercard.gateway.android.sdk.GatewayCallback;
+import com.mastercard.gateway.android.sdk.GatewayMap;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import static android.text.TextUtils.isEmpty;
 
@@ -94,25 +93,12 @@ public class PayActivity extends AppCompatActivity {
 
         submitButton.setEnabled(false);
 
-
-        Map<String, Object> expiry = new HashMap<>();
-        expiry.put("month", expiryMM);
-        expiry.put("year", expiryYY);
-
-        Map<String, Object> card = new HashMap<>();
-        card.put("nameOnCard", nameOnCard);
-        card.put("number", cardNumber);
-        card.put("securityCode", cvv);
-        card.put("expiry", expiry);
-
-        Map<String, Object> provided = new HashMap<>();
-        provided.put("card", card);
-
-        Map<String, Object> sourceOfFunds = new HashMap<>();
-        sourceOfFunds.put("provided", provided);
-
-        Map<String, Object> request = new HashMap<>();
-        request.put("sourceOfFunds", sourceOfFunds);
+        GatewayMap request = new GatewayMap();
+        request.put("sourceOfFunds.provided.card.nameOnCard", nameOnCard);
+        request.put("sourceOfFunds.provided.card.number", cardNumber);
+        request.put("sourceOfFunds.provided.card.securityCode", cvv);
+        request.put("sourceOfFunds.provided.card.expiry.month", expiryMM);
+        request.put("sourceOfFunds.provided.card.expiry.year", expiryYY);
 
         gateway.updateSession(sessionId, request, new UpdateSessionCallback());
     }
@@ -139,7 +125,7 @@ public class PayActivity extends AppCompatActivity {
     class UpdateSessionCallback implements GatewayCallback {
 
         @Override
-        public void onSuccess(Map<String, Object> response) {
+        public void onSuccess(GatewayMap response) {
             Log.i(PayActivity.class.getSimpleName(), "Successful pay");
 
             Intent intent = new Intent(PayActivity.this, ConfirmActivity.class);

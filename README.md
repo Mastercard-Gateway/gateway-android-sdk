@@ -33,9 +33,9 @@ gateway.setRegion(Gateway.Region.YOUR_REGION);
 To help alleviate the worry of passing card information through your servers, the SDK provides a method to update a session with card data directly with the Gateway. Using an existing session ID, you can do so in a couple different ways:
 
 ```java
-GatewayCallback<UpdateSessionResponse> callback = new GatewayCallback<UpdateSessionResponse>() {
+GatewayCallback callback = new GatewayCallback() {
     @Override
-    public void onSuccess(UpdateSessionResponse response) {
+    public void onSuccess(GatewayMap response) {
         // TODO handle success
     }
     
@@ -45,37 +45,63 @@ GatewayCallback<UpdateSessionResponse> callback = new GatewayCallback<UpdateSess
     }
 };
 
-gateway.updateSessionWithCardInfo(sessionId, nameOnCard, cardNumber, securityCode, expiryMM, expiryYY, callback);
-```
-
-You can also construct a `Card` object and pass that as argument to the SDK.
-
-```java
-Card card = Card.builder()
-    .nameOnCard("Joe Cardholder")
-    .number("5111111111111118")
-    .securityCode("100")
-    .expiry(Expiry.builder()
-        .month("05")
-        .year("21")
-        .build())
-    .build();
-
-gateway.updateSessionWithCardInfo(sessionId, card, callback);
-```
-
-You may also include additional information such as shipping/billing addresses, customer info, and device data by manually building the `UpdateSessionRequest` object and providing that to the SDK.
-
-```java
-UpdateSessionRequest request = UpdateSessionRequest.builder()
-    .sourceOfFunds(SourceOfFunds.builder()...)
-    .customer(Customer.buider()...)
-    .shipping(Shipping.builder()...)
-    .billing(Billing.builder()...)
-    .device(Device.builder()...)
-    .build();
+// The GatewayMap object provides support for building a nested map structure using key-based dot(.) notation.
+// Each parameter is similarly defined in your online integration guide.
+GatewayMap request = new GatewayMap();
+request.put("sourceOfFunds.provided.card.nameOnCard", nameOnCard);
+request.put("sourceOfFunds.provided.card.number", cardNumber);
+request.put("sourceOfFunds.provided.card.securityCode", cardCvv);
+request.put("sourceOfFunds.provided.card.expiry.month", cardExpiryMM);
+request.put("sourceOfFunds.provided.card.expiry.year", cardExpiryYY);
 
 gateway.updateSession(sessionId, request, callback);
+```
+
+You may also include additional information such as shipping/billing addresses, customer info, device data, and more by appending them to your request object before providing it to the SDK. Consult your integration guide for a full list of available options.
+
+```java
+// billing address
+request.put("billing.address.city", billingCity);
+request.put("billing.address.company", billingCompany);
+request.put("billing.address.country", billingCountry);
+request.put("billing.address.postcodeZip", billingZip);
+request.put("billing.address.stateProvince", billingState);
+request.put("billing.address.street", billingStreet);
+request.put("billing.address.street2", billingStreet2);
+
+// shipping address
+request.put("shipping.address.city", shippingCity);
+request.put("shipping.address.company", shippingCompany);
+request.put("shipping.address.country", shippingCountry);
+request.put("shipping.address.postcodeZip", shippingZip);
+request.put("shipping.address.stateProvince", shippingState);
+request.put("shipping.address.street", shippingStreet);
+request.put("shipping.address.street2", shippingStreet2);
+
+// shipping contact
+request.put("shipping.contact.email", shippingEmail);
+request.put("shipping.contact.firstName", shippingFirstName);
+request.put("shipping.contact.lastName", shippingLastName);
+request.put("shipping.contact.mobilePhone", shippingMobile);
+request.put("shipping.contact.phone", shippingPhone);
+
+// shipping method
+request.put("shipping.method", shippingMethod);
+
+// customer
+request.put("customer.email", customerEmail);
+request.put("customer.firstName", customerFirstName);
+request.put("customer.lastName", customerLastName);
+request.put("customer.mobilePhone", customerMobile);
+request.put("customer.phone", customerPhone);
+request.put("customer.taxRegistrationId", customerTaxId);
+
+// device
+request.put("device.browser", deviceUserAgent);
+request.put("device.fingerprint", deviceFingerprint);
+request.put("device.hostname", deviceHostname);
+request.put("device.ipAddress", deviceIpAddress);
+request.put("device.mobilePhoneModel", deviceModel);
 ```
 
 Once payer data has been sent, you can complete the Gateway session on your servers with the private API password.
@@ -86,7 +112,7 @@ Once payer data has been sent, you can complete the Gateway session on your serv
 You may optionally include the **[RxJava2]** library in your project and utilize the appropriate methods provided in the `Gateway` class.
 
 ```java
-Single<UpdateSessionResponse> single = gateway.updateSessionWithCardInfo(session, card);
+Single<GatewayMap> single = gateway.updateSession(session, request);
 ```
 
 # Sample App

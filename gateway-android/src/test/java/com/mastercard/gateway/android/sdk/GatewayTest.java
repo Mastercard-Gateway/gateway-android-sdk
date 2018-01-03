@@ -1,12 +1,6 @@
 package com.mastercard.gateway.android.sdk;
 
 
-import com.mastercard.gateway.android.sdk.api.GatewayCallback;
-import com.mastercard.gateway.android.sdk.api.GatewayResponse;
-import com.mastercard.gateway.android.sdk.api.UpdateSessionRequest;
-import com.mastercard.gateway.android.sdk.api.UpdateSessionResponse;
-import com.mastercard.gateway.android.sdk.api.model.Card;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -76,7 +70,7 @@ public class GatewayTest {
     @Test
     public void testUpdateSessionThrowsExceptionIfSessionIdIsNull() throws Exception {
         try {
-            gateway.updateSession(null, mock(UpdateSessionRequest.class), null);
+            gateway.updateSession(null, mock(GatewayMap.class), null);
 
             fail("Null session id should throw illegal argument exception");
         } catch (Exception e) {
@@ -130,39 +124,6 @@ public class GatewayTest {
     }
 
     @Test
-    public void testBuildCardWorksAsIntended() throws Exception {
-        String nameOnCard = "Test Card";
-        String number = "5111111111111118";
-        String cvc = "100";
-        String expiryMM = "05";
-        String expiryYY = "21";
-
-        Card card = gateway.buildCard(nameOnCard, number, cvc, expiryMM, expiryYY);
-
-        assertEquals(nameOnCard, card.nameOnCard());
-        assertEquals(number, card.number());
-        assertEquals(cvc, card.securityCode());
-        assertEquals(expiryMM, card.expiry().month());
-        assertEquals(expiryYY, card.expiry().year());
-    }
-
-    @Test
-    public void testBuildUpdateSessionRequestWorksAsIntended() throws Exception {
-        String nameOnCard = "Test Card";
-        String number = "5111111111111118";
-        String cvc = "100";
-        String expiryMM = "05";
-        String expiryYY = "21";
-
-        Card card = gateway.buildCard(nameOnCard, number, cvc, expiryMM, expiryYY);
-
-        UpdateSessionRequest request = gateway.buildUpdateSessionRequest(card);
-
-        assertEquals("UPDATE_PAYER_DATA", request.apiOperation());
-        assertEquals(card, request.sourceOfFunds().provided().card());
-    }
-
-    @Test
     public void testHandleCallbackMessageCallsOnErrorWithThrowableArg() throws Exception {
         GatewayCallback callback = mock(GatewayCallback.class);
         Throwable arg = new Exception("Some exception");
@@ -175,7 +136,7 @@ public class GatewayTest {
     @Test
     public void testHandleCallbackMessageCallsSuccessWithNonThrowableArg() throws Exception {
         GatewayCallback callback = mock(GatewayCallback.class);
-        GatewayResponse arg = UpdateSessionResponse.builder().build();
+        GatewayMap arg = new GatewayMap();
 
         gateway.handleCallbackMessage(callback, arg);
 

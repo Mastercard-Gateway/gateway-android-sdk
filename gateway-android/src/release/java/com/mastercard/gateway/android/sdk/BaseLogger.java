@@ -14,7 +14,7 @@ class BaseLogger implements Logger {
     }
 
     @Override
-    public void logResponse(HttpResponse response) {
+    public void logResponse(HttpURLConnection c, String data) {
         // no-op
     }
 
