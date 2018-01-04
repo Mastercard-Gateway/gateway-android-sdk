@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Base64;
 import android.util.Log;
+import android.util.Pair;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -31,7 +32,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
@@ -59,7 +59,7 @@ public class ApiController {
 
 
     interface CreateSessionCallback {
-        void onSuccess(String sessionId);
+        void onSuccess(String sessionId, String apiVersion);
 
         void onError(Throwable throwable);
     }
@@ -89,7 +89,8 @@ public class ApiController {
                     if (message.obj instanceof Throwable) {
                         callback.onError((Throwable) message.obj);
                     } else {
-                        callback.onSuccess((String) message.obj);
+                        Pair<String, String> pair = (Pair<String, String>) message.obj;
+                        callback.onSuccess(pair.first, pair.second);
                     }
                 }
                 return true;
@@ -139,20 +140,28 @@ public class ApiController {
         }).start();
     }
 
-    String executeCreateSession() throws Exception {
+    Pair<String, String> executeCreateSession() throws Exception {
         String jsonResponse = doJsonRequest(new URL(merchantServerUrl + "/session.php"), "", "POST", null, null, HttpsURLConnection.HTTP_OK);
 
-        Type type = new TypeToken<Map<String, Object>>() {
-        }.getType();
-        Map<String, Object> map = GSON.fromJson(jsonResponse, type);
+        Map<String, Object> map = GSON.fromJson(jsonResponse, new TypeToken<Map<String, Object>>() {
+        }.getType());
 
-        if (!map.containsKey("result") || !"SUCCESS".equalsIgnoreCase((String) map.get("result"))) {
-            throw new RuntimeException("Create session result: " + map.get("result"));
+        if (!map.containsKey("gatewayResponse")) {
+            throw new RuntimeException("Could not read gateway response");
         }
 
-        String sessionId = ((Map<String, String>) map.get("session")).get("id");
-        Log.i("createSession", "Created session with ID: " + sessionId);
-        return sessionId;
+        String apiVersion = (String) map.get("apiVersion");
+
+        Map<String, Object> gatewayResponse = (Map<String, Object>) map.get("gatewayResponse");
+
+        if (!gatewayResponse.containsKey("result") || !"SUCCESS".equalsIgnoreCase((String) gatewayResponse.get("result"))) {
+            throw new RuntimeException("Create session result: " + gatewayResponse.get("result"));
+        }
+
+        String sessionId = ((Map<String, String>) gatewayResponse.get("session")).get("id");
+        Log.i("createSession", "Created session with ID " + sessionId + " with API version " + apiVersion);
+
+        return new Pair<>(sessionId, apiVersion);
     }
 
     String executeCompleteSession(String sessionId, String orderId, String transactionId, String amount, String currency) throws Exception {
@@ -180,15 +189,20 @@ public class ApiController {
 
         String jsonResponse = doJsonRequest(new URL(merchantServerUrl + "/transaction.php?order=" + orderId + "&transaction=" + transactionId), jsonString, "PUT", null, null, HttpsURLConnection.HTTP_OK);
 
-        Type type = new TypeToken<Map<String, Object>>() {
-        }.getType();
-        Map<String, Object> map = GSON.fromJson(jsonResponse, type);
+        Map<String, Object> map = GSON.fromJson(jsonResponse, new TypeToken<Map<String, Object>>() {
+        }.getType());
 
-        if (!map.containsKey("result") || !"SUCCESS".equalsIgnoreCase((String) map.get("result"))) {
-            throw new RuntimeException("Payment result: " + map.get("result") + "; Payload: " + jsonResponse);
+        if (!map.containsKey("gatewayResponse")) {
+            throw new RuntimeException("Could not read gateway response");
         }
 
-        return (String) map.get("result");
+        Map<String, Object> gatewayResponse = (Map<String, Object>) map.get("gatewayResponse");
+
+        if (!gatewayResponse.containsKey("result") || !"SUCCESS".equalsIgnoreCase((String) gatewayResponse.get("result"))) {
+            throw new RuntimeException("Payment result: " + gatewayResponse.get("result") + "; Payload: " + jsonResponse);
+        }
+
+        return (String) gatewayResponse.get("result");
     }
 
 

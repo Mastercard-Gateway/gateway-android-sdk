@@ -42,7 +42,7 @@ public class PayActivity extends AppCompatActivity {
     ActivityPayBinding binding;
 
     SharedPreferences prefs = null;
-    String nameOnCard, cardNumber, expiryMM, expiryYY, cvv, sessionId;
+    String nameOnCard, cardNumber, expiryMM, expiryYY, cvv, sessionId, apiVersion;
     Gateway gateway;
     TextChangeListener textChangeListener = new TextChangeListener();
 
@@ -54,6 +54,7 @@ public class PayActivity extends AppCompatActivity {
         prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
         sessionId = getIntent().getStringExtra("SESSION_ID");
+        apiVersion = getIntent().getStringExtra("API_VERSION");
 
         // ========================================================
         // Configure the Gateway object
@@ -100,7 +101,7 @@ public class PayActivity extends AppCompatActivity {
         request.put("sourceOfFunds.provided.card.expiry.month", expiryMM);
         request.put("sourceOfFunds.provided.card.expiry.year", expiryYY);
 
-        gateway.updateSession(sessionId, request, new UpdateSessionCallback());
+        gateway.updateSession(sessionId, Integer.valueOf(apiVersion), request, new UpdateSessionCallback());
     }
 
     String maskedCardNumber() {

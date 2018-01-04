@@ -54,11 +54,12 @@ public class MainActivity extends AppCompatActivity {
 
     class CreateSessionCallback implements ApiController.CreateSessionCallback {
         @Override
-        public void onSuccess(String sessionId) {
+        public void onSuccess(String sessionId, String apiVersion) {
             Log.i("CreateSessionTask", "Session established");
 
             Intent intent = new Intent(MainActivity.this, PayActivity.class);
             intent.putExtra("SESSION_ID", sessionId);
+            intent.putExtra("API_VERSION", apiVersion);
 
             startActivity(intent);
 
