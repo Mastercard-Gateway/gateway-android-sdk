@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.KeyStore;
 import java.security.cert.CertificateException;
@@ -84,7 +83,9 @@ public class Gateway {
 
 
     static final int API_VERSION = 44;
-
+    static final int CONNECTION_TIMEOUT = 15000;
+    static final int READ_TIMEOUT = 60000;
+    static final String USER_AGENT_PREFIX = "Gateway-Android-SDK";
     static final String INTERMEDIATE_CA = "-----BEGIN CERTIFICATE-----\n" +
             "MIIFAzCCA+ugAwIBAgIEUdNg7jANBgkqhkiG9w0BAQsFADCBvjELMAkGA1UEBhMC\n" +
             "VVMxFjAUBgNVBAoTDUVudHJ1c3QsIEluYy4xKDAmBgNVBAsTH1NlZSB3d3cuZW50\n" +
@@ -117,6 +118,7 @@ public class Gateway {
 
 
     Logger logger = new BaseLogger();
+    Gson gson = new Gson();
     String merchantId;
     Region region;
 
@@ -268,24 +270,14 @@ public class Gateway {
     }
 
     GatewayMap executeGatewayRequest(String endpoint, Method method, GatewayMap payload) throws Exception {
-        // init gson
-        Gson gson = new Gson();
-
         // init ssl context with limiting trust managers
         SSLContext context = createSslContext();
 
-        // init connection
+        // parse url
         URL url = new URL(endpoint);
-        HttpURLConnection c = (HttpURLConnection) url.openConnection();
-        if (url.getProtocol().startsWith("https")) {
-            ((HttpsURLConnection) c).setSSLSocketFactory(context.getSocketFactory());
-        }
-        c.setConnectTimeout(15000);
-        c.setReadTimeout(60000);
-        c.setRequestMethod(method.name());
-        c.setRequestProperty("User-Agent", "Gateway-Android-SDK/" + BuildConfig.VERSION_NAME);
-        c.setRequestProperty("Content-Type", "application/json");
-        c.setDoOutput(true);
+
+        // init connection
+        HttpsURLConnection c = createHttpsUrlConnection(url, context, method);
 
         // encode request data to json
         String requestData = gson.toJson(payload);
@@ -374,6 +366,21 @@ public class Gateway {
 
         return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
     }
+
+    HttpsURLConnection createHttpsUrlConnection(URL url, SSLContext context, Method method) throws IOException {
+        HttpsURLConnection c = (HttpsURLConnection) url.openConnection();
+        c.setSSLSocketFactory(context.getSocketFactory());
+        c.setConnectTimeout(CONNECTION_TIMEOUT);
+        c.setReadTimeout(READ_TIMEOUT);
+        c.setRequestMethod(method.name());
+        c.setRequestProperty("User-Agent", USER_AGENT_PREFIX + "/" + BuildConfig.VERSION_NAME);
+        c.setRequestProperty("Content-Type", "application/json");
+        c.setDoOutput(true);
+
+        return c;
+    }
+
+    
 
     boolean isStatusCodeOk(int statusCode) {
         return (statusCode >= 200 && statusCode < 300);

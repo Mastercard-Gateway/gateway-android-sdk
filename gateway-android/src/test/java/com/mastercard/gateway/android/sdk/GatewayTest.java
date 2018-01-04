@@ -7,8 +7,13 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.net.URL;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -159,5 +164,31 @@ public class GatewayTest {
 
         assertNotNull(certificate);
         assertEquals(expectedSerialNo, certificate.getSerialNumber().toString());
+    }
+
+    @Test
+    public void testCreateConnectionWorksAsIntended() throws Exception {
+        String endpoint = "https://www.mastercard.com";
+        URL url = new URL(endpoint);
+
+        SSLContext context = mock(SSLContext.class);
+        SSLSocketFactory socketFactory = mock(SSLSocketFactory.class);
+        doReturn(socketFactory).when(context).getSocketFactory();
+
+        String expectedMethod = "PUT";
+        String expectedUserAgent = Gateway.USER_AGENT_PREFIX + "/" + BuildConfig.VERSION_NAME;
+        String expectedContentType = "application/json";
+
+
+        HttpsURLConnection c = gateway.createHttpsUrlConnection(url, context, Gateway.Method.PUT);
+
+        assertEquals(url, c.getURL());
+        assertEquals(socketFactory, c.getSSLSocketFactory());
+        assertEquals(Gateway.CONNECTION_TIMEOUT, c.getConnectTimeout());
+        assertEquals(Gateway.READ_TIMEOUT, c.getReadTimeout());
+        assertEquals(expectedMethod, c.getRequestMethod());
+        assertEquals(expectedUserAgent, c.getRequestProperty("User-Agent"));
+        assertEquals(expectedContentType, c.getRequestProperty("Content-Type"));
+        assertTrue(c.getDoOutput());
     }
 }
