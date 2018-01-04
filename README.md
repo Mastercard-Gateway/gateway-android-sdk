@@ -54,7 +54,7 @@ request.put("sourceOfFunds.provided.card.securityCode", cardCvv);
 request.put("sourceOfFunds.provided.card.expiry.month", cardExpiryMM);
 request.put("sourceOfFunds.provided.card.expiry.year", cardExpiryYY);
 
-gateway.updateSession(sessionId, request, callback);
+gateway.updateSession(sessionId, apiVersion, request, callback);
 ```
 
 You may also include additional information such as shipping/billing addresses, customer info, device data, and more by appending them to your request object before providing it to the SDK. Consult your integration guide for a full list of available options.
@@ -112,7 +112,7 @@ Once payer data has been sent, you can complete the Gateway session on your serv
 You may optionally include the **[RxJava2]** library in your project and utilize the appropriate methods provided in the `Gateway` class.
 
 ```java
-Single<GatewayMap> single = gateway.updateSession(session, request);
+Single<GatewayMap> single = gateway.updateSession(apiVersion, session, request);
 ```
 
 # Sample App

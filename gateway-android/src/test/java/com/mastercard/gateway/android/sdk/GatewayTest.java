@@ -26,7 +26,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest=Config.NONE)
+@Config(manifest = Config.NONE)
 public class GatewayTest {
 
     Gateway gateway;
@@ -73,22 +73,12 @@ public class GatewayTest {
     }
 
     @Test
-    public void testUpdateSessionThrowsExceptionIfSessionIdIsNull() throws Exception {
-        try {
-            gateway.updateSession(null, mock(GatewayMap.class), null);
-
-            fail("Null session id should throw illegal argument exception");
-        } catch (Exception e) {
-            assertTrue(e instanceof IllegalArgumentException);
-        }
-    }
-
-    @Test
     public void testGetApiUrlThrowsExceptionIfRegionIsNull() throws Exception {
+        int apiVersion = 44;
         gateway.region = null;
 
         try {
-            String apiUrl = gateway.getApiUrl();
+            String apiUrl = gateway.getApiUrl(apiVersion);
 
             fail("Null region should have caused illegal state exception");
         } catch (Exception e) {
@@ -97,19 +87,45 @@ public class GatewayTest {
     }
 
     @Test
+    public void testGetApiUrlThrowsExceptionIfApiVersionIsLessThanMin() throws Exception {
+        int apiVersion = Gateway.MIN_API_VERSION - 1;
+
+        try {
+            String apiUrl = gateway.getApiUrl(apiVersion);
+
+            fail("Api version less than minimum value should have caused illegal argument exception");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+    }
+
+
+    @Test
     public void testGetApiUrlWorksAsIntended() throws Exception {
         gateway.region = Gateway.Region.NORTH_AMERICA;
-        String expectedUrl = "https://na-gateway.mastercard.com/api/rest/version/" + Gateway.API_VERSION;
+        String expectedUrl = "https://na-gateway.mastercard.com/api/rest/version/" + Gateway.MIN_API_VERSION;
 
-        assertEquals(expectedUrl, gateway.getApiUrl());
+        assertEquals(expectedUrl, gateway.getApiUrl(Gateway.MIN_API_VERSION));
     }
+
+    @Test
+    public void testGetUpdateSessionUrlThrowsExceptionIfSessionIdIsNull() throws Exception {
+        try {
+            gateway.getUpdateSessionUrl(Gateway.MIN_API_VERSION, null);
+
+            fail("Null session id should throw illegal argument exception");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+    }
+
 
     @Test
     public void testGetUpdateSessionUrlThrowsExceptionIfMerchantIdIsNull() throws Exception {
         gateway.merchantId = null;
 
         try {
-            String url = gateway.getUpdateSessionUrl("sess1234");
+            String url = gateway.getUpdateSessionUrl(Gateway.MIN_API_VERSION, "sess1234");
 
             fail("Null merchant id should have caused illegal state exception");
         } catch (Exception e) {
@@ -121,9 +137,9 @@ public class GatewayTest {
     public void testGetUpdateSessionUrlWorksAsIntended() throws Exception {
         gateway.merchantId = "somemerchant";
         gateway.region = Gateway.Region.NORTH_AMERICA;
-        String expectedUrl = "https://na-gateway.mastercard.com/api/rest/version/" + Gateway.API_VERSION + "/merchant/somemerchant/session/sess1234";
+        String expectedUrl = "https://na-gateway.mastercard.com/api/rest/version/" + Gateway.MIN_API_VERSION + "/merchant/somemerchant/session/sess1234";
 
-        String actualUrl = gateway.getUpdateSessionUrl("sess1234");
+        String actualUrl = gateway.getUpdateSessionUrl(Gateway.MIN_API_VERSION, "sess1234");
 
         assertEquals(expectedUrl, actualUrl);
     }
