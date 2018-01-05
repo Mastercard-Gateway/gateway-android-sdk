@@ -94,14 +94,15 @@ public class PayActivity extends AppCompatActivity {
 
         submitButton.setEnabled(false);
 
-        GatewayMap request = new GatewayMap();
-        request.put("sourceOfFunds.provided.card.nameOnCard", nameOnCard);
-        request.put("sourceOfFunds.provided.card.number", cardNumber);
-        request.put("sourceOfFunds.provided.card.securityCode", cvv);
-        request.put("sourceOfFunds.provided.card.expiry.month", expiryMM);
-        request.put("sourceOfFunds.provided.card.expiry.year", expiryYY);
+        // build the gateway request
+        GatewayMap request = new GatewayMap()
+                .set("sourceOfFunds.provided.card.nameOnCard", nameOnCard)
+                .set("sourceOfFunds.provided.card.number", cardNumber)
+                .set("sourceOfFunds.provided.card.securityCode", cvv)
+                .set("sourceOfFunds.provided.card.expiry.month", expiryMM)
+                .set("sourceOfFunds.provided.card.expiry.year", expiryYY);
 
-        gateway.updateSession(sessionId, Integer.valueOf(apiVersion), request, new UpdateSessionCallback());
+        gateway.updateSession(sessionId, apiVersion, request, new UpdateSessionCallback());
     }
 
     String maskedCardNumber() {

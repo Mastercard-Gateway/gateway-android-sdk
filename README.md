@@ -45,14 +45,17 @@ GatewayCallback callback = new GatewayCallback() {
     }
 };
 
+String sessionId = "...";
+String apiVersion = "..."; // must be >= 39
+
 // The GatewayMap object provides support for building a nested map structure using key-based dot(.) notation.
 // Each parameter is similarly defined in your online integration guide.
-GatewayMap request = new GatewayMap();
-request.put("sourceOfFunds.provided.card.nameOnCard", nameOnCard);
-request.put("sourceOfFunds.provided.card.number", cardNumber);
-request.put("sourceOfFunds.provided.card.securityCode", cardCvv);
-request.put("sourceOfFunds.provided.card.expiry.month", cardExpiryMM);
-request.put("sourceOfFunds.provided.card.expiry.year", cardExpiryYY);
+GatewayMap request = new GatewayMap()
+    .set("sourceOfFunds.provided.card.nameOnCard", nameOnCard)
+    .set("sourceOfFunds.provided.card.number", cardNumber)
+    .set("sourceOfFunds.provided.card.securityCode", cardCvv)
+    .set("sourceOfFunds.provided.card.expiry.month", cardExpiryMM)
+    .set("sourceOfFunds.provided.card.expiry.year", cardExpiryYY);
 
 gateway.updateSession(sessionId, apiVersion, request, callback);
 ```

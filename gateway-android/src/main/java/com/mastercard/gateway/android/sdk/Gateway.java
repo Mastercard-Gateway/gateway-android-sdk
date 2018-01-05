@@ -21,7 +21,6 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -188,14 +187,14 @@ public class Gateway {
      * This will execute the necessary network request on a background thread
      * and return the response (or error) to the provided callback.
      *
-     * @param sessionId A session ID from the Mastercard Gateway
-     * @param apiVersion   The API version number used when the session was created
-     * @param payload   A map of the request data
-     * @param callback  A callback to handle success and error messages
+     * @param sessionId  A session ID from the Mastercard Gateway
+     * @param apiVersion The API version number used when the session was created
+     * @param payload    A map of the request data
+     * @param callback   A callback to handle success and error messages
      * @throws IllegalArgumentException If the provided session id is null
      */
-    public void updateSession(String sessionId, int apiVersion, GatewayMap payload, GatewayCallback callback) {
-        String url = getUpdateSessionUrl(apiVersion, sessionId);
+    public void updateSession(String sessionId, String apiVersion, GatewayMap payload, GatewayCallback callback) {
+        String url = getUpdateSessionUrl(sessionId, apiVersion);
         payload.put("apiOperation", "UPDATE_PAYER_DATA");
         runGatewayRequest(url, Method.PUT, payload, callback);
     }
@@ -206,23 +205,23 @@ public class Gateway {
      * <p>
      * Does not adhere to any particular scheduler
      *
-     * @param sessionId A session ID from the Mastercard Gateway
-     * @param apiVersion   The API version number used when the session was created
-     * @param payload   A map of the request data
+     * @param sessionId  A session ID from the Mastercard Gateway
+     * @param apiVersion The API version number used when the session was created
+     * @param payload    A map of the request data
      * @return A <tt>Single</tt> of the response map
      * @throws IllegalArgumentException If the provided session id is null
      * @see <a href="http://reactivex.io/RxJava/javadoc/io/reactivex/Single.html">RxJava: Single</a>
      */
-    public Single<GatewayMap> updateSession(String sessionId, int apiVersion, GatewayMap payload) {
-        String url = getUpdateSessionUrl(apiVersion, sessionId);
+    public Single<GatewayMap> updateSession(String sessionId, String apiVersion, GatewayMap payload) {
+        String url = getUpdateSessionUrl(sessionId, apiVersion);
         payload.put("apiOperation", "UPDATE_PAYER_DATA");
         return runGatewayRequest(url, Method.PUT, payload);
     }
 
 
-    String getApiUrl(int apiVersion) {
-        if (apiVersion < MIN_API_VERSION) {
-            throw new IllegalArgumentException("API version must be greater than " + MIN_API_VERSION);
+    String getApiUrl(String apiVersion) {
+        if (Integer.valueOf(apiVersion) < MIN_API_VERSION) {
+            throw new IllegalArgumentException("API version must be >= " + MIN_API_VERSION);
         }
 
         if (region == null) {
@@ -232,7 +231,7 @@ public class Gateway {
         return "https://" + region.getPrefix() + "-gateway.mastercard.com/api/rest/version/" + apiVersion;
     }
 
-    String getUpdateSessionUrl(int apiVersion, String sessionId) {
+    String getUpdateSessionUrl(String sessionId, String apiVersion) {
         if (sessionId == null) {
             throw new IllegalArgumentException("Session Id may not be null");
         }
@@ -321,10 +320,9 @@ public class Gateway {
         logger.logResponse(c, responseData);
 
         // parse the response body
-        GatewayMap response = gson.fromJson(responseData, new TypeToken<GatewayMap>() {
-        }.getType());
+        GatewayMap response = new GatewayMap(responseData);
 
-        // if response statuc is good, return response
+        // if response static is good, return response
         if (isStatusOk) {
             return response;
         }
@@ -387,7 +385,6 @@ public class Gateway {
 
         return c;
     }
-
 
 
     boolean isStatusCodeOk(int statusCode) {

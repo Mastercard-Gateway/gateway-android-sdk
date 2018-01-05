@@ -74,7 +74,7 @@ public class GatewayTest {
 
     @Test
     public void testGetApiUrlThrowsExceptionIfRegionIsNull() throws Exception {
-        int apiVersion = 44;
+        String apiVersion = "44";
         gateway.region = null;
 
         try {
@@ -88,7 +88,7 @@ public class GatewayTest {
 
     @Test
     public void testGetApiUrlThrowsExceptionIfApiVersionIsLessThanMin() throws Exception {
-        int apiVersion = Gateway.MIN_API_VERSION - 1;
+        String apiVersion = String.valueOf(Gateway.MIN_API_VERSION - 1);
 
         try {
             String apiUrl = gateway.getApiUrl(apiVersion);
@@ -105,13 +105,13 @@ public class GatewayTest {
         gateway.region = Gateway.Region.NORTH_AMERICA;
         String expectedUrl = "https://na-gateway.mastercard.com/api/rest/version/" + Gateway.MIN_API_VERSION;
 
-        assertEquals(expectedUrl, gateway.getApiUrl(Gateway.MIN_API_VERSION));
+        assertEquals(expectedUrl, gateway.getApiUrl(String.valueOf(Gateway.MIN_API_VERSION)));
     }
 
     @Test
     public void testGetUpdateSessionUrlThrowsExceptionIfSessionIdIsNull() throws Exception {
         try {
-            gateway.getUpdateSessionUrl(Gateway.MIN_API_VERSION, null);
+            gateway.getUpdateSessionUrl(null, String.valueOf(Gateway.MIN_API_VERSION));
 
             fail("Null session id should throw illegal argument exception");
         } catch (Exception e) {
@@ -125,7 +125,7 @@ public class GatewayTest {
         gateway.merchantId = null;
 
         try {
-            String url = gateway.getUpdateSessionUrl(Gateway.MIN_API_VERSION, "sess1234");
+            String url = gateway.getUpdateSessionUrl("sess1234", String.valueOf(Gateway.MIN_API_VERSION));
 
             fail("Null merchant id should have caused illegal state exception");
         } catch (Exception e) {
@@ -139,7 +139,7 @@ public class GatewayTest {
         gateway.region = Gateway.Region.NORTH_AMERICA;
         String expectedUrl = "https://na-gateway.mastercard.com/api/rest/version/" + Gateway.MIN_API_VERSION + "/merchant/somemerchant/session/sess1234";
 
-        String actualUrl = gateway.getUpdateSessionUrl(Gateway.MIN_API_VERSION, "sess1234");
+        String actualUrl = gateway.getUpdateSessionUrl("sess1234", String.valueOf(Gateway.MIN_API_VERSION));
 
         assertEquals(expectedUrl, actualUrl);
     }
@@ -157,7 +157,7 @@ public class GatewayTest {
     @Test
     public void testHandleCallbackMessageCallsSuccessWithNonThrowableArg() throws Exception {
         GatewayCallback callback = mock(GatewayCallback.class);
-        GatewayMap arg = new GatewayMap();
+        GatewayMap arg = mock(GatewayMap.class);
 
         gateway.handleCallbackMessage(callback, arg);
 
