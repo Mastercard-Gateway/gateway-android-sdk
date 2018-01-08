@@ -1,8 +1,6 @@
 package com.mastercard.gateway.android.sdk;
 
 
-import com.mastercard.gateway.android.sdk.api.HttpResponse;
-
 import java.net.HttpURLConnection;
 
 
