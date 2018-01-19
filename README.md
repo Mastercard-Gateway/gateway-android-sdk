@@ -68,7 +68,7 @@ Once payer data has been sent, you can complete the Gateway session on your serv
 You may optionally include the **[RxJava2]** library in your project and utilize the appropriate methods provided in the `Gateway` class.
 
 ```java
-Single<GatewayMap> single = gateway.updateSession(apiVersion, session, request);
+Single<GatewayMap> single = gateway.updateSession(sessionId, apiVersion, request);
 ```
 
 # Sample App
