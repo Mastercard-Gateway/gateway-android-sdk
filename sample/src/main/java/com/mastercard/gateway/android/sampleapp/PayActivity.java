@@ -30,8 +30,8 @@ import android.widget.Toast;
 
 import com.mastercard.gateway.android.sampleapp.databinding.ActivityPayBinding;
 import com.mastercard.gateway.android.sdk.Gateway;
-import com.mastercard.gateway.android.sdk.api.GatewayCallback;
-import com.mastercard.gateway.android.sdk.api.UpdateSessionResponse;
+import com.mastercard.gateway.android.sdk.GatewayCallback;
+import com.mastercard.gateway.android.sdk.GatewayMap;
 
 import java.util.Arrays;
 
@@ -42,7 +42,7 @@ public class PayActivity extends AppCompatActivity {
     ActivityPayBinding binding;
 
     SharedPreferences prefs = null;
-    String nameOnCard, cardNumber, expiryMM, expiryYY, cvv, sessionId;
+    String nameOnCard, cardNumber, expiryMM, expiryYY, cvv, sessionId, apiVersion;
     Gateway gateway;
     TextChangeListener textChangeListener = new TextChangeListener();
 
@@ -54,6 +54,7 @@ public class PayActivity extends AppCompatActivity {
         prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
         sessionId = getIntent().getStringExtra("SESSION_ID");
+        apiVersion = getIntent().getStringExtra("API_VERSION");
 
         // ========================================================
         // Configure the Gateway object
@@ -93,7 +94,15 @@ public class PayActivity extends AppCompatActivity {
 
         submitButton.setEnabled(false);
 
-        gateway.updateSessionWithCardInfo(sessionId, nameOnCard, cardNumber, cvv, expiryMM, expiryYY, new UpdateSessionCallback());
+        // build the gateway request
+        GatewayMap request = new GatewayMap()
+                .set("sourceOfFunds.provided.card.nameOnCard", nameOnCard)
+                .set("sourceOfFunds.provided.card.number", cardNumber)
+                .set("sourceOfFunds.provided.card.securityCode", cvv)
+                .set("sourceOfFunds.provided.card.expiry.month", expiryMM)
+                .set("sourceOfFunds.provided.card.expiry.year", expiryYY);
+
+        gateway.updateSession(sessionId, apiVersion, request, new UpdateSessionCallback());
     }
 
     String maskedCardNumber() {
@@ -115,10 +124,10 @@ public class PayActivity extends AppCompatActivity {
     }
 
 
-    class UpdateSessionCallback implements GatewayCallback<UpdateSessionResponse> {
+    class UpdateSessionCallback implements GatewayCallback {
 
         @Override
-        public void onSuccess(UpdateSessionResponse updateSessionResponse) {
+        public void onSuccess(GatewayMap response) {
             Log.i(PayActivity.class.getSimpleName(), "Successful pay");
 
             Intent intent = new Intent(PayActivity.this, ConfirmActivity.class);

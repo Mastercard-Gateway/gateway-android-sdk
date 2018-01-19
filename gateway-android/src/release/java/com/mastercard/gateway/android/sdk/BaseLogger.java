@@ -1,8 +1,6 @@
 package com.mastercard.gateway.android.sdk;
 
 
-import com.mastercard.gateway.android.sdk.api.HttpResponse;
-
 import java.net.HttpURLConnection;
 
 
@@ -14,7 +12,7 @@ class BaseLogger implements Logger {
     }
 
     @Override
-    public void logResponse(HttpResponse response) {
+    public void logResponse(HttpURLConnection c, String data) {
         // no-op
     }
 

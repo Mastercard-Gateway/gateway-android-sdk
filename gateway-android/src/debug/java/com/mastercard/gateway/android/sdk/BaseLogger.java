@@ -3,8 +3,6 @@ package com.mastercard.gateway.android.sdk;
 
 import android.util.Log;
 
-import com.mastercard.gateway.android.sdk.api.HttpResponse;
-
 import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
@@ -32,16 +30,16 @@ class BaseLogger implements Logger {
 
         String[] parts = log.split("\n");
         for (String part : parts) {
-            Log.d(Gateway.class.getSimpleName(), part);
+            logDebug(part);
         }
     }
 
     @Override
-    public void logResponse(HttpResponse response) {
+    public void logResponse(HttpURLConnection c, String data) {
         String log = "RESPONSE: ";
 
         // log response headers
-        Map<String, List<String>> headers = response.getConnection().getHeaderFields();
+        Map<String, List<String>> headers = c.getHeaderFields();
         Set<String> keys = headers.keySet();
 
         int i = 0;
@@ -51,9 +49,8 @@ class BaseLogger implements Logger {
                 if (i == 0 && key == null) {
                     log += value;
 
-                    String payload = response.getPayload();
-                    if (payload.length() > 0) {
-                        log += "\n-- Data: " + payload;
+                    if (data != null && data.length() > 0) {
+                        log += "\n-- Data: " + data;
                     }
                 } else {
                     log += "\n-- " + (key == null ? "" : key + ": ") + value;
@@ -64,7 +61,7 @@ class BaseLogger implements Logger {
 
         String[] parts = log.split("\n");
         for (String part : parts) {
-            Log.d(Gateway.class.getSimpleName(), part);
+            logDebug(part);
         }
     }
 

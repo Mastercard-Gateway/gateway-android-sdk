@@ -1,20 +1,19 @@
 package com.mastercard.gateway.android.sdk;
 
 
-import com.mastercard.gateway.android.sdk.api.GatewayCallback;
-import com.mastercard.gateway.android.sdk.api.GatewayResponse;
-import com.mastercard.gateway.android.sdk.api.UpdateSessionRequest;
-import com.mastercard.gateway.android.sdk.api.UpdateSessionResponse;
-import com.mastercard.gateway.android.sdk.api.model.Card;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.net.URL;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -27,7 +26,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest=Config.NONE)
+@Config(manifest = Config.NONE)
 public class GatewayTest {
 
     Gateway gateway;
@@ -74,22 +73,12 @@ public class GatewayTest {
     }
 
     @Test
-    public void testUpdateSessionThrowsExceptionIfSessionIdIsNull() throws Exception {
-        try {
-            gateway.updateSession(null, mock(UpdateSessionRequest.class), null);
-
-            fail("Null session id should throw illegal argument exception");
-        } catch (Exception e) {
-            assertTrue(e instanceof IllegalArgumentException);
-        }
-    }
-
-    @Test
     public void testGetApiUrlThrowsExceptionIfRegionIsNull() throws Exception {
+        String apiVersion = "44";
         gateway.region = null;
 
         try {
-            String apiUrl = gateway.getApiUrl();
+            String apiUrl = gateway.getApiUrl(apiVersion);
 
             fail("Null region should have caused illegal state exception");
         } catch (Exception e) {
@@ -98,19 +87,45 @@ public class GatewayTest {
     }
 
     @Test
+    public void testGetApiUrlThrowsExceptionIfApiVersionIsLessThanMin() throws Exception {
+        String apiVersion = String.valueOf(Gateway.MIN_API_VERSION - 1);
+
+        try {
+            String apiUrl = gateway.getApiUrl(apiVersion);
+
+            fail("Api version less than minimum value should have caused illegal argument exception");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+    }
+
+
+    @Test
     public void testGetApiUrlWorksAsIntended() throws Exception {
         gateway.region = Gateway.Region.NORTH_AMERICA;
-        String expectedUrl = "https://na-gateway.mastercard.com/api/rest/version/" + Gateway.API_VERSION;
+        String expectedUrl = "https://na-gateway.mastercard.com/api/rest/version/" + Gateway.MIN_API_VERSION;
 
-        assertEquals(expectedUrl, gateway.getApiUrl());
+        assertEquals(expectedUrl, gateway.getApiUrl(String.valueOf(Gateway.MIN_API_VERSION)));
     }
+
+    @Test
+    public void testGetUpdateSessionUrlThrowsExceptionIfSessionIdIsNull() throws Exception {
+        try {
+            gateway.getUpdateSessionUrl(null, String.valueOf(Gateway.MIN_API_VERSION));
+
+            fail("Null session id should throw illegal argument exception");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+    }
+
 
     @Test
     public void testGetUpdateSessionUrlThrowsExceptionIfMerchantIdIsNull() throws Exception {
         gateway.merchantId = null;
 
         try {
-            String url = gateway.getUpdateSessionUrl("sess1234");
+            String url = gateway.getUpdateSessionUrl("sess1234", String.valueOf(Gateway.MIN_API_VERSION));
 
             fail("Null merchant id should have caused illegal state exception");
         } catch (Exception e) {
@@ -122,44 +137,11 @@ public class GatewayTest {
     public void testGetUpdateSessionUrlWorksAsIntended() throws Exception {
         gateway.merchantId = "somemerchant";
         gateway.region = Gateway.Region.NORTH_AMERICA;
-        String expectedUrl = "https://na-gateway.mastercard.com/api/rest/version/" + Gateway.API_VERSION + "/merchant/somemerchant/session/sess1234";
+        String expectedUrl = "https://na-gateway.mastercard.com/api/rest/version/" + Gateway.MIN_API_VERSION + "/merchant/somemerchant/session/sess1234";
 
-        String actualUrl = gateway.getUpdateSessionUrl("sess1234");
+        String actualUrl = gateway.getUpdateSessionUrl("sess1234", String.valueOf(Gateway.MIN_API_VERSION));
 
         assertEquals(expectedUrl, actualUrl);
-    }
-
-    @Test
-    public void testBuildCardWorksAsIntended() throws Exception {
-        String nameOnCard = "Test Card";
-        String number = "5111111111111118";
-        String cvc = "100";
-        String expiryMM = "05";
-        String expiryYY = "21";
-
-        Card card = gateway.buildCard(nameOnCard, number, cvc, expiryMM, expiryYY);
-
-        assertEquals(nameOnCard, card.nameOnCard());
-        assertEquals(number, card.number());
-        assertEquals(cvc, card.securityCode());
-        assertEquals(expiryMM, card.expiry().month());
-        assertEquals(expiryYY, card.expiry().year());
-    }
-
-    @Test
-    public void testBuildUpdateSessionRequestWorksAsIntended() throws Exception {
-        String nameOnCard = "Test Card";
-        String number = "5111111111111118";
-        String cvc = "100";
-        String expiryMM = "05";
-        String expiryYY = "21";
-
-        Card card = gateway.buildCard(nameOnCard, number, cvc, expiryMM, expiryYY);
-
-        UpdateSessionRequest request = gateway.buildUpdateSessionRequest(card);
-
-        assertEquals("UPDATE_PAYER_DATA", request.apiOperation());
-        assertEquals(card, request.sourceOfFunds().provided().card());
     }
 
     @Test
@@ -175,7 +157,7 @@ public class GatewayTest {
     @Test
     public void testHandleCallbackMessageCallsSuccessWithNonThrowableArg() throws Exception {
         GatewayCallback callback = mock(GatewayCallback.class);
-        GatewayResponse arg = UpdateSessionResponse.builder().build();
+        GatewayMap arg = mock(GatewayMap.class);
 
         gateway.handleCallbackMessage(callback, arg);
 
@@ -198,5 +180,31 @@ public class GatewayTest {
 
         assertNotNull(certificate);
         assertEquals(expectedSerialNo, certificate.getSerialNumber().toString());
+    }
+
+    @Test
+    public void testCreateConnectionWorksAsIntended() throws Exception {
+        String endpoint = "https://www.mastercard.com";
+        URL url = new URL(endpoint);
+
+        SSLContext context = mock(SSLContext.class);
+        SSLSocketFactory socketFactory = mock(SSLSocketFactory.class);
+        doReturn(socketFactory).when(context).getSocketFactory();
+
+        String expectedMethod = "PUT";
+        String expectedUserAgent = Gateway.USER_AGENT_PREFIX + "/" + BuildConfig.VERSION_NAME;
+        String expectedContentType = "application/json";
+
+
+        HttpsURLConnection c = gateway.createHttpsUrlConnection(url, context, Gateway.Method.PUT);
+
+        assertEquals(url, c.getURL());
+        assertEquals(socketFactory, c.getSSLSocketFactory());
+        assertEquals(Gateway.CONNECTION_TIMEOUT, c.getConnectTimeout());
+        assertEquals(Gateway.READ_TIMEOUT, c.getReadTimeout());
+        assertEquals(expectedMethod, c.getRequestMethod());
+        assertEquals(expectedUserAgent, c.getRequestProperty("User-Agent"));
+        assertEquals(expectedContentType, c.getRequestProperty("Content-Type"));
+        assertTrue(c.getDoOutput());
     }
 }
