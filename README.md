@@ -60,53 +60,6 @@ GatewayMap request = new GatewayMap()
 gateway.updateSession(sessionId, apiVersion, request, callback);
 ```
 
-You may also include additional information such as shipping/billing addresses, customer info, device data, and more by appending them to your request object before providing it to the SDK. Consult your integration guide for a full list of available options.
-
-```java
-// billing address
-request.put("billing.address.city", billingCity);
-request.put("billing.address.company", billingCompany);
-request.put("billing.address.country", billingCountry);
-request.put("billing.address.postcodeZip", billingZip);
-request.put("billing.address.stateProvince", billingState);
-request.put("billing.address.street", billingStreet);
-request.put("billing.address.street2", billingStreet2);
-
-// shipping address
-request.put("shipping.address.city", shippingCity);
-request.put("shipping.address.company", shippingCompany);
-request.put("shipping.address.country", shippingCountry);
-request.put("shipping.address.postcodeZip", shippingZip);
-request.put("shipping.address.stateProvince", shippingState);
-request.put("shipping.address.street", shippingStreet);
-request.put("shipping.address.street2", shippingStreet2);
-
-// shipping contact
-request.put("shipping.contact.email", shippingEmail);
-request.put("shipping.contact.firstName", shippingFirstName);
-request.put("shipping.contact.lastName", shippingLastName);
-request.put("shipping.contact.mobilePhone", shippingMobile);
-request.put("shipping.contact.phone", shippingPhone);
-
-// shipping method
-request.put("shipping.method", shippingMethod);
-
-// customer
-request.put("customer.email", customerEmail);
-request.put("customer.firstName", customerFirstName);
-request.put("customer.lastName", customerLastName);
-request.put("customer.mobilePhone", customerMobile);
-request.put("customer.phone", customerPhone);
-request.put("customer.taxRegistrationId", customerTaxId);
-
-// device
-request.put("device.browser", deviceUserAgent);
-request.put("device.fingerprint", deviceFingerprint);
-request.put("device.hostname", deviceHostname);
-request.put("device.ipAddress", deviceIpAddress);
-request.put("device.mobilePhoneModel", deviceModel);
-```
-
 Once payer data has been sent, you can complete the Gateway session on your servers with the private API password.
 
 
