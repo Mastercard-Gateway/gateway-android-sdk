@@ -15,20 +15,19 @@ import java.util.regex.Pattern;
 /**
  * Map object that extends the LinkedHashMap map with support for insertion and retrieval of keys using special
  * key path values.  The key path support nested maps and array values.
- * <p/>
+ * <p>
  * A key path consists of a sequence of key values separated by '.' characters.  Each part of the key path
  * consists of a separate map.  For example a key path of 'k1.k2.k3' is a map containing a key 'k1' whose
  * value is a map containing a key 'k2' whose values is a map containing a key 'k3'.   A key path can also
- * contain an array notation '[<number'] in which case the value of 'a' in the map is a list containing
+ * contain an array notation '[&lt;number&gt;]' in which case the value of 'a' in the map is a list containing
  * a map.  For example 'a[1].k2' refers to the key value 'k2' in the 2nd element of the list referred to by
  * the value of key 'a' in the map.  If no index value is given (i.e., '[]') then a put() method appends
  * to the list while a get() method returns the last value in the list.
- * <p/>
+ * <p>
  * When using the array index notation the value inserted must be a map; inserting values is not permitted.
  * For example using <code>put("a[3].k1", 1)</code> is permitted while <code>put("a[3]", 1)</code> results
  * in an <code>IllegalArgumentException</code>.
- * <p/>
- * <p/>
+ * <p>
  * Examples:
  * <pre>
  * GatewayMap map  = new GatewayMap();
@@ -409,6 +408,9 @@ public class GatewayMap extends LinkedHashMap<String, Object> {
 
     /**
      * Returns an identical copy of the map
+     *
+     * @param m The map to copy
+     * @return A copy of the original map
      */
     public static Map<String, Object> normalize(Map<String, Object> m) {
 
