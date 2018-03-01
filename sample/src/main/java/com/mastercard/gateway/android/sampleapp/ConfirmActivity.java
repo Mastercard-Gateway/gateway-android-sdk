@@ -31,9 +31,18 @@ import java.util.UUID;
  */
 public class ConfirmActivity extends AppCompatActivity {
 
+//    static String html = "<html><body><h1>Hello World</h1><a href=\"https://www.google.com\">Google!</a><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p></body></html>";
+    static int REQUEST_3DS = 10000;
+
     ActivityConfirmBinding binding;
     ApiController apiController = ApiController.getInstance();
     String sessionId;
+
+    String threeDSId;
+    String orderId;
+    String transactionId;
+    String amount;
+    String currency;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,26 +51,36 @@ public class ConfirmActivity extends AppCompatActivity {
         apiController.setMerchantServerUrl(BuildConfig.MERCHANT_SERVER_URL);
         sessionId = getIntent().getStringExtra("SESSION_ID");
 
+        amount = "1.00";
+        currency = "USD";
+
+        // random 3ds/order/txn IDs for example purposes
+        threeDSId = UUID.randomUUID().toString();
+        threeDSId = threeDSId.substring(0, threeDSId.indexOf('-'));
+        orderId = UUID.randomUUID().toString();
+        orderId = orderId.substring(0, orderId.indexOf('-'));
+        transactionId = UUID.randomUUID().toString();
+        transactionId = transactionId.substring(0, transactionId.indexOf('-'));
+
         binding = DataBindingUtil.setContentView(this, R.layout.activity_confirm);
         binding.confirmCardNo.setText(getIntent().getStringExtra("PAN_MASK"));
-        binding.confirmBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                doConfirm();
-            }
-        });
+        binding.confirmBtn.setOnClickListener(view -> doCheck3DSEnrollment());
+    }
+
+    void doCheck3DSEnrollment() {
+        binding.confirmBtn.setEnabled(false);
+
+        apiController.check3DSecureEnrollment(sessionId, threeDSId, amount, currency, new Check3DSecureEnrollmentCallback());
     }
 
     void doConfirm() {
-        binding.confirmBtn.setEnabled(false);
+        apiController.completeSession(sessionId, orderId, transactionId, amount, currency, new CompleteSessionCallback());
+    }
 
-        // random order/txn IDs for example purposes
-        String orderId = UUID.randomUUID().toString();
-        orderId = orderId.substring(0, orderId.indexOf('-'));
-        String transactionId = UUID.randomUUID().toString();
-        transactionId = transactionId.substring(0, transactionId.indexOf('-'));
-
-        apiController.completeSession(sessionId, orderId, transactionId, "250.00", "USD", new CompleteSessionCallback());
+    void start3DSecureActivity(String html) {
+        Intent intent = new Intent(this, ThreeDSecureActivity.class);
+        intent.putExtra(ThreeDSecureActivity.EXTRA_HTML, html);
+        startActivityForResult(intent, REQUEST_3DS);
     }
 
     void startResultActivity(boolean success) {
@@ -70,6 +89,23 @@ public class ConfirmActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    class Check3DSecureEnrollmentCallback implements ApiController.Check3DSecureEnrollmentCallback {
+        @Override
+        public void onSuccess(boolean cardEnrolled, String html) {
+            if (cardEnrolled) {
+                start3DSecureActivity(html);
+            } else {
+                doConfirm();
+            }
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            throwable.printStackTrace();
+            startResultActivity(false);
+            binding.confirmBtn.setEnabled(true);
+        }
+    }
 
     class CompleteSessionCallback implements ApiController.CompleteSessionCallback {
         @Override

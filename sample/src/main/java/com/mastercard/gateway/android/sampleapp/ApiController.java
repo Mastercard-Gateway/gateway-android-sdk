@@ -26,6 +26,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import com.mastercard.gateway.android.sdk.GatewayMap;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -64,6 +65,12 @@ public class ApiController {
         void onError(Throwable throwable);
     }
 
+    interface Check3DSecureEnrollmentCallback {
+        void onSuccess(boolean cardEnrolled, String html);
+
+        void onError(Throwable throwable);
+    }
+
     interface CompleteSessionCallback {
         void onSuccess(String result);
 
@@ -82,61 +89,75 @@ public class ApiController {
     }
 
     public void createSession(final CreateSessionCallback callback) {
-        final Handler handler = new Handler(new Handler.Callback() {
-            @Override
-            public boolean handleMessage(Message message) {
-                if (callback != null) {
-                    if (message.obj instanceof Throwable) {
-                        callback.onError((Throwable) message.obj);
-                    } else {
-                        Pair<String, String> pair = (Pair<String, String>) message.obj;
-                        callback.onSuccess(pair.first, pair.second);
-                    }
+        final Handler handler = new Handler(message -> {
+            if (callback != null) {
+                if (message.obj instanceof Throwable) {
+                    callback.onError((Throwable) message.obj);
+                } else {
+                    Pair<String, String> pair = (Pair<String, String>) message.obj;
+                    callback.onSuccess(pair.first, pair.second);
                 }
-                return true;
             }
+            return true;
         });
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Message m = handler.obtainMessage();
-                try {
-                    m.obj = executeCreateSession();
-                } catch (Exception e) {
-                    m.obj = e;
-                }
-                handler.sendMessage(m);
+        new Thread(() -> {
+            Message m = handler.obtainMessage();
+            try {
+                m.obj = executeCreateSession();
+            } catch (Exception e) {
+                m.obj = e;
             }
+            handler.sendMessage(m);
+        }).start();
+    }
+
+    public void check3DSecureEnrollment(final String sessionId, final String threeDSId, final String amount, final String currency, final Check3DSecureEnrollmentCallback callback) {
+        final Handler handler = new Handler(message -> {
+            if (callback != null) {
+                if (message.obj instanceof Throwable) {
+                    callback.onError((Throwable) message.obj);
+                } else {
+                    GatewayMap response = (GatewayMap) message.obj;
+                    boolean cardEnrolled = ((String) response.get("gatewayResponse.3DSecure.summaryStatus")).equalsIgnoreCase("CARD_ENROLLED");
+                    String html = (String) response.get("gatewayResponse.3DSecure.authenticationRedirect.simple.htmlBodyContent");
+                    callback.onSuccess(cardEnrolled, html);
+                }
+            }
+            return true;
+        });
+
+        new Thread(() -> {
+            Message m = handler.obtainMessage();
+            try {
+                m.obj = executeCheck3DSEnrollment(sessionId, threeDSId, amount, currency);
+            } catch (Exception e) {
+                m.obj = e;
+            }
+            handler.sendMessage(m);
         }).start();
     }
 
     public void completeSession(final String sessionId, final String orderId, final String transactionId, final String amount, final String currency, final CompleteSessionCallback callback) {
-        final Handler handler = new Handler(new Handler.Callback() {
-            @Override
-            public boolean handleMessage(Message message) {
-                if (callback != null) {
-                    if (message.obj instanceof Throwable) {
-                        callback.onError((Throwable) message.obj);
-                    } else {
-                        callback.onSuccess((String) message.obj);
-                    }
+        final Handler handler = new Handler(message -> {
+            if (callback != null) {
+                if (message.obj instanceof Throwable) {
+                    callback.onError((Throwable) message.obj);
+                } else {
+                    callback.onSuccess((String) message.obj);
                 }
-                return true;
             }
+            return true;
         });
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Message m = handler.obtainMessage();
-                try {
-                    m.obj = executeCompleteSession(sessionId, orderId, transactionId, amount, currency);
-                } catch (Exception e) {
-                    m.obj = e;
-                }
-                handler.sendMessage(m);
+        new Thread(() -> {
+            Message m = handler.obtainMessage();
+            try {
+                m.obj = executeCompleteSession(sessionId, orderId, transactionId, amount, currency);
+            } catch (Exception e) {
+                m.obj = e;
             }
+            handler.sendMessage(m);
         }).start();
     }
 
@@ -162,6 +183,39 @@ public class ApiController {
         Log.i("createSession", "Created session with ID " + sessionId + " with API version " + apiVersion);
 
         return new Pair<>(sessionId, apiVersion);
+    }
+
+    GatewayMap executeCheck3DSEnrollment(String sessionId, String threeDSId, String amount, String currency) throws Exception {
+        JsonObject session = new JsonObject();
+        session.addProperty("id", sessionId);
+
+        JsonObject order = new JsonObject();
+        order.addProperty("amount", amount);
+        order.addProperty("currency", currency);
+
+        JsonObject authRedirect = new JsonObject();
+        authRedirect.addProperty("responseUrl", "https://mpgs3dstest.herokuapp.com");
+
+        JsonObject threeDS = new JsonObject();
+        threeDS.add("authenticationRedirect", authRedirect);
+
+        JsonObject json = new JsonObject();
+        json.addProperty("apiOperation", "CHECK_3DS_ENROLLMENT");
+        json.add("session", session);
+        json.add("order", order);
+        json.add("3DSecure", threeDS);
+
+        String jsonString = GSON.toJson(json);
+
+        String jsonResponse = doJsonRequest(new URL(merchantServerUrl + "/3DSecure.php?3DSecureId=" + threeDSId), jsonString, "PUT", null, null, HttpsURLConnection.HTTP_OK);
+
+        GatewayMap response = new GatewayMap(jsonResponse);
+
+        if (!response.containsKey("gatewayResponse")) {
+            throw new RuntimeException("Could not read gateway response");
+        }
+
+        return response;
     }
 
     String executeCompleteSession(String sessionId, String orderId, String transactionId, String amount, String currency) throws Exception {

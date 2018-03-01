@@ -17,8 +17,15 @@
 package com.mastercard.gateway.android.sdk;
 
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.telecom.GatewayInfo;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import com.google.gson.Gson;
 
@@ -216,6 +223,41 @@ public class Gateway {
         String url = getUpdateSessionUrl(sessionId, apiVersion);
         payload.put("apiOperation", "UPDATE_PAYER_DATA");
         return runGatewayRequest(url, Method.PUT, payload);
+    }
+
+    public AlertDialog display3dsPopup(Context context, String html, Gateway3DSCallback callback) {
+        WebView webView = new WebView(context);
+        webView.loadData(html, "text/html", "utf-8");
+        webView.setWebViewClient(new WebViewClient() {
+            // shouldOverrideUrlLoading makes this `WebView` the default handler for URLs inside the app, so that links are not kicked out to other apps.
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                // Use an external email program if the link begins with "mailto:".
+                if (url.startsWith("mailto:")) {
+                    // We use `ACTION_SENDTO` instead of `ACTION_SEND` so that only email programs are launched.
+                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+
+                    // Parse the url and set it as the data for the `Intent`.
+                    emailIntent.setData(Uri.parse(url));
+
+                    // `FLAG_ACTIVITY_NEW_TASK` opens the email program in a new task instead as part of this application.
+                    emailIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                    // Make it so.
+                    context.startActivity(emailIntent);
+                    return true;
+                } else {  // Load the URL in `webView`.
+                    webView.loadUrl(url);
+                    return true;
+                }
+            }
+        });
+
+        return new AlertDialog.Builder(context)
+                .setCancelable(false)
+                .setView(webView)
+                .setTitle("Hello 3DS")
+                .show();
     }
 
 
