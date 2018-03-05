@@ -16,37 +16,43 @@
 
 package com.mastercard.gateway.android.sampleapp;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 
 import com.mastercard.gateway.android.sampleapp.databinding.ActivityConfirmBinding;
+import com.mastercard.gateway.android.sdk.Gateway;
+import com.mastercard.gateway.android.sdk.Gateway3DSCallback;
+import com.mastercard.gateway.android.sdk.Gateway3DSecureActivity;
+import com.mastercard.gateway.android.sdk.SummaryStatus;
 
 import java.util.UUID;
 
 /**
  * Display a payment confirmation screen and send the final pay request
  */
-public class ConfirmActivity extends AppCompatActivity {
+public class ConfirmActivity extends AppCompatActivity implements Gateway3DSCallback {
 
-//    static String html = "<html><body><h1>Hello World</h1><a href=\"https://www.google.com\">Google!</a><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p><p>hi</p></body></html>";
-    static int REQUEST_3DS = 10000;
+    static final int REQUEST_3DS = 10000;
 
     ActivityConfirmBinding binding;
     ApiController apiController = ApiController.getInstance();
     String sessionId;
 
-    String threeDSId;
     String orderId;
     String transactionId;
     String amount;
     String currency;
 
+    Gateway gateway;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        gateway = new Gateway();
 
         apiController.setMerchantServerUrl(BuildConfig.MERCHANT_SERVER_URL);
         sessionId = getIntent().getStringExtra("SESSION_ID");
@@ -55,8 +61,7 @@ public class ConfirmActivity extends AppCompatActivity {
         currency = "USD";
 
         // random 3ds/order/txn IDs for example purposes
-        threeDSId = UUID.randomUUID().toString();
-        threeDSId = threeDSId.substring(0, threeDSId.indexOf('-'));
+
         orderId = UUID.randomUUID().toString();
         orderId = orderId.substring(0, orderId.indexOf('-'));
         transactionId = UUID.randomUUID().toString();
@@ -67,23 +72,53 @@ public class ConfirmActivity extends AppCompatActivity {
         binding.confirmBtn.setOnClickListener(view -> doCheck3DSEnrollment());
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (gateway.handle3DSecureResult(requestCode, resultCode, data, this)) {
+            return;
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void on3DSecureCancel() {
+        // reset the screen to try again
+        binding.confirmBtn.setEnabled(true);
+    }
+
+    @Override
+    public void on3DSecureError(SummaryStatus summaryStatus) {
+        // if error, show error page
+        startResultActivity(false);
+    }
+
+    @Override
+    public void on3DSecureSuccess(String threeDSecureId, SummaryStatus summaryStatus) {
+        doConfirm(threeDSecureId);
+    }
+
     void doCheck3DSEnrollment() {
         binding.confirmBtn.setEnabled(false);
 
-        apiController.check3DSecureEnrollment(sessionId, threeDSId, amount, currency, new Check3DSecureEnrollmentCallback());
+        // generate a random 3DSecureId for testing
+        String threeDSId = UUID.randomUUID().toString();
+        threeDSId = threeDSId.substring(0, threeDSId.indexOf('-'));
+
+        apiController.check3DSecureEnrollment(sessionId, amount, currency, threeDSId, new Check3DSecureEnrollmentCallback());
     }
 
     void doConfirm() {
-        apiController.completeSession(sessionId, orderId, transactionId, amount, currency, new CompleteSessionCallback());
+        doConfirm(null);
     }
 
-    void start3DSecureActivity(String html) {
-        Intent intent = new Intent(this, ThreeDSecureActivity.class);
-        intent.putExtra(ThreeDSecureActivity.EXTRA_HTML, html);
-        startActivityForResult(intent, REQUEST_3DS);
+    void doConfirm(String threeDSecureId) {
+        apiController.completeSession(sessionId, orderId, transactionId, amount, currency, threeDSecureId, new CompleteSessionCallback());
     }
 
     void startResultActivity(boolean success) {
+        binding.confirmBtn.setEnabled(true);
+
         Intent intent = new Intent(this, ResultActivity.class);
         intent.putExtra("SUCCESS", success);
         startActivity(intent);
@@ -93,7 +128,7 @@ public class ConfirmActivity extends AppCompatActivity {
         @Override
         public void onSuccess(boolean cardEnrolled, String html) {
             if (cardEnrolled) {
-                start3DSecureActivity(html);
+                gateway.start3DSecureActivity(ConfirmActivity.this, "3DS", html);
             } else {
                 doConfirm();
             }
@@ -103,7 +138,6 @@ public class ConfirmActivity extends AppCompatActivity {
         public void onError(Throwable throwable) {
             throwable.printStackTrace();
             startResultActivity(false);
-            binding.confirmBtn.setEnabled(true);
         }
     }
 
@@ -111,14 +145,12 @@ public class ConfirmActivity extends AppCompatActivity {
         @Override
         public void onSuccess(String result) {
             startResultActivity(true);
-            binding.confirmBtn.setEnabled(true);
         }
 
         @Override
         public void onError(Throwable throwable) {
             throwable.printStackTrace();
             startResultActivity(false);
-            binding.confirmBtn.setEnabled(true);
         }
     }
 }

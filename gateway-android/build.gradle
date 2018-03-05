@@ -39,8 +39,9 @@ configurations {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.google.code.gson:gson:2.8.2'
-    optional 'io.reactivex.rxjava2:rxjava:2.1.5'
-    compileOnly 'com.android.support:support-annotations:27.0.2'
+    optional 'com.android.support:appcompat-v7:27.1.0'
+    optional 'io.reactivex.rxjava2:rxjava:2.1.10'
+    compileOnly 'com.android.support:support-annotations:27.1.0'
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.robolectric:robolectric:3.5.1'

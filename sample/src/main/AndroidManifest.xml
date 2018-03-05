@@ -34,7 +34,7 @@
             android:label="@string/app_name" />
 
         <activity
-            android:name=".ThreeDSecureActivity"
+            android:name="com.mastercard.gateway.android.sdk.Gateway3DSecureActivity"
             android:label="@string/app_name" />
 
     </application>

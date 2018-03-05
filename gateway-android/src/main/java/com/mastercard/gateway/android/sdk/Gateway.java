@@ -17,13 +17,13 @@
 package com.mastercard.gateway.android.sdk;
 
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
-import android.telecom.GatewayInfo;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -223,6 +223,47 @@ public class Gateway {
         String url = getUpdateSessionUrl(sessionId, apiVersion);
         payload.put("apiOperation", "UPDATE_PAYER_DATA");
         return runGatewayRequest(url, Method.PUT, payload);
+    }
+
+    /**
+     *
+     * @param activity
+     * @param title
+     * @param html
+     */
+    public void start3DSecureActivity(Activity activity, String title, String html) {
+        Intent intent = new Intent(activity, Gateway3DSecureActivity.class);
+        intent.putExtra(Gateway3DSecureActivity.EXTRA_TITLE, title);
+        intent.putExtra(Gateway3DSecureActivity.EXTRA_REQUEST_HTML, html);
+        activity.startActivityForResult(intent, Gateway3DSecureActivity.REQUEST_3DS);
+    }
+
+    /**
+     *
+     * @return
+     */
+    public boolean handle3DSecureResult(int requestCode, int resultCode, Intent data, Gateway3DSCallback callback) {
+        if (requestCode == Gateway3DSecureActivity.REQUEST_3DS) {
+            if (resultCode == Activity.RESULT_OK) {
+                // get the basic txn details
+                String threeDSecureId = data.getStringExtra(Gateway3DSecureActivity.EXTRA_RESPONSE_3DSECURE_ID);
+                SummaryStatus summaryStatus = (SummaryStatus) data.getSerializableExtra(Gateway3DSecureActivity.EXTRA_RESPONSE_SUMMARY_STATUS);
+
+                // check if there was an error during 3DS auth
+                boolean error = data.getBooleanExtra(Gateway3DSecureActivity.EXTRA_RESPONSE_ERROR, true);
+                if (error) {
+                    callback.on3DSecureError(summaryStatus);
+                } else {
+                    callback.on3DSecureSuccess(threeDSecureId, summaryStatus);
+                }
+            } else {
+                callback.on3DSecureCancel();
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     public AlertDialog display3dsPopup(Context context, String html, Gateway3DSCallback callback) {

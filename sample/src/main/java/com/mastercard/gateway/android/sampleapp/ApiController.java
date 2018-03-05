@@ -112,15 +112,25 @@ public class ApiController {
         }).start();
     }
 
-    public void check3DSecureEnrollment(final String sessionId, final String threeDSId, final String amount, final String currency, final Check3DSecureEnrollmentCallback callback) {
+    public void check3DSecureEnrollment(final String sessionId, final String amount, final String currency, final String threeDSId, final Check3DSecureEnrollmentCallback callback) {
         final Handler handler = new Handler(message -> {
             if (callback != null) {
                 if (message.obj instanceof Throwable) {
                     callback.onError((Throwable) message.obj);
                 } else {
                     GatewayMap response = (GatewayMap) message.obj;
-                    boolean cardEnrolled = ((String) response.get("gatewayResponse.3DSecure.summaryStatus")).equalsIgnoreCase("CARD_ENROLLED");
-                    String html = (String) response.get("gatewayResponse.3DSecure.authenticationRedirect.simple.htmlBodyContent");
+
+                    boolean cardEnrolled = false;
+                    String html = null;
+
+                    if (response.containsKey("gatewayResponse.3DSecure.summaryStatus")) {
+                        cardEnrolled = ((String) response.get("gatewayResponse.3DSecure.summaryStatus")).equalsIgnoreCase("CARD_ENROLLED");
+                    }
+
+                    if (response.containsKey("gatewayResponse.3DSecure.authenticationRedirect.simple.htmlBodyContent")) {
+                        html = (String) response.get("gatewayResponse.3DSecure.authenticationRedirect.simple.htmlBodyContent");
+                    }
+                    
                     callback.onSuccess(cardEnrolled, html);
                 }
             }
@@ -130,7 +140,7 @@ public class ApiController {
         new Thread(() -> {
             Message m = handler.obtainMessage();
             try {
-                m.obj = executeCheck3DSEnrollment(sessionId, threeDSId, amount, currency);
+                m.obj = executeCheck3DSEnrollment(sessionId, amount, currency, threeDSId);
             } catch (Exception e) {
                 m.obj = e;
             }
@@ -138,7 +148,7 @@ public class ApiController {
         }).start();
     }
 
-    public void completeSession(final String sessionId, final String orderId, final String transactionId, final String amount, final String currency, final CompleteSessionCallback callback) {
+    public void completeSession(final String sessionId, final String orderId, final String transactionId, final String amount, final String currency, final String threeDSecureId, final CompleteSessionCallback callback) {
         final Handler handler = new Handler(message -> {
             if (callback != null) {
                 if (message.obj instanceof Throwable) {
@@ -153,7 +163,7 @@ public class ApiController {
         new Thread(() -> {
             Message m = handler.obtainMessage();
             try {
-                m.obj = executeCompleteSession(sessionId, orderId, transactionId, amount, currency);
+                m.obj = executeCompleteSession(sessionId, orderId, transactionId, amount, currency, threeDSecureId);
             } catch (Exception e) {
                 m.obj = e;
             }
@@ -164,50 +174,34 @@ public class ApiController {
     Pair<String, String> executeCreateSession() throws Exception {
         String jsonResponse = doJsonRequest(new URL(merchantServerUrl + "/session.php"), "", "POST", null, null, HttpsURLConnection.HTTP_OK);
 
-        Map<String, Object> map = GSON.fromJson(jsonResponse, new TypeToken<Map<String, Object>>() {
-        }.getType());
+        GatewayMap response = new GatewayMap(jsonResponse);
 
-        if (!map.containsKey("gatewayResponse")) {
+        if (!response.containsKey("gatewayResponse")) {
             throw new RuntimeException("Could not read gateway response");
         }
 
-        String apiVersion = (String) map.get("apiVersion");
-
-        Map<String, Object> gatewayResponse = (Map<String, Object>) map.get("gatewayResponse");
-
-        if (!gatewayResponse.containsKey("result") || !"SUCCESS".equalsIgnoreCase((String) gatewayResponse.get("result"))) {
-            throw new RuntimeException("Create session result: " + gatewayResponse.get("result"));
+        if (!response.containsKey("gatewayResponse.result") || !"SUCCESS".equalsIgnoreCase((String) response.get("gatewayResponse.result"))) {
+            throw new RuntimeException("Create session result: " + response.get("gatewayResponse.result"));
         }
 
-        String sessionId = ((Map<String, String>) gatewayResponse.get("session")).get("id");
+        String apiVersion = (String) response.get("apiVersion");
+        String sessionId = (String) response.get("gatewayResponse.session.id");
         Log.i("createSession", "Created session with ID " + sessionId + " with API version " + apiVersion);
 
         return new Pair<>(sessionId, apiVersion);
     }
 
-    GatewayMap executeCheck3DSEnrollment(String sessionId, String threeDSId, String amount, String currency) throws Exception {
-        JsonObject session = new JsonObject();
-        session.addProperty("id", sessionId);
+    GatewayMap executeCheck3DSEnrollment(String sessionId, String amount, String currency, String threeDSecureId) throws Exception {
+        GatewayMap request = new GatewayMap()
+                .set("apiOperation", "CHECK_3DS_ENROLLMENT")
+                .set("session.id", sessionId)
+                .set("order.amount", amount)
+                .set("order.currency", currency)
+                .set("3DSecure.authenticationRedirect.responseUrl", merchantServerUrl + "/3DSecureResult.php?3DSecureId=" + threeDSecureId);
 
-        JsonObject order = new JsonObject();
-        order.addProperty("amount", amount);
-        order.addProperty("currency", currency);
+        String jsonRequest = GSON.toJson(request);
 
-        JsonObject authRedirect = new JsonObject();
-        authRedirect.addProperty("responseUrl", "https://mpgs3dstest.herokuapp.com");
-
-        JsonObject threeDS = new JsonObject();
-        threeDS.add("authenticationRedirect", authRedirect);
-
-        JsonObject json = new JsonObject();
-        json.addProperty("apiOperation", "CHECK_3DS_ENROLLMENT");
-        json.add("session", session);
-        json.add("order", order);
-        json.add("3DSecure", threeDS);
-
-        String jsonString = GSON.toJson(json);
-
-        String jsonResponse = doJsonRequest(new URL(merchantServerUrl + "/3DSecure.php?3DSecureId=" + threeDSId), jsonString, "PUT", null, null, HttpsURLConnection.HTTP_OK);
+        String jsonResponse = doJsonRequest(new URL(merchantServerUrl + "/3DSecure.php?3DSecureId=" + threeDSecureId), jsonRequest, "PUT", null, null, HttpsURLConnection.HTTP_OK);
 
         GatewayMap response = new GatewayMap(jsonResponse);
 
@@ -218,45 +212,34 @@ public class ApiController {
         return response;
     }
 
-    String executeCompleteSession(String sessionId, String orderId, String transactionId, String amount, String currency) throws Exception {
-        JsonObject order = new JsonObject();
-        order.addProperty("amount", amount);
-        order.addProperty("currency", currency);
+    String executeCompleteSession(String sessionId, String orderId, String transactionId, String amount, String currency, String threeDSecureId) throws Exception {
+        GatewayMap request = new GatewayMap()
+                .set("apiOperation", "PAY")
+                .set("session.id", sessionId)
+                .set("order.amount", amount)
+                .set("order.currency", currency)
+                .set("sourceOfFunds.type", "CARD")
+                .set("transaction.frequency", "SINGLE");
 
-        JsonObject session = new JsonObject();
-        session.addProperty("id", sessionId);
+        if (threeDSecureId != null) {
+            request.put("3DSecureId", threeDSecureId);
+        }
 
-        JsonObject sourceOfFunds = new JsonObject();
-        sourceOfFunds.addProperty("type", "CARD");
+        String jsonRequest = GSON.toJson(request);
 
-        JsonObject transaction = new JsonObject();
-        transaction.addProperty("frequency", "SINGLE");
+        String jsonResponse = doJsonRequest(new URL(merchantServerUrl + "/transaction.php?order=" + orderId + "&transaction=" + transactionId), jsonRequest, "PUT", null, null, HttpsURLConnection.HTTP_OK);
 
-        JsonObject json = new JsonObject();
-        json.addProperty("apiOperation", "PAY");
-        json.add("order", order);
-        json.add("session", session);
-        json.add("sourceOfFunds", sourceOfFunds);
-        json.add("transaction", transaction);
+        GatewayMap response = new GatewayMap(jsonResponse);
 
-        String jsonString = GSON.toJson(json);
-
-        String jsonResponse = doJsonRequest(new URL(merchantServerUrl + "/transaction.php?order=" + orderId + "&transaction=" + transactionId), jsonString, "PUT", null, null, HttpsURLConnection.HTTP_OK);
-
-        Map<String, Object> map = GSON.fromJson(jsonResponse, new TypeToken<Map<String, Object>>() {
-        }.getType());
-
-        if (!map.containsKey("gatewayResponse")) {
+        if (!response.containsKey("gatewayResponse")) {
             throw new RuntimeException("Could not read gateway response");
         }
 
-        Map<String, Object> gatewayResponse = (Map<String, Object>) map.get("gatewayResponse");
-
-        if (!gatewayResponse.containsKey("result") || !"SUCCESS".equalsIgnoreCase((String) gatewayResponse.get("result"))) {
-            throw new RuntimeException("Payment result: " + gatewayResponse.get("result") + "; Payload: " + jsonResponse);
+        if (!response.containsKey("gatewayResponse.result") || !"SUCCESS".equalsIgnoreCase((String) response.get("gatewayResponse.result"))) {
+            throw new RuntimeException("Payment result: " + response.get("gatewayResponse.result") + "; Payload: " + jsonResponse);
         }
 
-        return (String) gatewayResponse.get("result");
+        return (String) response.get("gatewayResponse.result");
     }
 
 
