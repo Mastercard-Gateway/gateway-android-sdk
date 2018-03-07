@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.Fragment;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -91,6 +92,7 @@ public class Gateway {
     static final int MIN_API_VERSION = 39;
     static final int CONNECTION_TIMEOUT = 15000;
     static final int READ_TIMEOUT = 60000;
+    static final int REQUEST_3D_SECURE = 14137;
     static final String USER_AGENT_PREFIX = "Gateway-Android-SDK";
     static final String INTERMEDIATE_CA = "-----BEGIN CERTIFICATE-----\n" +
             "MIIFAzCCA+ugAwIBAgIEUdNg7jANBgkqhkiG9w0BAQsFADCBvjELMAkGA1UEBhMC\n" +
@@ -234,8 +236,18 @@ public class Gateway {
     public void start3DSecureActivity(Activity activity, String title, String html) {
         Intent intent = new Intent(activity, Gateway3DSecureActivity.class);
         intent.putExtra(Gateway3DSecureActivity.EXTRA_TITLE, title);
-        intent.putExtra(Gateway3DSecureActivity.EXTRA_REQUEST_HTML, html);
-        activity.startActivityForResult(intent, Gateway3DSecureActivity.REQUEST_3DS);
+        intent.putExtra(Gateway3DSecureActivity.EXTRA_HTML, html);
+        activity.startActivityForResult(intent, REQUEST_3D_SECURE);
+    }
+
+    /**
+     *
+     * @param fragment
+     * @param title
+     * @param html
+     */
+    public void start3DSecureActivity(Fragment fragment, String title, String html) {
+        start3DSecureActivity(fragment.getActivity(), title, html);
     }
 
     /**
@@ -243,14 +255,14 @@ public class Gateway {
      * @return
      */
     public boolean handle3DSecureResult(int requestCode, int resultCode, Intent data, Gateway3DSCallback callback) {
-        if (requestCode == Gateway3DSecureActivity.REQUEST_3DS) {
+        if (requestCode == REQUEST_3D_SECURE) {
             if (resultCode == Activity.RESULT_OK) {
                 // get the basic txn details
-                String threeDSecureId = data.getStringExtra(Gateway3DSecureActivity.EXTRA_RESPONSE_3DSECURE_ID);
-                SummaryStatus summaryStatus = (SummaryStatus) data.getSerializableExtra(Gateway3DSecureActivity.EXTRA_RESPONSE_SUMMARY_STATUS);
+                String threeDSecureId = data.getStringExtra(Gateway3DSecureActivity.EXTRA_3D_SECURE_ID);
+                SummaryStatus summaryStatus = (SummaryStatus) data.getSerializableExtra(Gateway3DSecureActivity.EXTRA_SUMMARY_STATUS);
 
                 // check if there was an error during 3DS auth
-                boolean error = data.getBooleanExtra(Gateway3DSecureActivity.EXTRA_RESPONSE_ERROR, true);
+                boolean error = data.getBooleanExtra(Gateway3DSecureActivity.EXTRA_ERROR, true);
                 if (error) {
                     callback.on3DSecureError(summaryStatus);
                 } else {

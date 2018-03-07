@@ -35,7 +35,7 @@
 
         <activity
             android:name="com.mastercard.gateway.android.sdk.Gateway3DSecureActivity"
-            android:label="@string/app_name" />
+            android:label="@string/gateway_3d_secure_authentication" />
 
     </application>
 

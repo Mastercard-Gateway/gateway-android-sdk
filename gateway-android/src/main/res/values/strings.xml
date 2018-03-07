@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="gateway_3dsecure_card_authentication">Card Authentication</string>
+    <string name="gateway_3d_secure_authentication">3-D Secure Authentication</string>
 </resources>

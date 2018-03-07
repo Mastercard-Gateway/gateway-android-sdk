@@ -16,13 +16,11 @@ import android.webkit.WebViewClient;
 
 public class Gateway3DSecureActivity extends AppCompatActivity {
 
-    public static final int REQUEST_3DS = 14137;
-
     public static final String EXTRA_TITLE = "com.mastercard.gateway.android.TITLE";
-    public static final String EXTRA_REQUEST_HTML = "com.mastercard.gateway.android.HTML";
-    public static final String EXTRA_RESPONSE_3DSECURE_ID = "com.mastercard.gateway.android.3DSECURE_ID";
-    public static final String EXTRA_RESPONSE_SUMMARY_STATUS = "com.mastercard.gateway.android.SUMMARY_STATUS";
-    public static final String EXTRA_RESPONSE_ERROR = "com.mastercard.gateway.android.ERROR";
+    public static final String EXTRA_HTML = "com.mastercard.gateway.android.HTML";
+    public static final String EXTRA_3D_SECURE_ID = "com.mastercard.gateway.android.3DSECURE_ID";
+    public static final String EXTRA_SUMMARY_STATUS = "com.mastercard.gateway.android.SUMMARY_STATUS";
+    public static final String EXTRA_ERROR = "com.mastercard.gateway.android.ERROR";
 
     private static final String REDIRECT_SCHEME = "gatewaysdk:";
     private static final String QUERY_3DSECURE_ID = "3DSecureId";
@@ -46,10 +44,10 @@ public class Gateway3DSecureActivity extends AppCompatActivity {
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            String title = extras.getString(EXTRA_TITLE, getString(R.string.gateway_3dsecure_card_authentication));
+            String title = extras.getString(EXTRA_TITLE, getString(R.string.gateway_3d_secure_authentication));
             toolbar.setTitle(title);
 
-            String html = extras.getString(EXTRA_REQUEST_HTML);
+            String html = extras.getString(EXTRA_HTML);
             if (html == null) {
                 onBackPressed();
             } else {
@@ -75,9 +73,9 @@ public class Gateway3DSecureActivity extends AppCompatActivity {
         }
 
         Intent data = new Intent();
-        data.putExtra(EXTRA_RESPONSE_3DSECURE_ID, threeDSecureId);
-        data.putExtra(EXTRA_RESPONSE_SUMMARY_STATUS, summaryStatus);
-        data.putExtra(EXTRA_RESPONSE_ERROR, error);
+        data.putExtra(EXTRA_3D_SECURE_ID, threeDSecureId);
+        data.putExtra(EXTRA_SUMMARY_STATUS, summaryStatus);
+        data.putExtra(EXTRA_ERROR, error);
 
         setResult(Activity.RESULT_OK, data);
         finish();
