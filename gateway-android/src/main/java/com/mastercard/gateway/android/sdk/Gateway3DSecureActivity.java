@@ -16,15 +16,39 @@ import android.webkit.WebViewClient;
 
 public class Gateway3DSecureActivity extends AppCompatActivity {
 
-    public static final String EXTRA_TITLE = "com.mastercard.gateway.android.TITLE";
+    /**
+     * The HTML used to initialize the WebView. SHould be the HTML content returned from the Gateway
+     * during the Check 3DS Enrollment call
+     */
     public static final String EXTRA_HTML = "com.mastercard.gateway.android.HTML";
-    public static final String EXTRA_3D_SECURE_ID = "com.mastercard.gateway.android.3DSECURE_ID";
+
+    /**
+     * An OPTIONAL title to display in the toolbar for this activity
+     */
+    public static final String EXTRA_TITLE = "com.mastercard.gateway.android.TITLE";
+
+    /**
+     * The 3-D Secure Id returned from the Gateway on the Process ACS Result call
+     * Will not be set on error
+     */
+    public static final String EXTRA_3D_SECURE_ID = "com.mastercard.gateway.android.3D_SECURE_ID";
+
+    /**
+     * The summary status returned from the Gateway on the Process ACS Result call
+     * Will not be set on error
+     */
     public static final String EXTRA_SUMMARY_STATUS = "com.mastercard.gateway.android.SUMMARY_STATUS";
+
+    /**
+     * A message indicating there was an error reading response data.
+     * Will not be set on success
+     */
     public static final String EXTRA_ERROR = "com.mastercard.gateway.android.ERROR";
 
-    private static final String REDIRECT_SCHEME = "gatewaysdk:";
-    private static final String QUERY_3DSECURE_ID = "3DSecureId";
-    private static final String QUERY_SUMMARY_STATUS = "summaryStatus";
+
+    static final String REDIRECT_SCHEME = "gatewaysdk:";
+    static final String QUERY_3DSECURE_ID = "3DSecureId";
+    static final String QUERY_SUMMARY_STATUS = "summaryStatus";
 
 
     @Override
@@ -59,23 +83,34 @@ public class Gateway3DSecureActivity extends AppCompatActivity {
     }
 
     void handle3DSecureResult(String url) {
+        String summaryStatus = null;
         String threeDSecureId = null;
-        SummaryStatus summaryStatus = null;
-        boolean error = true;
 
+        // parse response info from url redirect
         try {
             Uri uri = Uri.parse(url);
+            summaryStatus = uri.getQueryParameter(QUERY_SUMMARY_STATUS);
             threeDSecureId = uri.getQueryParameter(QUERY_3DSECURE_ID);
-            summaryStatus = SummaryStatus.valueOf(uri.getQueryParameter(QUERY_SUMMARY_STATUS).toUpperCase());
-            error = summaryStatus == SummaryStatus.AUTHENTICATION_FAILED;
         } catch (Exception e) {
             // unable to parse or find result data
         }
 
+        // check that we got the correct data back
+        String error = null;
+        if (summaryStatus == null) {
+            error = getString(R.string.gateway_error_missing_summary_status);
+        } else if (threeDSecureId == null) {
+            error = getString(R.string.gateway_error_missing_3d_secure_id);
+        }
+
+        // build result data
         Intent data = new Intent();
-        data.putExtra(EXTRA_3D_SECURE_ID, threeDSecureId);
-        data.putExtra(EXTRA_SUMMARY_STATUS, summaryStatus);
-        data.putExtra(EXTRA_ERROR, error);
+        if (error != null) {
+            data.putExtra(EXTRA_ERROR, error);
+        } else {
+            data.putExtra(EXTRA_SUMMARY_STATUS, summaryStatus);
+            data.putExtra(EXTRA_3D_SECURE_ID, threeDSecureId);
+        }
 
         setResult(Activity.RESULT_OK, data);
         finish();

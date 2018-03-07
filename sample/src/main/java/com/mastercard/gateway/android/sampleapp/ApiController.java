@@ -66,7 +66,7 @@ public class ApiController {
     }
 
     interface Check3DSecureEnrollmentCallback {
-        void onSuccess(boolean cardEnrolled, String html);
+        void onSuccess(String summaryStatus, String threeDSecureId, String html);
 
         void onError(Throwable throwable);
     }
@@ -112,7 +112,7 @@ public class ApiController {
         }).start();
     }
 
-    public void check3DSecureEnrollment(final String sessionId, final String amount, final String currency, final String threeDSId, final Check3DSecureEnrollmentCallback callback) {
+    public void check3DSecureEnrollment(final String sessionId, final String amount, final String currency, final String threeDSecureId, final Check3DSecureEnrollmentCallback callback) {
         final Handler handler = new Handler(message -> {
             if (callback != null) {
                 if (message.obj instanceof Throwable) {
@@ -120,18 +120,18 @@ public class ApiController {
                 } else {
                     GatewayMap response = (GatewayMap) message.obj;
 
-                    boolean cardEnrolled = false;
+                    String summaryStatus = null;
                     String html = null;
 
                     if (response.containsKey("gatewayResponse.3DSecure.summaryStatus")) {
-                        cardEnrolled = ((String) response.get("gatewayResponse.3DSecure.summaryStatus")).equalsIgnoreCase("CARD_ENROLLED");
+                        summaryStatus = (String) response.get("gatewayResponse.3DSecure.summaryStatus");
                     }
 
                     if (response.containsKey("gatewayResponse.3DSecure.authenticationRedirect.simple.htmlBodyContent")) {
                         html = (String) response.get("gatewayResponse.3DSecure.authenticationRedirect.simple.htmlBodyContent");
                     }
                     
-                    callback.onSuccess(cardEnrolled, html);
+                    callback.onSuccess(summaryStatus, threeDSecureId, html);
                 }
             }
             return true;
@@ -140,7 +140,7 @@ public class ApiController {
         new Thread(() -> {
             Message m = handler.obtainMessage();
             try {
-                m.obj = executeCheck3DSEnrollment(sessionId, amount, currency, threeDSId);
+                m.obj = executeCheck3DSEnrollment(sessionId, amount, currency, threeDSecureId);
             } catch (Exception e) {
                 m.obj = e;
             }

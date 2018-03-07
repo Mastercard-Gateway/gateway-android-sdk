@@ -16,7 +16,6 @@
 
 package com.mastercard.gateway.android.sampleapp;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -24,18 +23,14 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.mastercard.gateway.android.sampleapp.databinding.ActivityConfirmBinding;
 import com.mastercard.gateway.android.sdk.Gateway;
-import com.mastercard.gateway.android.sdk.Gateway3DSCallback;
-import com.mastercard.gateway.android.sdk.Gateway3DSecureActivity;
-import com.mastercard.gateway.android.sdk.SummaryStatus;
+import com.mastercard.gateway.android.sdk.Gateway3DSecureCallback;
 
 import java.util.UUID;
 
 /**
  * Display a payment confirmation screen and send the final pay request
  */
-public class ConfirmActivity extends AppCompatActivity implements Gateway3DSCallback {
-
-    static final int REQUEST_3DS = 10000;
+public class ConfirmActivity extends AppCompatActivity implements Gateway3DSecureCallback {
 
     ActivityConfirmBinding binding;
     ApiController apiController = ApiController.getInstance();
@@ -46,13 +41,9 @@ public class ConfirmActivity extends AppCompatActivity implements Gateway3DSCall
     String amount;
     String currency;
 
-    Gateway gateway;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        gateway = new Gateway();
 
         apiController.setMerchantServerUrl(BuildConfig.MERCHANT_SERVER_URL);
         sessionId = getIntent().getStringExtra("SESSION_ID");
@@ -74,7 +65,7 @@ public class ConfirmActivity extends AppCompatActivity implements Gateway3DSCall
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (gateway.handle3DSecureResult(requestCode, resultCode, data, this)) {
+        if (Gateway.handle3DSecureResult(requestCode, resultCode, data, this)) {
             return;
         }
 
@@ -88,14 +79,14 @@ public class ConfirmActivity extends AppCompatActivity implements Gateway3DSCall
     }
 
     @Override
-    public void on3DSecureError(SummaryStatus summaryStatus) {
-        // if error, show error page
-        startResultActivity(false);
+    public void on3DSecureComplete(String summaryStatus, String threeDSecureId) {
+        doConfirm(threeDSecureId);
     }
 
     @Override
-    public void on3DSecureSuccess(String threeDSecureId, SummaryStatus summaryStatus) {
-        doConfirm(threeDSecureId);
+    public void on3DSecureError(String errorMessage) {
+        // if error, show error page
+        startResultActivity(false);
     }
 
     void doCheck3DSEnrollment() {
@@ -126,9 +117,12 @@ public class ConfirmActivity extends AppCompatActivity implements Gateway3DSCall
 
     class Check3DSecureEnrollmentCallback implements ApiController.Check3DSecureEnrollmentCallback {
         @Override
-        public void onSuccess(boolean cardEnrolled, String html) {
-            if (cardEnrolled) {
-                gateway.start3DSecureActivity(ConfirmActivity.this, "3DS", html);
+        public void onSuccess(String summaryStatus, String threeDSecureId, String html) {
+            if ("CARD_ENROLLED".equalsIgnoreCase(summaryStatus)) {
+                Gateway.start3DSecureActivity(ConfirmActivity.this, html);
+            } else if ("CARD_NOT_ENROLLED".equalsIgnoreCase(summaryStatus) || "AUTHENTICATION_NOT_AVAILABLE".equalsIgnoreCase(summaryStatus)) {
+                // for these 2 cases, you still provide the 3DSecureId with the pay operation
+                doConfirm(threeDSecureId);
             } else {
                 doConfirm();
             }

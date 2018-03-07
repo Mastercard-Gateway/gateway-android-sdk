@@ -18,15 +18,9 @@ package com.mastercard.gateway.android.sdk;
 
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.Fragment;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
 import com.google.gson.Gson;
 
@@ -230,44 +224,49 @@ public class Gateway {
     /**
      *
      * @param activity
-     * @param title
      * @param html
      */
-    public void start3DSecureActivity(Activity activity, String title, String html) {
-        Intent intent = new Intent(activity, Gateway3DSecureActivity.class);
-        intent.putExtra(Gateway3DSecureActivity.EXTRA_TITLE, title);
-        intent.putExtra(Gateway3DSecureActivity.EXTRA_HTML, html);
-        activity.startActivityForResult(intent, REQUEST_3D_SECURE);
+    public static void start3DSecureActivity(Activity activity, String html) {
+        start3DSecureActivity(activity, html, null);
     }
 
     /**
      *
-     * @param fragment
-     * @param title
+     * @param activity
      * @param html
+     * @param title
      */
-    public void start3DSecureActivity(Fragment fragment, String title, String html) {
-        start3DSecureActivity(fragment.getActivity(), title, html);
+    public static void start3DSecureActivity(Activity activity, String html, String title) {
+        Intent intent = new Intent(activity, Gateway3DSecureActivity.class);
+        intent.putExtra(Gateway3DSecureActivity.EXTRA_HTML, html); // required
+        intent.putExtra(Gateway3DSecureActivity.EXTRA_TITLE, title);
+
+        activity.startActivityForResult(intent, REQUEST_3D_SECURE);
     }
 
     /**
      *
      * @return
      */
-    public boolean handle3DSecureResult(int requestCode, int resultCode, Intent data, Gateway3DSCallback callback) {
+    public static boolean handle3DSecureResult(int requestCode, int resultCode, Intent data, Gateway3DSecureCallback callback) {
+        if (data == null || callback == null) {
+            return false;
+        }
+
         if (requestCode == REQUEST_3D_SECURE) {
             if (resultCode == Activity.RESULT_OK) {
+                // check for error
+                String errorMessage = data.getStringExtra(Gateway3DSecureActivity.EXTRA_ERROR);
+                if (errorMessage != null) {
+                    callback.on3DSecureError(errorMessage);
+                    return true;
+                }
+
                 // get the basic txn details
                 String threeDSecureId = data.getStringExtra(Gateway3DSecureActivity.EXTRA_3D_SECURE_ID);
-                SummaryStatus summaryStatus = (SummaryStatus) data.getSerializableExtra(Gateway3DSecureActivity.EXTRA_SUMMARY_STATUS);
+                String summaryStatus = data.getStringExtra(Gateway3DSecureActivity.EXTRA_SUMMARY_STATUS);
 
-                // check if there was an error during 3DS auth
-                boolean error = data.getBooleanExtra(Gateway3DSecureActivity.EXTRA_ERROR, true);
-                if (error) {
-                    callback.on3DSecureError(summaryStatus);
-                } else {
-                    callback.on3DSecureSuccess(threeDSecureId, summaryStatus);
-                }
+                callback.on3DSecureComplete(summaryStatus, threeDSecureId);
             } else {
                 callback.on3DSecureCancel();
             }
@@ -276,41 +275,6 @@ public class Gateway {
         }
 
         return false;
-    }
-
-    public AlertDialog display3dsPopup(Context context, String html, Gateway3DSCallback callback) {
-        WebView webView = new WebView(context);
-        webView.loadData(html, "text/html", "utf-8");
-        webView.setWebViewClient(new WebViewClient() {
-            // shouldOverrideUrlLoading makes this `WebView` the default handler for URLs inside the app, so that links are not kicked out to other apps.
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                // Use an external email program if the link begins with "mailto:".
-                if (url.startsWith("mailto:")) {
-                    // We use `ACTION_SENDTO` instead of `ACTION_SEND` so that only email programs are launched.
-                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
-
-                    // Parse the url and set it as the data for the `Intent`.
-                    emailIntent.setData(Uri.parse(url));
-
-                    // `FLAG_ACTIVITY_NEW_TASK` opens the email program in a new task instead as part of this application.
-                    emailIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-                    // Make it so.
-                    context.startActivity(emailIntent);
-                    return true;
-                } else {  // Load the URL in `webView`.
-                    webView.loadUrl(url);
-                    return true;
-                }
-            }
-        });
-
-        return new AlertDialog.Builder(context)
-                .setCancelable(false)
-                .setView(webView)
-                .setTitle("Hello 3DS")
-                .show();
     }
 
 
