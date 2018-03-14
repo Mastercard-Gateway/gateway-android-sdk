@@ -42,12 +42,12 @@ public class ResultActivity extends AppCompatActivity {
 
         binding.resultText.setText(getString(success ? R.string.result_you_payment_was_successful : R.string.result_error_processing_your_payment));
         binding.resultIcon.setImageDrawable(ContextCompat.getDrawable(this, success ? R.drawable.success : R.drawable.failed));
-        binding.continueBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                doContinue();
-            }
-        });
+        binding.continueBtn.setOnClickListener(view -> doContinue());
+    }
+
+    @Override
+    public void onBackPressed() {
+        doContinue();
     }
 
     void doContinue() {

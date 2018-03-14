@@ -17,6 +17,8 @@
 package com.mastercard.gateway.android.sdk;
 
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 
@@ -84,6 +86,7 @@ public class Gateway {
     static final int MIN_API_VERSION = 39;
     static final int CONNECTION_TIMEOUT = 15000;
     static final int READ_TIMEOUT = 60000;
+    static final int REQUEST_3D_SECURE = 14137;
     static final String USER_AGENT_PREFIX = "Gateway-Android-SDK";
     static final String INTERMEDIATE_CA = "-----BEGIN CERTIFICATE-----\n" +
             "MIIFAzCCA+ugAwIBAgIEUdNg7jANBgkqhkiG9w0BAQsFADCBvjELMAkGA1UEBhMC\n" +
@@ -216,6 +219,62 @@ public class Gateway {
         String url = getUpdateSessionUrl(sessionId, apiVersion);
         payload.put("apiOperation", "UPDATE_PAYER_DATA");
         return runGatewayRequest(url, Method.PUT, payload);
+    }
+
+    /**
+     *
+     * @param activity
+     * @param html
+     */
+    public static void start3DSecureActivity(Activity activity, String html) {
+        start3DSecureActivity(activity, html, null);
+    }
+
+    /**
+     *
+     * @param activity
+     * @param html
+     * @param title
+     */
+    public static void start3DSecureActivity(Activity activity, String html, String title) {
+        Intent intent = new Intent(activity, Gateway3DSecureActivity.class);
+        intent.putExtra(Gateway3DSecureActivity.EXTRA_HTML, html); // required
+        intent.putExtra(Gateway3DSecureActivity.EXTRA_TITLE, title);
+
+        activity.startActivityForResult(intent, REQUEST_3D_SECURE);
+    }
+
+    /**
+     *
+     * @return
+     */
+    public static boolean handle3DSecureResult(int requestCode, int resultCode, Intent data, Gateway3DSecureCallback callback) {
+        if (data == null || callback == null) {
+            return false;
+        }
+
+        if (requestCode == REQUEST_3D_SECURE) {
+            if (resultCode == Activity.RESULT_OK) {
+                // check for error
+                String errorMessage = data.getStringExtra(Gateway3DSecureActivity.EXTRA_ERROR);
+                if (errorMessage != null) {
+                    callback.on3DSecureError(errorMessage);
+                    return true;
+                }
+
+                // get the basic txn details
+                String threeDSecureId = data.getStringExtra(Gateway3DSecureActivity.EXTRA_3D_SECURE_ID);
+                String summaryStatus = data.getStringExtra(Gateway3DSecureActivity.EXTRA_SUMMARY_STATUS);
+
+                callback.on3DSecureComplete(summaryStatus, threeDSecureId);
+            } else {
+                callback.on3DSecureCancel();
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
 
