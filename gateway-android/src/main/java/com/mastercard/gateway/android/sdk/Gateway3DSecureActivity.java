@@ -17,7 +17,7 @@ import android.webkit.WebViewClient;
 public class Gateway3DSecureActivity extends AppCompatActivity {
 
     /**
-     * The HTML used to initialize the WebView. SHould be the HTML content returned from the Gateway
+     * The HTML used to initialize the WebView. Should be the HTML content returned from the Gateway
      * during the Check 3DS Enrollment call
      */
     public static final String EXTRA_HTML = "com.mastercard.gateway.android.HTML";
