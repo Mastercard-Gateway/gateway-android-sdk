@@ -10,10 +10,10 @@ Our Android SDK allows you to easily integrate payments into your Android app. B
 
 ## Installation
 
-This library is hosted in the jCenter repository. To import the Android SDK, include it as a dependency in your build.gradle file. Be sure to replace `{X.X.X}` with the version number in the shield above.
+This library is hosted in the jCenter repository. To import the Android SDK, include it as a dependency in your build.gradle file. Be sure to replace `X.X.X` with the version number in the shield above.
 
 ```groovy
-implementation 'com.mastercard.gateway:gateway-android:{X.X.X}'
+implementation 'com.mastercard.gateway:gateway-android:X.X.X'
 ```
 
 
