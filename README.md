@@ -45,7 +45,7 @@ GatewayMap request = new GatewayMap()
 gateway.updateSession(sessionId, apiVersion, request, callback);
 ```
 
-For more detailed information about the transaction lifecycle and **3-D Secure** support, consult the [Gateway Android SDK Wiki](https://github.com/Mastercard/gateway-android-sdk/wiki)
+Visit the [**Gateway Android SDK Wiki**](https://github.com/Mastercard/gateway-android-sdk/wiki) for more detailed information about the transaction lifecycle and 3-D Secure support.
 
 
 ## Rx-Enabled
