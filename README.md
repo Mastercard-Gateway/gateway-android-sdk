@@ -1,9 +1,11 @@
+#### \*\*DISCLAIMER: This SDK is currently in pilot phase. Pending a `1.X.X` release, the interface is subject to change. Please direct all support inquiries to your acquirer.
+
 # Gateway Android SDK
-[![Download](https://api.bintray.com/packages/mpgs/Android/gateway-android-sdk/images/download.svg)](https://bintray.com/mpgs/Android/gateway-android-sdk/_latestVersion) [![Build Status](https://travis-ci.org/Mastercard/gateway-android-sdk.svg?branch=master)](https://travis-ci.org/Mastercard/gateway-android-sdk)
+
+[![Download](https://api.bintray.com/packages/mpgs/Android/gateway-android-sdk/images/download.svg)](https://bintray.com/mpgs/Android/gateway-android-sdk/_latestVersion)
+[![Build Status](https://travis-ci.org/Mastercard/gateway-android-sdk.svg?branch=master)](https://travis-ci.org/Mastercard/gateway-android-sdk)
 
 Our Android SDK allows you to easily integrate payments into your Android app. By updating a checkout session directly with the Gateway, you avoid the risk of handling sensitive card details on your server. This sample app demonstrates the basics of installing and configuring the SDK to complete a simple payment.
-
-**\*\*DISCLAIMER: This SDK is currently in pilot phase. Pending a `1.X.X` release, the interface is subject to change. Please direct all support inquiries to your acquirer.**
 
 
 ## Installation
@@ -43,7 +45,7 @@ GatewayMap request = new GatewayMap()
 gateway.updateSession(sessionId, apiVersion, request, callback);
 ```
 
-For more information about the transaction lifecycle and **3-D Secure** support, consult the [Gateway Android SDK Wiki](https://github.com/Mastercard/gateway-android-sdk/wiki)
+For more detailed information about the transaction lifecycle and **3-D Secure** support, consult the [Gateway Android SDK Wiki](https://github.com/Mastercard/gateway-android-sdk/wiki)
 
 
 ## Rx-Enabled
