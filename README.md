@@ -7,6 +7,7 @@
 
 Our Android SDK allows you to easily integrate payments into your Android app. By updating a checkout session directly with the Gateway, you avoid the risk of handling sensitive card details on your server. This sample app demonstrates the basics of installing and configuring the SDK to complete a simple payment.
 
+For more information, visit the [**Gateway Android SDK Wiki**](https://github.com/Mastercard/gateway-android-sdk/wiki) to find details about the basic transaction lifecycle and 3-D Secure support.
 
 ## Installation
 
@@ -45,8 +46,6 @@ GatewayMap request = new GatewayMap()
 gateway.updateSession(sessionId, apiVersion, request, callback);
 ```
 
-Visit the [**Gateway Android SDK Wiki**](https://github.com/Mastercard/gateway-android-sdk/wiki) for more detailed information about the transaction lifecycle and 3-D Secure support.
-
 
 ## Rx-Enabled
 
@@ -56,6 +55,8 @@ You may optionally include the **[RxJava2]** library in your project and utilize
 Single<GatewayMap> single = gateway.updateSession(sessionId, apiVersion, request);
 ```
 
+
+---
 
 # Sample App
 
