@@ -14,7 +14,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 
-public class Gateway3DSecureActivity extends AppCompatActivity {
+public class Gateway3DSecureActivity extends AppCompatActivity implements Gateway3DSecureView {
 
     /**
      * The HTML used to initialize the WebView. Should be the HTML content returned from the Gateway
@@ -46,10 +46,10 @@ public class Gateway3DSecureActivity extends AppCompatActivity {
     public static final String EXTRA_ERROR = "com.mastercard.gateway.android.ERROR";
 
 
-    static final String REDIRECT_SCHEME = "gatewaysdk:";
-    static final String QUERY_3DSECURE_ID = "3DSecureId";
-    static final String QUERY_SUMMARY_STATUS = "summaryStatus";
+    Toolbar toolbar;
+    WebView webView;
 
+    Gateway3DSecurePresenter presenter = new Gateway3DSecurePresenter();
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
@@ -57,80 +57,110 @@ public class Gateway3DSecureActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_3dsecure);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setNavigationOnClickListener(view -> onBackPressed());
+        // init toolbar
+        toolbar = findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener(view -> cancel());
 
-        WebView webView = findViewById(R.id.webview);
+        // init web view
+        webView = findViewById(R.id.webview);
         webView.setWebChromeClient(new WebChromeClient());
         webView.getSettings().setDomStorageEnabled(true);
         webView.getSettings().setJavaScriptEnabled(true);
-        webView.setWebViewClient(new MyWebViewClient());
+        webView.setWebViewClient(buildWebViewClient());
 
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            String title = extras.getString(EXTRA_TITLE, getString(R.string.gateway_3d_secure_authentication));
-            toolbar.setTitle(title);
-
-            String html = extras.getString(EXTRA_HTML);
-            if (html == null) {
-                onBackPressed();
-            } else {
-                webView.loadData(html, "text/html", "utf-8");
-            }
-        } else {
-            onBackPressed();
-        }
+        presenter.attachView(this);
     }
 
-    void handle3DSecureResult(String url) {
-        String summaryStatus = null;
-        String threeDSecureId = null;
+    @Override
+    protected void onDestroy() {
+        presenter.detachView();
 
-        // parse response info from url redirect
-        try {
-            Uri uri = Uri.parse(url);
-            summaryStatus = uri.getQueryParameter(QUERY_SUMMARY_STATUS);
-            threeDSecureId = uri.getQueryParameter(QUERY_3DSECURE_ID);
-        } catch (Exception e) {
-            // unable to parse or find result data
+        super.onDestroy();
+    }
+
+    @Override
+    public String getDefaultTitle() {
+        return getString(R.string.gateway_3d_secure_authentication);
+    }
+
+    @Override
+    public String getExtraTitle() {
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            return extras.getString(EXTRA_TITLE);
         }
 
-        // check that we got the correct data back
-        String error = null;
-        if (summaryStatus == null) {
-            error = getString(R.string.gateway_error_missing_summary_status);
-        } else if (threeDSecureId == null) {
-            error = getString(R.string.gateway_error_missing_3d_secure_id);
+        return null;
+    }
+
+    @Override
+    public String getExtraHtml() {
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            return extras.getString(EXTRA_HTML);
         }
 
-        // build result data
-        Intent data = new Intent();
-        if (error != null) {
-            data.putExtra(EXTRA_ERROR, error);
-        } else {
-            data.putExtra(EXTRA_SUMMARY_STATUS, summaryStatus);
-            data.putExtra(EXTRA_3D_SECURE_ID, threeDSecureId);
-        }
+        return null;
+    }
 
-        setResult(Activity.RESULT_OK, data);
+    @Override
+    public void setToolbarTitle(String title) {
+        toolbar.setTitle(title);
+    }
+
+    @Override
+    public void setWebViewHtml(String html) {
+        webView.loadData(html, "text/html", "utf-8");
+    }
+
+    @Override
+    public void loadWebViewUrl(String url) {
+        webView.loadUrl(url);
+    }
+
+    @Override
+    public void intentToEmail(String url) {
+        Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+        emailIntent.setData(Uri.parse(url));
+        emailIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        startActivity(emailIntent);
+    }
+
+    @Override
+    public void error(int errorResId) {
+        Intent intent = new Intent();
+        intent.putExtra(EXTRA_ERROR, getString(errorResId));
+
+        complete(intent);
+    }
+
+    @Override
+    public void success(String summaryStatus, String threeDSecureId) {
+        Intent intent = new Intent();
+        intent.putExtra(EXTRA_SUMMARY_STATUS, summaryStatus);
+        intent.putExtra(EXTRA_3D_SECURE_ID, threeDSecureId);
+
+        complete(intent);
+    }
+
+    @Override
+    public void cancel() {
+        onBackPressed();
+    }
+
+    void complete(Intent intent) {
+        setResult(Activity.RESULT_OK, intent);
         finish();
     }
 
-    class MyWebViewClient extends WebViewClient {
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            if (url.startsWith(REDIRECT_SCHEME)) {
-                handle3DSecureResult(url);
-            } else if (url.startsWith("mailto:")) {
-                Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
-                emailIntent.setData(Uri.parse(url));
-                emailIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(emailIntent);
-            } else {
-                view.loadUrl(url);
+    WebViewClient buildWebViewClient() {
+        return new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                presenter.webViewUrlChanges(url);
+                return true;
             }
-
-            return true;
-        }
+        };
     }
 }

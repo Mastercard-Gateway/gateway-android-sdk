@@ -3,7 +3,7 @@
 
     <string name="main_simple_store">Simple Store</string>
     <string name="main_modern_green_lounge_chair">Modern Green Lounge Chair</string>
-    <string name="main_250">$250</string>
+    <string name="main_1">$1</string>
     <string name="main_check_out">Check out</string>
 
     <string name="pay_enter_payment_details">Enter payment details</string>
@@ -18,7 +18,7 @@
     <string name="confirm_please_confirm_the_following_payment_information">Please confirm the following\npayment information.</string>
     <string name="confirm_card_number">Card number</string>
     <string name="confirm_amount">Amount</string>
-    <string name="confirm_250_00">$250.00</string>
+    <string name="confirm_1_00">$1.00</string>
     <string name="confirm_and_pay">Confirm and Pay</string>
 
     <!-- Strings related to result screen -->

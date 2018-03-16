@@ -28,6 +28,12 @@ android {
         debug
         release
     }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
 }
 
 // define an 'optional' dependency
@@ -36,16 +42,26 @@ configurations {
     implementation.extendsFrom optional
 }
 
+ext {
+    supportLibraryVersion = '27.1.0'
+    gsonVersion = '2.8.2'
+    rxJavaVersion = '2.1.10'
+
+    jUnitVersion = '4.12'
+    robolectricVersion = '3.7.1'
+    mockitoVersion = '2.13.0'
+}
+
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.google.code.gson:gson:2.8.2'
-    optional 'com.android.support:appcompat-v7:27.1.0'
-    optional 'io.reactivex.rxjava2:rxjava:2.1.10'
-    compileOnly 'com.android.support:support-annotations:27.1.0'
+    implementation "com.android.support:appcompat-v7:$supportLibraryVersion"
+    implementation "com.google.code.gson:gson:$gsonVersion"
+    optional "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
+    compileOnly "com.android.support:support-annotations:$supportLibraryVersion"
 
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'org.robolectric:robolectric:3.5.1'
-    testImplementation 'org.mockito:mockito-core:2.13.0'
+    testImplementation "junit:junit:$jUnitVersion"
+    testImplementation "org.robolectric:robolectric:$robolectricVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
 }
 
 task androidJavadocs(type: Javadoc) {
