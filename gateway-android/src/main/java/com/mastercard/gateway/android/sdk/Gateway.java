@@ -222,31 +222,46 @@ public class Gateway {
     }
 
     /**
+     * Starts the {@link Gateway3DSecureActivity} for result, initializing it with the provided html
      *
-     * @param activity
-     * @param html
+     * @param activity The calling activity context
+     * @param html     The initial HTML to render in the web view
      */
     public static void start3DSecureActivity(Activity activity, String html) {
         start3DSecureActivity(activity, html, null);
     }
 
     /**
+     * Starts the {@link Gateway3DSecureActivity} for result, initializing it with the provided html
      *
-     * @param activity
-     * @param html
-     * @param title
+     * @param activity The calling activity context
+     * @param html     The initial HTML to render in the web view
+     * @param title    An optional title to render in the toolbar
      */
     public static void start3DSecureActivity(Activity activity, String html, String title) {
         Intent intent = new Intent(activity, Gateway3DSecureActivity.class);
         intent.putExtra(Gateway3DSecureActivity.EXTRA_HTML, html); // required
-        intent.putExtra(Gateway3DSecureActivity.EXTRA_TITLE, title);
+
+        if (title != null) {
+            intent.putExtra(Gateway3DSecureActivity.EXTRA_TITLE, title);
+        }
 
         activity.startActivityForResult(intent, REQUEST_3D_SECURE);
     }
 
     /**
+     * A convenience method helper for handling activity result messages returned from {@link Gateway3DSecureActivity}.
+     * This method should be called within the calling Activity's onActivityResult() lifecycle method.
+     * This helper only works if the 3-D Secure Activity was launched using the
+     * {@link Gateway#start3DSecureActivity(Activity, String, String)} method.
      *
-     * @return
+     * @param requestCode The request code returning from the activity result
+     * @param resultCode The result code returning from the activity result
+     * @param data The intent data returning from the activity result
+     * @param callback An implementation of {@link Gateway3DSecureCallback}
+     * @return True if handled, False if not
+     * @see Gateway#start3DSecureActivity(Activity, String)
+     * @see Gateway#start3DSecureActivity(Activity, String, String)
      */
     public static boolean handle3DSecureResult(int requestCode, int resultCode, Intent data, Gateway3DSecureCallback callback) {
         if (data == null || callback == null) {
