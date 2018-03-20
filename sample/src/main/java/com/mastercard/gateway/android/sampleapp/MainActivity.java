@@ -19,12 +19,14 @@ package com.mastercard.gateway.android.sampleapp;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.mastercard.gateway.android.sampleapp.databinding.ActivityMainBinding;
+import com.mastercard.gateway.android.sdk.Gateway;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -38,12 +40,17 @@ public class MainActivity extends AppCompatActivity {
         apiController.setMerchantServerUrl(BuildConfig.MERCHANT_SERVER_URL);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        binding.buyButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                buyClicked(view);
-            }
-        });
+        binding.buyButton.setOnClickListener(this::buyClicked);
+
+        Gateway gateway = new Gateway();
+        gateway.setMerchantId(BuildConfig.GATEWAY_MERCHANT_ID);
+
+        try {
+            Gateway.Region region = Gateway.Region.valueOf(BuildConfig.GATEWAY_REGION);
+            gateway.setRegion(region);
+        } catch (Exception e) {
+            Log.e(PayActivity.class.getSimpleName(), "Invalid Gateway region value provided", e);
+        }
     }
 
     void buyClicked(View v) {

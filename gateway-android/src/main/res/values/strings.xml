@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gateway_3d_secure_authentication">3-D Secure Authentication</string>
+    <string name="gateway_error_missing_summary_status">Missing summary status</string>
+    <string name="gateway_error_missing_3d_secure_id">Missing 3-D Secure Id</string>
+</resources>

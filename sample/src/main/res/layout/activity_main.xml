@@ -40,7 +40,7 @@
             android:textSize="@dimen/material_typography_regular_headline_text_size"
             android:fontFamily="sans-serif-light"
             android:textColor="@color/coral"
-            android:text="@string/main_250"/>
+            android:text="@string/main_1"/>
 
         <Button
             android:id="@+id/buyButton"

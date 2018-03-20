@@ -2,5 +2,6 @@
     package="com.mastercard.gateway.android.sdk">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
 </manifest>
