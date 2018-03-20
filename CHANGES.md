@@ -1,5 +1,12 @@
 # CHANGES
 
+### 0.10.0
+* Introduced 3-D Secure support with a custom Activity
+
+### 0.9.0
+* Migrated to map-based data model
+* Consuming a dynamic API version within each SDK method
+
 ### 0.8.0
 * Removed requirement for custom certificate pinning, in favor of pining internally
 * Added parameter for providing a region
