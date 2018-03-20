@@ -114,15 +114,15 @@ public class Gateway3DSecureActivity extends AppCompatActivity implements Gatewa
     }
 
     @Override
-    public void loadWebViewUrl(String url) {
-        webView.loadUrl(url);
+    public void loadWebViewUrl(Uri uri) {
+        webView.loadUrl(uri.toString());
     }
 
     @Override
-    public void intentToEmail(String url) {
+    public void intentToEmail(Uri uri) {
         Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
-        emailIntent.setData(Uri.parse(url));
         emailIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        emailIntent.setData(uri);
 
         startActivity(emailIntent);
     }
@@ -158,7 +158,7 @@ public class Gateway3DSecureActivity extends AppCompatActivity implements Gatewa
         return new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                presenter.webViewUrlChanges(url);
+                presenter.webViewUrlChanges(Uri.parse(url));
                 return true;
             }
         };

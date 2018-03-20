@@ -4,9 +4,9 @@ import android.net.Uri;
 
 class Gateway3DSecurePresenter {
 
-    static final String REDIRECT_SCHEME = "gatewaysdk:";
-    static final String QUERY_3DSECURE_ID = "3DSecureId";
+    static final String REDIRECT_SCHEME = "gatewaysdk";
     static final String QUERY_SUMMARY_STATUS = "summaryStatus";
+    static final String QUERY_3DSECURE_ID = "3DSecureId";
 
     Gateway3DSecureView view;
 
@@ -32,28 +32,20 @@ class Gateway3DSecurePresenter {
         view = null;
     }
 
-    void webViewUrlChanges(String url) {
-        if (url.startsWith(REDIRECT_SCHEME)) {
-            handle3DSecureResult(url);
-        } else if (url.startsWith("mailto:")) {
-            view.intentToEmail(url);
+    void webViewUrlChanges(Uri uri) {
+        String scheme = uri.getScheme();
+        if (REDIRECT_SCHEME.equalsIgnoreCase(scheme)) {
+            handle3DSecureResult(uri);
+        } else if ("mailto".equalsIgnoreCase(scheme)) {
+            view.intentToEmail(uri);
         } else {
-            view.loadWebViewUrl(url);
+            view.loadWebViewUrl(uri);
         }
     }
 
-    void handle3DSecureResult(String url) {
-        String summaryStatus = null;
-        String threeDSecureId = null;
-
-        // parse response info from url redirect
-        try {
-            Uri uri = Uri.parse(url);
-            summaryStatus = uri.getQueryParameter(QUERY_SUMMARY_STATUS);
-            threeDSecureId = uri.getQueryParameter(QUERY_3DSECURE_ID);
-        } catch (Exception e) {
-            // unable to parse or find result data
-        }
+    void handle3DSecureResult(Uri uri) {
+        String summaryStatus = uri.getQueryParameter(QUERY_SUMMARY_STATUS);
+        String threeDSecureId = uri.getQueryParameter(QUERY_3DSECURE_ID);
 
         // check that we got the correct data back
         if (summaryStatus == null) {

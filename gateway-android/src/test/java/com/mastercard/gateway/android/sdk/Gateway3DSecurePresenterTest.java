@@ -1,9 +1,10 @@
 package com.mastercard.gateway.android.sdk;
 
 
+import android.net.Uri;
+
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -91,34 +92,75 @@ public class Gateway3DSecurePresenterTest {
 
     @Test
     public void testUrlChangeCallsIntentToEmailIfMailtoLink() throws Exception {
-        String url = "mailto:someemail@email.com";
+        Uri mockUri = mock(Uri.class);
+        doReturn("mailto").when(mockUri).getScheme();
         presenter.view = mockView;
 
-        presenter.webViewUrlChanges(url);
+        presenter.webViewUrlChanges(mockUri);
 
-        verify(mockView).intentToEmail(url);
+        verify(mockView).intentToEmail(mockUri);
     }
 
     @Test
     public void testUrlChangeCallsLoadWebViewOnStandardRedirect() throws Exception {
-        String url = "https://google.com";
+        Uri mockUri = mock(Uri.class);
+        doReturn("https").when(mockUri).getScheme();
         presenter.view = mockView;
 
-        presenter.webViewUrlChanges(url);
+        presenter.webViewUrlChanges(mockUri);
 
-        verify(mockView).loadWebViewUrl(url);
+        verify(mockView).loadWebViewUrl(mockUri);
     }
 
     @Test
-    @Ignore // issue with testing string.startsWith method
     public void testUrlChangeHandles3DSResultOnMatchingScheme() throws Exception {
-        String url = "gatewaysdk://3dsecure?summaryStatus=APPROVED&3DSecureId=asdasd";
+        Uri mockUri = mock(Uri.class);
+        doReturn(Gateway3DSecurePresenter.REDIRECT_SCHEME).when(mockUri).getScheme();
         presenter.view = mockView;
 
         Gateway3DSecurePresenter presenterSpy = spy(presenter);
 
-        presenter.webViewUrlChanges(url);
+        presenterSpy.webViewUrlChanges(mockUri);
 
-        verify(presenterSpy).handle3DSecureResult(url);
+        verify(presenterSpy).handle3DSecureResult(mockUri);
+    }
+
+    @Test
+    public void testHandle3DSecureResultCallsErrorOnMissingSummaryStatus() throws Exception {
+        Uri mockUri = mock(Uri.class);
+        doReturn(null).when(mockUri).getQueryParameter(Gateway3DSecurePresenter.QUERY_SUMMARY_STATUS);
+        doReturn("some3DSecureId").when(mockUri).getQueryParameter(Gateway3DSecurePresenter.QUERY_3DSECURE_ID);
+        presenter.view = mockView;
+
+        presenter.handle3DSecureResult(mockUri);
+
+        verify(mockView).error(R.string.gateway_error_missing_summary_status);
+    }
+
+    @Test
+    public void testHandle3DSecureResultCallsErrorOnMissing3DSecureId() throws Exception {
+        Uri mockUri = mock(Uri.class);
+        doReturn("someSummaryStatus").when(mockUri).getQueryParameter(Gateway3DSecurePresenter.QUERY_SUMMARY_STATUS);
+        doReturn(null).when(mockUri).getQueryParameter(Gateway3DSecurePresenter.QUERY_3DSECURE_ID);
+        presenter.view = mockView;
+
+        presenter.handle3DSecureResult(mockUri);
+
+        verify(mockView).error(R.string.gateway_error_missing_3d_secure_id);
+    }
+
+    @Test
+    public void testHandle3DSecureResultWorksAsIntended() throws Exception {
+        String expectedSummaryStatus = "someSummaryStatus";
+        String expected3DSecureId = "some3DSecureId";
+
+        Uri mockUri = mock(Uri.class);
+        doReturn(expectedSummaryStatus).when(mockUri).getQueryParameter(Gateway3DSecurePresenter.QUERY_SUMMARY_STATUS);
+        doReturn(expected3DSecureId).when(mockUri).getQueryParameter(Gateway3DSecurePresenter.QUERY_3DSECURE_ID);
+        presenter.view = mockView;
+
+        presenter.handle3DSecureResult(mockUri);
+
+        verify(mockView).success(expectedSummaryStatus, expected3DSecureId);
     }
 }

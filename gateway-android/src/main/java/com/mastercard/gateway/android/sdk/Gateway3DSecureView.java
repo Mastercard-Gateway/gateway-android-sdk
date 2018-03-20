@@ -1,6 +1,8 @@
 package com.mastercard.gateway.android.sdk;
 
 
+import android.net.Uri;
+
 interface Gateway3DSecureView {
 
     String getDefaultTitle();
@@ -8,8 +10,8 @@ interface Gateway3DSecureView {
     String getExtraHtml();
     void setToolbarTitle(String title);
     void setWebViewHtml(String html);
-    void loadWebViewUrl(String url);
-    void intentToEmail(String url);
+    void loadWebViewUrl(Uri uri);
+    void intentToEmail(Uri uri);
     void error(int errorResId);
     void success(String summaryStatus, String threeDSecureId);
     void cancel();
