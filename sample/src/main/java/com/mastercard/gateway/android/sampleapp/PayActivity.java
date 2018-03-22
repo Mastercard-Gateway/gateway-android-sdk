@@ -28,9 +28,24 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.wallet.AutoResolveHelper;
+import com.google.android.gms.wallet.CardRequirements;
+import com.google.android.gms.wallet.IsReadyToPayRequest;
+import com.google.android.gms.wallet.PaymentData;
+import com.google.android.gms.wallet.PaymentDataRequest;
+import com.google.android.gms.wallet.PaymentMethodTokenizationParameters;
+import com.google.android.gms.wallet.PaymentsClient;
+import com.google.android.gms.wallet.TransactionInfo;
+import com.google.android.gms.wallet.Wallet;
+import com.google.android.gms.wallet.WalletConstants;
 import com.mastercard.gateway.android.sampleapp.databinding.ActivityPayBinding;
 import com.mastercard.gateway.android.sdk.Gateway;
 import com.mastercard.gateway.android.sdk.GatewayCallback;
+import com.mastercard.gateway.android.sdk.GatewayGooglePayCallback;
 import com.mastercard.gateway.android.sdk.GatewayMap;
 
 import java.util.Arrays;
@@ -45,6 +60,8 @@ public class PayActivity extends AppCompatActivity {
     String nameOnCard, cardNumber, expiryMM, expiryYY, cvv, sessionId, apiVersion;
     Gateway gateway;
     TextChangeListener textChangeListener = new TextChangeListener();
+    PaymentsClient mPaymentsClient;
+    GooglePayCallback googlePayCallback = new GooglePayCallback();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +98,55 @@ public class PayActivity extends AppCompatActivity {
 
         binding.submitButton.setEnabled(false);
         binding.submitButton.setOnClickListener(this::buyClicked);
+
+        // init Google Pay client
+        mPaymentsClient = Wallet.getPaymentsClient(this, new Wallet.WalletOptions.Builder()
+                .setEnvironment(WalletConstants.ENVIRONMENT_TEST)
+                .build());
+
+        // init google pay button
+        binding.googlePayButton.setOnClickListener(view -> {
+            PaymentDataRequest request = createPaymentDataRequest();
+            if (request != null) {
+                // use the Gateway convenience handler for launching the Google Pay flow
+                Gateway.requestGooglePayData(mPaymentsClient, request, PayActivity.this);
+            }
+        });
+
+        // check if Google Pay is available
+        isReadyToPay();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // handle the Google Pay lifecycle
+        if (Gateway.handleGooglePayResult(requestCode, resultCode, data, googlePayCallback)) {
+            return;
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void isReadyToPay() {
+        IsReadyToPayRequest request = IsReadyToPayRequest.newBuilder()
+                .addAllowedPaymentMethod(WalletConstants.PAYMENT_METHOD_CARD)
+                .addAllowedPaymentMethod(WalletConstants.PAYMENT_METHOD_TOKENIZED_CARD)
+                .build();
+
+        Task<Boolean> task = mPaymentsClient.isReadyToPay(request);
+        task.addOnCompleteListener(task1 -> {
+            try {
+                boolean result = task1.getResult(ApiException.class);
+                if (result) {
+                    // Show Google as payment option.
+                    binding.googlePayButton.setVisibility(View.VISIBLE);
+                } else {
+                    // Hide Google as payment option.
+                    binding.googlePayButton.setVisibility(View.GONE);
+                }
+            } catch (ApiException exception) {
+            }
+        });
     }
 
     void buyClicked(View submitButton) {
@@ -123,6 +189,33 @@ public class PayActivity extends AppCompatActivity {
         }
     }
 
+    PaymentDataRequest createPaymentDataRequest() {
+        PaymentDataRequest.Builder request = PaymentDataRequest.newBuilder()
+                .setTransactionInfo(TransactionInfo.newBuilder()
+                        .setTotalPriceStatus(WalletConstants.TOTAL_PRICE_STATUS_FINAL)
+                        .setTotalPrice("1.00")
+                        .setCurrencyCode("USD")
+                        .build())
+                .addAllowedPaymentMethod(WalletConstants.PAYMENT_METHOD_CARD)
+                .addAllowedPaymentMethod(WalletConstants.PAYMENT_METHOD_TOKENIZED_CARD)
+                .setCardRequirements(CardRequirements.newBuilder()
+                        .addAllowedCardNetworks(Arrays.asList(
+                                WalletConstants.CARD_NETWORK_AMEX,
+                                WalletConstants.CARD_NETWORK_DISCOVER,
+                                WalletConstants.CARD_NETWORK_VISA,
+                                WalletConstants.CARD_NETWORK_MASTERCARD))
+                        .build());
+
+        PaymentMethodTokenizationParameters params = PaymentMethodTokenizationParameters.newBuilder()
+                .setPaymentMethodTokenizationType(WalletConstants.PAYMENT_METHOD_TOKENIZATION_TYPE_PAYMENT_GATEWAY)
+                .addParameter("gateway", "example")
+                .addParameter("gatewayMerchantId", "exampleGatewayMerchantId")
+                .build();
+
+        request.setPaymentMethodTokenizationParameters(params);
+        return request.build();
+    }
+
 
     class UpdateSessionCallback implements GatewayCallback {
 
@@ -158,6 +251,23 @@ public class PayActivity extends AppCompatActivity {
         @Override
         public void afterTextChanged(Editable editable) {
 
+        }
+    }
+
+    class GooglePayCallback implements GatewayGooglePayCallback {
+        @Override
+        public void onReceivedPaymentData(PaymentData paymentData) {
+            Log.d(GooglePayCallback.class.getSimpleName(), "ReceivedPaymentData");
+        }
+
+        @Override
+        public void onGooglePayCancelled() {
+            Log.d(GooglePayCallback.class.getSimpleName(), "Cancelled");
+        }
+
+        @Override
+        public void onGooglePayError(Status status) {
+            Log.d(GooglePayCallback.class.getSimpleName(), "Error");
         }
     }
 }

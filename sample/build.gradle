@@ -45,6 +45,7 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:27.1.0'
     implementation 'com.android.support:design:27.1.0'
     implementation 'com.android.support:support-v4:27.1.0'
+    implementation 'com.google.android.gms:play-services-wallet:11.8.0'
     implementation 'blue.aodev:material-values:1.1.1'
     implementation project(':gateway-android')
     // Espresso testing

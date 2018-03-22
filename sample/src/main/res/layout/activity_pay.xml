@@ -5,23 +5,23 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="@dimen/material_baseline_grid_2x"
-        android:orientation="vertical"
         android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="@dimen/material_baseline_grid_2x"
         tools:context=".PayActivity">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textSize="@dimen/material_typography_regular_title_text_size"
+            android:text="@string/pay_enter_payment_details"
             android:textColor="@color/material_color_black"
-            android:text="@string/pay_enter_payment_details"/>
+            android:textSize="@dimen/material_typography_regular_title_text_size"
+            android:textStyle="bold" />
 
         <android.support.v4.widget.Space
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"/>
+            android:layout_weight="1" />
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
@@ -32,8 +32,8 @@
                 android:id="@+id/nameOnCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/pay_name_on_card"
-                android:gravity="center_horizontal"/>
+                android:gravity="center_horizontal"
+                android:hint="@string/pay_name_on_card" />
 
         </android.support.design.widget.TextInputLayout>
 
@@ -46,9 +46,9 @@
                 android:id="@+id/cardnumber"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
                 android:hint="@string/pay_card_number"
-                android:inputType="number"
-                android:gravity="center_horizontal"/>
+                android:inputType="number" />
 
         </android.support.design.widget.TextInputLayout>
 
@@ -61,9 +61,9 @@
                 android:id="@+id/expiry_month"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
                 android:hint="@string/pay_expiry_month"
-                android:inputType="number"
-                android:gravity="center_horizontal"/>
+                android:inputType="number" />
 
         </android.support.design.widget.TextInputLayout>
 
@@ -76,9 +76,9 @@
                 android:id="@+id/expiry_year"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
                 android:hint="@string/pay_expiry_year"
-                android:inputType="number"
-                android:gravity="center_horizontal"/>
+                android:inputType="number" />
 
         </android.support.design.widget.TextInputLayout>
 
@@ -90,22 +90,31 @@
                 android:id="@+id/cvv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
                 android:hint="@string/pay_cvv"
-                android:inputType="number"
-                android:gravity="center_horizontal"/>
+                android:inputType="number" />
 
         </android.support.design.widget.TextInputLayout>
 
         <android.support.v4.widget.Space
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"/>
+            android:layout_weight="1" />
 
         <Button
-            android:id="@+id/submitButton"
+            android:id="@+id/submit_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="@dimen/material_baseline_grid_2x"
             android:text="@string/pay_continue" />
+
+        <include
+            android:id="@+id/google_pay_button"
+            layout="@layout/googlepay_button"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
     </LinearLayout>
 
