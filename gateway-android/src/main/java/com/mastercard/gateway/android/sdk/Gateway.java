@@ -22,6 +22,11 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.wallet.AutoResolveHelper;
+import com.google.android.gms.wallet.PaymentData;
+import com.google.android.gms.wallet.PaymentDataRequest;
+import com.google.android.gms.wallet.PaymentsClient;
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
@@ -86,7 +91,8 @@ public class Gateway {
     static final int MIN_API_VERSION = 39;
     static final int CONNECTION_TIMEOUT = 15000;
     static final int READ_TIMEOUT = 60000;
-    static final int REQUEST_3D_SECURE = 14137;
+    static final int REQUEST_3D_SECURE = 10000;
+    static final int REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA = 10001;
     static final String USER_AGENT_PREFIX = "Gateway-Android-SDK";
     static final String INTERMEDIATE_CA = "-----BEGIN CERTIFICATE-----\n" +
             "MIIFAzCCA+ugAwIBAgIEUdNg7jANBgkqhkiG9w0BAQsFADCBvjELMAkGA1UEBhMC\n" +
@@ -284,6 +290,47 @@ public class Gateway {
                 callback.on3DSecureComplete(summaryStatus, threeDSecureId);
             } else {
                 callback.on3DSecureCancel();
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+
+    /**
+     *
+     * @param paymentsClient
+     * @param request
+     * @param activity
+     */
+    public static void requestGooglePayData(PaymentsClient paymentsClient, PaymentDataRequest request, Activity activity) {
+        AutoResolveHelper.resolveTask(paymentsClient.loadPaymentData(request), activity, REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA);
+    }
+
+    /**
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     * @param callback
+     * @return
+     */
+    public static boolean handleGooglePayResult(int requestCode, int resultCode, Intent data, GatewayGooglePayCallback callback) {
+        if (data == null || callback == null) {
+            return false;
+        }
+
+        if (requestCode == REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA) {
+            if (resultCode == Activity.RESULT_OK) {
+                PaymentData paymentData = PaymentData.getFromIntent(data);
+                callback.onReceivedPaymentData(paymentData);
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                callback.onGooglePayCancelled();
+            } else if (resultCode == AutoResolveHelper.RESULT_ERROR) {
+                Status status = AutoResolveHelper.getStatusFromIntent(data);
+                callback.onGooglePayError(status);
             }
 
             return true;

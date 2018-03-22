@@ -46,6 +46,7 @@ ext {
     supportLibraryVersion = '27.1.0'
     gsonVersion = '2.8.2'
     rxJavaVersion = '2.1.10'
+    playServicesWalletVersion = '11.8.0'
 
     jUnitVersion = '4.12'
     robolectricVersion = '3.7.1'
@@ -54,9 +55,18 @@ ext {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    // required
     implementation "com.android.support:appcompat-v7:$supportLibraryVersion"
     implementation "com.google.code.gson:gson:$gsonVersion"
+
+    // optional for rx java
     optional "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
+
+    // optional for google pay
+    optional "com.android.support:support-v4:$supportLibraryVersion"
+    optional "com.google.android.gms:play-services-wallet:$playServicesWalletVersion"
+
     compileOnly "com.android.support:support-annotations:$supportLibraryVersion"
 
     testImplementation "junit:junit:$jUnitVersion"
