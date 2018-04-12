@@ -76,7 +76,7 @@ gatewayMerchantId=
 gatewayRegion=
 
 # TEST Merchant Server URL (test server app deployed to Heroku)
-# For more information, see: https://github.com/Mastercard/gateway-test-merchant-server
+# For more information, see: https://github.com/Mastercard-Gateway/gateway-test-merchant-server
 # ex: https://{your-app-name}.herokuapp.com
 merchantServerUrl=
 ```
