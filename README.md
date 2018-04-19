@@ -9,6 +9,14 @@ Our Android SDK allows you to easily integrate payments into your Android app. B
 
 For more information, visit the [**Gateway Android SDK Wiki**](https://github.com/Mastercard-Gateway/gateway-android-sdk/wiki) to find details about the basic transaction lifecycle and 3-D Secure support.
 
+
+## Scope
+
+The primary responsibility of this SDK is to eliminate the need for card details to pass thru your merchant service while collecting card information from a mobile device. The Gateway provides this ability by exposing an API call to update a session with card information. This is an "unathenticated" call in the sense that you are not required to provide your private API credentials. It is important to retain your private API password in a secure location and NOT distribute it within your mobile app.
+
+Once you have updated a session with card information from the app, you may then perform a variety of operations using this session from your secure server. Some of these operations include creating an authorization or payment, creating a card token to save card information for a customer, etc. Refer to your gateway integration guide for more details on how a Session can be used in your application.
+
+
 ## Installation
 
 This library is hosted in the jCenter repository. To import the Android SDK, include it as a dependency in your build.gradle file. Be sure to replace `X.X.X` with the version number in the shield above.
