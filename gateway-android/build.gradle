@@ -43,10 +43,10 @@ configurations {
 }
 
 ext {
-    supportLibraryVersion = '27.1.0'
+    supportLibraryVersion = '27.1.1'
     gsonVersion = '2.8.2'
     rxJavaVersion = '2.1.10'
-    playServicesWalletVersion = '11.8.0'
+    playServicesWalletVersion = '15.0.0'
 
     jUnitVersion = '4.12'
     robolectricVersion = '3.7.1'

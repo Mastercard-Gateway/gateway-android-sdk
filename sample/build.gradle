@@ -39,21 +39,34 @@ android {
     }
 }
 
+ext {
+    supportLibraryVersion = '27.1.1'
+    gsonVersion = '2.8.2'
+    playServicesWalletVersion = '15.0.0'
+    materialValuesVersion = '1.1.1'
+
+    jUnitVersion = '4.12'
+    espressoVersion = '2.2.2'
+    testRunnerVersion = '0.5'
+}
+
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.google.code.gson:gson:2.8.2'
-    implementation 'com.android.support:appcompat-v7:27.1.0'
-    implementation 'com.android.support:design:27.1.0'
-    implementation 'com.android.support:support-v4:27.1.0'
-    implementation 'com.google.android.gms:play-services-wallet:11.8.0'
-    implementation 'blue.aodev:material-values:1.1.1'
+    implementation "com.google.code.gson:gson:$gsonVersion"
+    implementation "com.android.support:appcompat-v7:$supportLibraryVersion"
+    implementation "com.android.support:design:$supportLibraryVersion"
+    implementation "com.android.support:support-v4:$supportLibraryVersion"
+    implementation "com.google.android.gms:play-services-wallet:$playServicesWalletVersion"
+    implementation "blue.aodev:material-values:$materialValuesVersion"
+
     implementation project(':gateway-android')
+
     // Espresso testing
-    androidTestImplementation 'junit:junit:4.12'
-    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2') {
+    androidTestImplementation "junit:junit:$jUnitVersion"
+    androidTestImplementation("com.android.support.test.espresso:espresso-core:$espressoVersion") {
         exclude module: 'support-annotations'
     }
-    androidTestImplementation('com.android.support.test:runner:0.5') {
+    androidTestImplementation("com.android.support.test:runner:$testRunnerVersion") {
         exclude module: 'support-annotations'
     }
 }

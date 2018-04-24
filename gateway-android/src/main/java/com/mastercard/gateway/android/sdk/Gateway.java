@@ -66,10 +66,11 @@ public class Gateway {
      * The available gateway regions
      */
     public enum Region {
-        ASIA_PACIFIC("ap"),
-        EUROPE("eu"),
-        NORTH_AMERICA("na"),
-        MTF("test");
+        ASIA_PACIFIC("ap-"),
+        EUROPE("eu-"),
+        NORTH_AMERICA("na-"),
+        MTF("test-"),
+        QA01("qa01.");
 
         String prefix;
 
@@ -349,7 +350,7 @@ public class Gateway {
             throw new IllegalStateException("You must initialize the the Gateway instance with a Region before use");
         }
 
-        return "https://" + region.getPrefix() + "-gateway.mastercard.com/api/rest/version/" + apiVersion;
+        return "https://" + region.getPrefix() + "gateway.mastercard.com/api/rest/version/" + apiVersion;
     }
 
     String getUpdateSessionUrl(String sessionId, String apiVersion) {

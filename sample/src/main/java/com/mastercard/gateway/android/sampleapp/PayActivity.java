@@ -30,6 +30,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.identity.intents.model.UserAddress;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wallet.AutoResolveHelper;
@@ -171,6 +172,12 @@ public class PayActivity extends AppCompatActivity {
         gateway.updateSession(sessionId, apiVersion, request, new UpdateSessionCallback());
     }
 
+    GatewayMap buildUpdateSessionRequest(PaymentData googlePayData) {
+        // build the gateway request
+        return new GatewayMap()
+                .set("sourceOfFunds.provided.card.devicePayment.paymentToken", googlePayData.getPaymentMethodToken().getToken());
+    }
+
     String maskedCardNumber() {
         int maskLen = cardNumber.length() - 4;
         char[] mask = new char[maskLen];
@@ -208,8 +215,8 @@ public class PayActivity extends AppCompatActivity {
 
         PaymentMethodTokenizationParameters params = PaymentMethodTokenizationParameters.newBuilder()
                 .setPaymentMethodTokenizationType(WalletConstants.PAYMENT_METHOD_TOKENIZATION_TYPE_PAYMENT_GATEWAY)
-                .addParameter("gateway", "example")
-                .addParameter("gatewayMerchantId", "exampleGatewayMerchantId")
+                .addParameter("gateway", "mpgs")
+                .addParameter("gatewayMerchantId", BuildConfig.GATEWAY_MERCHANT_ID)
                 .build();
 
         request.setPaymentMethodTokenizationParameters(params);
@@ -258,11 +265,17 @@ public class PayActivity extends AppCompatActivity {
         @Override
         public void onReceivedPaymentData(PaymentData paymentData) {
             Log.d(GooglePayCallback.class.getSimpleName(), "ReceivedPaymentData");
+
+            GatewayMap request = buildUpdateSessionRequest(paymentData);
+
+            gateway.updateSession(sessionId, apiVersion, request, new UpdateSessionCallback());
         }
 
         @Override
         public void onGooglePayCancelled() {
             Log.d(GooglePayCallback.class.getSimpleName(), "Cancelled");
+
+
         }
 
         @Override
