@@ -319,7 +319,7 @@ public class Gateway {
      * @return
      */
     public static boolean handleGooglePayResult(int requestCode, int resultCode, Intent data, GatewayGooglePayCallback callback) {
-        if (data == null || callback == null) {
+        if (callback == null) {
             return false;
         }
 

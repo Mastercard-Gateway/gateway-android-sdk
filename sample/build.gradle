@@ -41,6 +41,7 @@ android {
 
 ext {
     supportLibraryVersion = '27.1.1'
+    constraintLayoutVersion = '1.1.0'
     gsonVersion = '2.8.2'
     playServicesWalletVersion = '15.0.0'
     materialValuesVersion = '1.1.1'
@@ -56,6 +57,7 @@ dependencies {
     implementation "com.android.support:appcompat-v7:$supportLibraryVersion"
     implementation "com.android.support:design:$supportLibraryVersion"
     implementation "com.android.support:support-v4:$supportLibraryVersion"
+    implementation "com.android.support.constraint:constraint-layout:$constraintLayoutVersion"
     implementation "com.google.android.gms:play-services-wallet:$playServicesWalletVersion"
     implementation "blue.aodev:material-values:$materialValuesVersion"
 

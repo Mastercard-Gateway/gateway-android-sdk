@@ -58,7 +58,8 @@ public class PayActivity extends AppCompatActivity {
     ActivityPayBinding binding;
 
     SharedPreferences prefs = null;
-    String nameOnCard, cardNumber, expiryMM, expiryYY, cvv, sessionId, apiVersion;
+    String sessionId, apiVersion, maskedCardNumber;
+    Boolean isGooglePay = false;
     Gateway gateway;
     TextChangeListener textChangeListener = new TextChangeListener();
     PaymentsClient mPaymentsClient;
@@ -151,11 +152,16 @@ public class PayActivity extends AppCompatActivity {
     }
 
     void buyClicked(View submitButton) {
-        nameOnCard = binding.nameOnCard.getText().toString();
-        cardNumber = binding.cardnumber.getText().toString();
-        expiryMM = binding.expiryMonth.getText().toString();
-        expiryYY = binding.expiryYear.getText().toString();
-        cvv = binding.cvv.getText().toString();
+        String nameOnCard = binding.nameOnCard.getText().toString();
+        String cardNumber = binding.cardnumber.getText().toString();
+        String expiryMM = binding.expiryMonth.getText().toString();
+        String expiryYY = binding.expiryYear.getText().toString();
+        String cvv = binding.cvv.getText().toString();
+
+        isGooglePay = false;
+
+        // compute masked card number
+        maskedCardNumber = maskCardNumber(cardNumber);
 
         Log.i(getClass().getSimpleName(), "Making purchase");
 
@@ -178,11 +184,11 @@ public class PayActivity extends AppCompatActivity {
                 .set("sourceOfFunds.provided.card.devicePayment.paymentToken", googlePayData.getPaymentMethodToken().getToken());
     }
 
-    String maskedCardNumber() {
-        int maskLen = cardNumber.length() - 4;
+    String maskCardNumber(String number) {
+        int maskLen = number.length() - 4;
         char[] mask = new char[maskLen];
         Arrays.fill(mask, '*');
-        return new String(mask) + cardNumber.substring(maskLen);
+        return new String(mask) + number.substring(maskLen);
     }
 
     void enableSubmitButton() {
@@ -231,8 +237,9 @@ public class PayActivity extends AppCompatActivity {
             Log.i(PayActivity.class.getSimpleName(), "Successful pay");
 
             Intent intent = new Intent(PayActivity.this, ConfirmActivity.class);
-            intent.putExtra("PAN_MASK", maskedCardNumber());
+            intent.putExtra("PAN_MASK", maskedCardNumber);
             intent.putExtra("SESSION_ID", sessionId);
+            intent.putExtra("GOOGLE_PAY", isGooglePay);
             startActivity(intent);
         }
 
@@ -266,8 +273,10 @@ public class PayActivity extends AppCompatActivity {
         public void onReceivedPaymentData(PaymentData paymentData) {
             Log.d(GooglePayCallback.class.getSimpleName(), "ReceivedPaymentData");
 
-            GatewayMap request = buildUpdateSessionRequest(paymentData);
+            isGooglePay = true;
+            maskedCardNumber = paymentData.getCardInfo().getCardDescription();
 
+            GatewayMap request = buildUpdateSessionRequest(paymentData);
             gateway.updateSession(sessionId, apiVersion, request, new UpdateSessionCallback());
         }
 
@@ -275,12 +284,14 @@ public class PayActivity extends AppCompatActivity {
         public void onGooglePayCancelled() {
             Log.d(GooglePayCallback.class.getSimpleName(), "Cancelled");
 
-
+            isGooglePay = false;
         }
 
         @Override
         public void onGooglePayError(Status status) {
             Log.d(GooglePayCallback.class.getSimpleName(), "Error");
+
+            isGooglePay = false;
         }
     }
 }

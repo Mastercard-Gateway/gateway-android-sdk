@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/appbar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:title="Google Pay" />
+
+        </android.support.design.widget.AppBarLayout>
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/chair"
+            app:layout_constraintBottom_toTopOf="@+id/textView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/appbar"
+            app:layout_constraintVertical_chainStyle="packed" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="241dp"
+            android:layout_height="26dp"
+            android:text="@string/modern_green_lounge_chair"
+            android:textAllCaps="true"
+            android:textSize="@dimen/material_typography_regular_subheading_text_size"
+            app:layout_constraintBottom_toTopOf="@+id/textView2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-light"
+            android:text="@string/one_dollar"
+            android:textColor="@color/coral"
+            android:textSize="@dimen/material_typography_regular_headline_text_size"
+            app:layout_constraintBottom_toTopOf="@+id/google_pay_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+        <RelativeLayout
+            android:id="@+id/google_pay_button"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/material_baseline_grid_6x"
+            android:layout_marginStart="@dimen/material_baseline_grid_2x"
+            android:layout_marginEnd="@dimen/material_baseline_grid_2x"
+            android:layout_marginBottom="@dimen/material_baseline_grid_2x"
+            android:background="@drawable/googlepay_button_background"
+            android:clickable="true"
+            android:contentDescription="@string/googlepay_button_content_description"
+            android:focusable="true"
+            android:padding="@dimen/material_baseline_grid_0.5x"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:duplicateParentState="true"
+                android:gravity="center_vertical"
+                android:orientation="vertical"
+                android:weightSum="2">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:duplicateParentState="true"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/googlepay_button_content" />
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:duplicateParentState="true"
+                android:scaleType="fitXY"
+                android:src="@drawable/googlepay_button_overlay" />
+        </RelativeLayout>
+
+    </android.support.constraint.ConstraintLayout>
+
+</layout>

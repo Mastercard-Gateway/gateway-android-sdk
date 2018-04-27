@@ -1,52 +1,130 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <LinearLayout
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
-        android:padding="@dimen/material_baseline_grid_2x"
-        tools:context=".MainActivity">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/appbar"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textSize="@dimen/material_typography_regular_title_text_size"
-            android:textColor="@color/material_color_black"
-            android:text="@string/main_simple_store"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:src="@drawable/chair"
-            android:contentDescription="@string/main_modern_green_lounge_chair"/>
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:title="@string/app_name" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/material_baseline_grid_1x"
-            android:textSize="@dimen/material_typography_regular_subheading_text_size"
-            android:textAllCaps="true"
-            android:text="@string/main_modern_green_lounge_chair"/>
+        </android.support.design.widget.AppBarLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/material_baseline_grid_4x"
-            android:textSize="@dimen/material_typography_regular_headline_text_size"
-            android:fontFamily="sans-serif-light"
-            android:textColor="@color/coral"
-            android:text="@string/main_1"/>
-
-        <Button
-            android:id="@+id/buyButton"
+        <android.support.constraint.Guideline
+            android:id="@+id/guideline_start"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/main_check_out"/>
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="@dimen/material_baseline_grid_2x" />
 
-    </LinearLayout>
+        <android.support.constraint.Guideline
+            android:id="@+id/guideline_end"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="@dimen/material_baseline_grid_2x" />
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/merchant_id_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toTopOf="@+id/region_layout"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="@+id/guideline_start"
+            app:layout_constraintTop_toBottomOf="@+id/appbar"
+            app:layout_constraintVertical_chainStyle="packed">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/merchant_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Merchant Id" />
+
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/region_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toTopOf="@+id/merchant_url_layout"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="@+id/guideline_start"
+            app:layout_constraintTop_toBottomOf="@+id/merchant_id_layout">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/region"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Region" />
+
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/merchant_url_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toTopOf="@+id/textView3"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="@+id/guideline_start"
+            app:layout_constraintTop_toBottomOf="@+id/region_layout">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/merchant_url"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textUri"
+                android:maxLines="1"
+                android:hint="Merchant Server URL" />
+
+        </android.support.design.widget.TextInputLayout>
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="@dimen/material_baseline_grid_2x"
+            android:text="Choose a workflow:"
+            app:layout_constraintBottom_toTopOf="@+id/manual_card_button"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+            app:layout_constraintStart_toStartOf="@+id/guideline_start" />
+
+        <Button
+            android:id="@+id/manual_card_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/material_baseline_grid_2x"
+            android:text="Manual Card Entry"
+            app:layout_constraintBottom_toTopOf="@+id/google_pay_button"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+            app:layout_constraintStart_toStartOf="@+id/guideline_start" />
+
+        <Button
+            android:id="@+id/google_pay_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/material_baseline_grid_2x"
+            android:text="Google Pay"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+            app:layout_constraintStart_toStartOf="@+id/guideline_start" />
+
+    </android.support.constraint.ConstraintLayout>
+
 </layout>

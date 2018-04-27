@@ -1,10 +1,10 @@
 <resources>
     <string name="app_name">Gateway SDK Sample App</string>
 
-    <string name="main_simple_store">Simple Store</string>
-    <string name="main_modern_green_lounge_chair">Modern Green Lounge Chair</string>
-    <string name="main_1">$1</string>
-    <string name="main_check_out">Check out</string>
+    <string name="simple_store">Simple Store</string>
+    <string name="modern_green_lounge_chair">Modern Green Lounge Chair</string>
+    <string name="one_dollar">$1</string>
+    <string name="check_out">Check out</string>
 
     <string name="pay_enter_payment_details">Enter payment details</string>
     <string name="pay_name_on_card">Name on card</string>

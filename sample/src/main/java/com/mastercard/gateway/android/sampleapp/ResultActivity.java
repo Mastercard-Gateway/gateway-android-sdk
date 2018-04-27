@@ -21,7 +21,6 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 
 import com.mastercard.gateway.android.sampleapp.databinding.ActivityResultBinding;
 
@@ -51,7 +50,7 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     void doContinue() {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, ManualCardActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }

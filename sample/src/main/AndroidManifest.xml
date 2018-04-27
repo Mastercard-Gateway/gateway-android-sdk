@@ -27,6 +27,14 @@
         </activity>
 
         <activity
+            android:name=".ManualCardActivity"
+            android:label="@string/app_name" />
+
+        <activity
+            android:name=".GooglePayActivity"
+            android:label="@string/app_name" />
+
+        <activity
             android:name=".PayActivity"
             android:label="@string/app_name" />
 

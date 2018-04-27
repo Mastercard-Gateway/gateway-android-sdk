@@ -40,6 +40,7 @@ public class ConfirmActivity extends AppCompatActivity implements Gateway3DSecur
     String transactionId;
     String amount;
     String currency;
+    Boolean isGooglePay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +48,7 @@ public class ConfirmActivity extends AppCompatActivity implements Gateway3DSecur
 
         apiController.setMerchantServerUrl(BuildConfig.MERCHANT_SERVER_URL);
         sessionId = getIntent().getStringExtra("SESSION_ID");
+        isGooglePay = getIntent().getBooleanExtra("GOOGLE_PAY", false);
 
         amount = "1.00";
         currency = "USD";
@@ -104,7 +106,7 @@ public class ConfirmActivity extends AppCompatActivity implements Gateway3DSecur
     }
 
     void doConfirm(String threeDSecureId) {
-        apiController.completeSession(sessionId, orderId, transactionId, amount, currency, threeDSecureId, new CompleteSessionCallback());
+        apiController.completeSession(sessionId, orderId, transactionId, amount, currency, threeDSecureId, isGooglePay, new CompleteSessionCallback());
     }
 
     void startResultActivity(boolean success) {
