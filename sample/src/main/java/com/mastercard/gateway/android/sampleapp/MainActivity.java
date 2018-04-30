@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         binding.merchantUrl.setText(Config.MERCHANT_URL.getValue(this));
         binding.merchantUrl.addTextChangedListener(textChangeListener);
 
-        binding.manualCardButton.setOnClickListener(v -> goTo(ManualCardActivity.class));
+        binding.manualCardButton.setOnClickListener(v -> goTo(ProcessPaymentActivity.class));
 
         binding.googlePayButton.setOnClickListener(v -> goTo(GooglePayActivity.class));
 

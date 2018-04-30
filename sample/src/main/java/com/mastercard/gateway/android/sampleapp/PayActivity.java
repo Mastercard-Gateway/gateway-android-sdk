@@ -30,10 +30,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.identity.intents.model.UserAddress;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.gms.wallet.AutoResolveHelper;
 import com.google.android.gms.wallet.CardRequirements;
 import com.google.android.gms.wallet.IsReadyToPayRequest;
 import com.google.android.gms.wallet.PaymentData;
@@ -43,7 +40,7 @@ import com.google.android.gms.wallet.PaymentsClient;
 import com.google.android.gms.wallet.TransactionInfo;
 import com.google.android.gms.wallet.Wallet;
 import com.google.android.gms.wallet.WalletConstants;
-import com.mastercard.gateway.android.sampleapp.databinding.ActivityPayBinding;
+import com.mastercard.gateway.android.sampleapp.databinding.ActivityCollectCardInfoBinding;
 import com.mastercard.gateway.android.sdk.Gateway;
 import com.mastercard.gateway.android.sdk.GatewayCallback;
 import com.mastercard.gateway.android.sdk.GatewayGooglePayCallback;
@@ -55,7 +52,7 @@ import static android.text.TextUtils.isEmpty;
 
 public class PayActivity extends AppCompatActivity {
 
-    ActivityPayBinding binding;
+    ActivityCollectCardInfoBinding binding;
 
     SharedPreferences prefs = null;
     String sessionId, apiVersion, maskedCardNumber;
@@ -69,7 +66,7 @@ public class PayActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_pay);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_collect_card_info);
         prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
         sessionId = getIntent().getStringExtra("SESSION_ID");
