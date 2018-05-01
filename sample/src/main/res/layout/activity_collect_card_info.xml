@@ -52,7 +52,7 @@
                 android:id="@+id/nameOnCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/pay_name_on_card" />
+                android:hint="@string/collect_card_name_on_card" />
 
         </android.support.design.widget.TextInputLayout>
 
@@ -70,7 +70,7 @@
                 android:id="@+id/cardnumber"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/pay_card_number"
+                android:hint="@string/collect_card_number"
                 android:inputType="number" />
 
         </android.support.design.widget.TextInputLayout>
@@ -89,7 +89,7 @@
                 android:id="@+id/expiry_month"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/pay_expiry_month"
+                android:hint="@string/collect_card_expiry_month"
                 android:inputType="number" />
 
         </android.support.design.widget.TextInputLayout>
@@ -108,7 +108,7 @@
                 android:id="@+id/expiry_year"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/pay_expiry_year"
+                android:hint="@string/collect_card_expiry_year"
                 android:inputType="number" />
 
         </android.support.design.widget.TextInputLayout>
@@ -127,7 +127,7 @@
                 android:id="@+id/cvv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/pay_cvv"
+                android:hint="@string/collect_card_cvv"
                 android:inputType="number" />
 
         </android.support.design.widget.TextInputLayout>
@@ -137,7 +137,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/material_baseline_grid_1x"
-            android:text="@string/pay_continue"
+            android:text="@string/collect_card_continue"
+            android:enabled="false"
             app:layout_constraintEnd_toStartOf="@+id/guideline_end"
             app:layout_constraintStart_toStartOf="@+id/guideline_start"
             app:layout_constraintTop_toBottomOf="@+id/card_cvv_layout" />
@@ -146,7 +147,7 @@
             android:id="@+id/or_separator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="- or -"
+            android:text="@string/collect_card_or"
             android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@+id/google_pay_button"
             app:layout_constraintEnd_toStartOf="@+id/guideline_end"

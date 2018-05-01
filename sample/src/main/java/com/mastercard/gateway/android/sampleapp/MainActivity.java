@@ -1,14 +1,18 @@
 package com.mastercard.gateway.android.sampleapp;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.View;
 
 import com.mastercard.gateway.android.sampleapp.databinding.ActivityMainBinding;
+import com.mastercard.gateway.android.sdk.Gateway;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,20 +30,22 @@ public class MainActivity extends AppCompatActivity {
 
         binding.region.setText(Config.REGION.getValue(this));
         binding.region.addTextChangedListener(textChangeListener);
+        binding.region.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                binding.region.clearFocus();
+                showRegionPicker();
+            }
+        });
 
         binding.merchantUrl.setText(Config.MERCHANT_URL.getValue(this));
         binding.merchantUrl.addTextChangedListener(textChangeListener);
 
-        binding.manualCardButton.setOnClickListener(v -> goTo(ProcessPaymentActivity.class));
-
-        binding.googlePayButton.setOnClickListener(v -> goTo(GooglePayActivity.class));
+        binding.processPaymentButton.setOnClickListener(v -> goTo(ProcessPaymentActivity.class));
 
         enableButtons();
     }
 
     void goTo(Class klass) {
-        persistConfig();
-
         Intent i = new Intent(this, klass);
         startActivity(i);
     }
@@ -58,8 +64,23 @@ public class MainActivity extends AppCompatActivity {
                 && !TextUtils.isEmpty(binding.region.getText())
                 && !TextUtils.isEmpty(binding.merchantUrl.getText());
 
-        binding.manualCardButton.setEnabled(enabled);
-        binding.googlePayButton.setEnabled(enabled);
+        binding.processPaymentButton.setEnabled(enabled);
+    }
+
+    void showRegionPicker() {
+        Gateway.Region[] regions = Gateway.Region.values();
+        final String[] items = new String[regions.length];
+        for (int i = 0; i < regions.length; i++) {
+            items[i] = regions[i].name();
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle("Select Region")
+                .setItems(items, (dialog, which) -> {
+                    binding.region.setText(items[which]);
+                    dialog.cancel();
+                })
+                .show();
     }
 
     class TextChangeListener implements TextWatcher {
@@ -71,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
             enableButtons();
+            persistConfig();
         }
 
         @Override

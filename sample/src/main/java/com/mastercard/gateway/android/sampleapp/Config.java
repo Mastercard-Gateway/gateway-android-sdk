@@ -4,10 +4,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.mastercard.gateway.android.sdk.Gateway;
+
 public enum Config {
 
     MERCHANT_ID(""),
-    REGION("NA"),
+    REGION(Gateway.Region.NORTH_AMERICA.name()),
     MERCHANT_URL("");
 
     String defValue;

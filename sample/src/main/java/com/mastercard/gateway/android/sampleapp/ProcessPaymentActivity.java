@@ -47,7 +47,7 @@ public class ProcessPaymentActivity extends AppCompatActivity {
             Gateway.Region region = Gateway.Region.valueOf(Config.REGION.getValue(this));
             gateway.setRegion(region);
         } catch (Exception e) {
-            Log.e(PayActivity.class.getSimpleName(), "Invalid Gateway region value provided", e);
+            Log.e(ProcessPaymentActivity.class.getSimpleName(), "Invalid Gateway region value provided", e);
         }
 
         // random order/txn IDs for example purposes
@@ -59,7 +59,7 @@ public class ProcessPaymentActivity extends AppCompatActivity {
         // bind buttons
         binding.startButton.setOnClickListener(v -> createSession());
         binding.confirmButton.setOnClickListener(v -> check3dsEnrollment());
-        binding.finishButton.setOnClickListener(v -> finish());
+        binding.doneButton.setOnClickListener(v -> finish());
 
         reset();
     }
@@ -78,7 +78,9 @@ public class ProcessPaymentActivity extends AppCompatActivity {
                 binding.collectCardInfoSuccess.setVisibility(View.VISIBLE);
 
                 String googlePayToken = data.getStringExtra(CollectCardInfoActivity.EXTRA_PAYMENT_TOKEN);
+
                 String cardDescription = data.getStringExtra(CollectCardInfoActivity.EXTRA_CARD_DESCRIPTION);
+                binding.confirmCardDescription.setText(cardDescription);
 
                 if (googlePayToken != null) {
                     isGooglePay = true;
@@ -136,10 +138,11 @@ public class ProcessPaymentActivity extends AppCompatActivity {
 
     void resetButtons() {
         binding.startButton.setEnabled(true);
+        binding.confirmButton.setEnabled(true);
 
         binding.startButton.setVisibility(View.VISIBLE);
-        binding.confirmButton.setVisibility(View.GONE);
-        binding.finishButton.setVisibility(View.GONE);
+        binding.groupConfirm.setVisibility(View.GONE);
+        binding.groupResult.setVisibility(View.GONE);
     }
 
     void createSession() {
@@ -226,20 +229,19 @@ public class ProcessPaymentActivity extends AppCompatActivity {
     }
 
     class UpdateSessionCallback implements GatewayCallback {
-
         @Override
         public void onSuccess(GatewayMap response) {
-            Log.i(PayActivity.class.getSimpleName(), "Successful pay");
+            Log.i(ProcessPaymentActivity.class.getSimpleName(), "Successful pay");
             binding.updateSessionProgress.setVisibility(View.GONE);
             binding.updateSessionSuccess.setVisibility(View.VISIBLE);
 
             binding.startButton.setVisibility(View.GONE);
-            binding.confirmButton.setVisibility(View.VISIBLE);
+            binding.groupConfirm.setVisibility(View.VISIBLE);
         }
 
         @Override
         public void onError(Throwable throwable) {
-            Log.e(PayActivity.class.getSimpleName(), throwable.getMessage(), throwable);
+            Log.e(ProcessPaymentActivity.class.getSimpleName(), throwable.getMessage(), throwable);
             binding.updateSessionProgress.setVisibility(View.GONE);
             binding.updateSessionError.setVisibility(View.VISIBLE);
 
@@ -308,20 +310,28 @@ public class ProcessPaymentActivity extends AppCompatActivity {
     class CompleteSessionCallback implements ApiController.CompleteSessionCallback {
         @Override
         public void onSuccess(String result) {
+            binding.resultIcon.setImageResource(R.drawable.success);
+            binding.resultText.setText(R.string.pay_you_payment_was_successful);
+
             binding.processPaymentProgress.setVisibility(View.GONE);
             binding.processPaymentSuccess.setVisibility(View.VISIBLE);
 
-            binding.confirmButton.setVisibility(View.GONE);
-            binding.finishButton.setVisibility(View.VISIBLE);
+            binding.groupConfirm.setVisibility(View.GONE);
+            binding.groupResult.setVisibility(View.VISIBLE);
         }
 
         @Override
         public void onError(Throwable throwable) {
             throwable.printStackTrace();
+
+            binding.resultIcon.setImageResource(R.drawable.failed);
+            binding.resultText.setText(R.string.pay_error_processing_your_payment);
+
             binding.processPaymentProgress.setVisibility(View.GONE);
             binding.processPaymentError.setVisibility(View.VISIBLE);
 
-            resetButtons();
+            binding.groupConfirm.setVisibility(View.GONE);
+            binding.groupResult.setVisibility(View.VISIBLE);
         }
     }
 }

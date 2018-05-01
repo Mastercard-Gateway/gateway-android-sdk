@@ -18,7 +18,8 @@
 
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -28,35 +29,18 @@
 
         <activity
             android:name=".CollectCardInfoActivity"
-            android:label="@string/app_name" />
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
 
         <activity
             android:name=".ProcessPaymentActivity"
-            android:label="@string/app_name" />
-
-        <activity
-            android:name=".ManualCardActivity"
-            android:label="@string/app_name" />
-
-        <activity
-            android:name=".GooglePayActivity"
-            android:label="@string/app_name" />
-
-        <activity
-            android:name=".PayActivity"
-            android:label="@string/app_name" />
-
-        <activity
-            android:name=".ConfirmActivity"
-            android:label="@string/app_name" />
-
-        <activity
-            android:name=".ResultActivity"
-            android:label="@string/app_name" />
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
 
         <activity
             android:name="com.mastercard.gateway.android.sdk.Gateway3DSecureActivity"
-            android:label="@string/gateway_3d_secure_authentication" />
+            android:label="@string/gateway_3d_secure_authentication"
+            android:screenOrientation="portrait" />
 
     </application>
 
