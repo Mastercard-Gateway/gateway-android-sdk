@@ -35,6 +35,7 @@ import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Set;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -270,18 +271,14 @@ public class Gateway {
 
         if (requestCode == REQUEST_3D_SECURE) {
             if (resultCode == Activity.RESULT_OK) {
-                // check for error
-                String errorMessage = data.getStringExtra(Gateway3DSecureActivity.EXTRA_ERROR);
-                if (errorMessage != null) {
-                    callback.on3DSecureError(errorMessage);
-                    return true;
+                GatewayMap response = new GatewayMap();
+
+                Set<String> keys = data.getExtras().keySet();
+                for (String key : keys) {
+                    response.put(key, data.getStringExtra(key));
                 }
 
-                // get the basic txn details
-                String threeDSecureId = data.getStringExtra(Gateway3DSecureActivity.EXTRA_3D_SECURE_ID);
-                String summaryStatus = data.getStringExtra(Gateway3DSecureActivity.EXTRA_SUMMARY_STATUS);
-
-                callback.on3DSecureComplete(summaryStatus, threeDSecureId);
+                callback.on3DSecureComplete(response);
             } else {
                 callback.on3DSecureCancel();
             }

@@ -13,6 +13,9 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import java.util.Map;
+import java.util.Set;
+
 
 public class Gateway3DSecureActivity extends AppCompatActivity implements Gateway3DSecureView {
 
@@ -26,24 +29,24 @@ public class Gateway3DSecureActivity extends AppCompatActivity implements Gatewa
      * An OPTIONAL title to display in the toolbar for this activity
      */
     public static final String EXTRA_TITLE = "com.mastercard.gateway.android.TITLE";
-
-    /**
-     * The 3-D Secure Id returned from the Gateway on the Process ACS Result call
-     * Will not be set on error
-     */
-    public static final String EXTRA_3D_SECURE_ID = "com.mastercard.gateway.android.3D_SECURE_ID";
-
-    /**
-     * The summary status returned from the Gateway on the Process ACS Result call
-     * Will not be set on error
-     */
-    public static final String EXTRA_SUMMARY_STATUS = "com.mastercard.gateway.android.SUMMARY_STATUS";
-
-    /**
-     * A message indicating there was an error reading response data.
-     * Will not be set on success
-     */
-    public static final String EXTRA_ERROR = "com.mastercard.gateway.android.ERROR";
+//
+//    /**
+//     * The 3-D Secure Id returned from the Gateway on the Process ACS Result call
+//     * Will not be set on error
+//     */
+//    public static final String EXTRA_3D_SECURE_ID = "com.mastercard.gateway.android.3D_SECURE_ID";
+//
+//    /**
+//     * The summary status returned from the Gateway on the Process ACS Result call
+//     * Will not be set on error
+//     */
+//    public static final String EXTRA_SUMMARY_STATUS = "com.mastercard.gateway.android.SUMMARY_STATUS";
+//
+//    /**
+//     * A message indicating there was an error reading response data.
+//     * Will not be set on success
+//     */
+//    public static final String EXTRA_ERROR = "com.mastercard.gateway.android.ERROR";
 
 
     Toolbar toolbar;
@@ -127,26 +130,39 @@ public class Gateway3DSecureActivity extends AppCompatActivity implements Gatewa
         startActivity(emailIntent);
     }
 
-    @Override
-    public void error(int errorResId) {
-        Intent intent = new Intent();
-        intent.putExtra(EXTRA_ERROR, getString(errorResId));
-
-        complete(intent);
-    }
-
-    @Override
-    public void success(String summaryStatus, String threeDSecureId) {
-        Intent intent = new Intent();
-        intent.putExtra(EXTRA_SUMMARY_STATUS, summaryStatus);
-        intent.putExtra(EXTRA_3D_SECURE_ID, threeDSecureId);
-
-        complete(intent);
-    }
+//    @Override
+//    public void error(int errorResId) {
+//        Intent intent = new Intent();
+//        intent.putExtra(EXTRA_ERROR, getString(errorResId));
+//
+//        complete(intent);
+//    }
+//
+//    @Override
+//    public void success(String summaryStatus, String threeDSecureId) {
+//        Intent intent = new Intent();
+//        intent.putExtra(EXTRA_SUMMARY_STATUS, summaryStatus);
+//        intent.putExtra(EXTRA_3D_SECURE_ID, threeDSecureId);
+//
+//        complete(intent);
+//    }
 
     @Override
     public void cancel() {
         onBackPressed();
+    }
+
+    @Override
+    public void complete(Map<String, String> data) {
+        Intent intent = new Intent();
+
+        Set<String> keys = data.keySet();
+        for (String key : keys) {
+            intent.putExtra(key, data.get(key));
+        }
+
+        setResult(Activity.RESULT_OK, intent);
+        finish();
     }
 
     void complete(Intent intent) {

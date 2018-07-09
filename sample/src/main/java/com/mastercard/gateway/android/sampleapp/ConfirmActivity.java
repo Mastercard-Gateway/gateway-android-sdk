@@ -24,6 +24,7 @@ import android.support.v7.app.AppCompatActivity;
 import com.mastercard.gateway.android.sampleapp.databinding.ActivityConfirmBinding;
 import com.mastercard.gateway.android.sdk.Gateway;
 import com.mastercard.gateway.android.sdk.Gateway3DSecureCallback;
+import com.mastercard.gateway.android.sdk.GatewayMap;
 
 import java.util.UUID;
 
@@ -79,14 +80,9 @@ public class ConfirmActivity extends AppCompatActivity implements Gateway3DSecur
     }
 
     @Override
-    public void on3DSecureComplete(String summaryStatus, String threeDSecureId) {
+    public void on3DSecureComplete(GatewayMap response) {
+        String threeDSecureId = (String) response.get("3DSecureId");
         doConfirm(threeDSecureId);
-    }
-
-    @Override
-    public void on3DSecureError(String errorMessage) {
-        // if error, show error page
-        startResultActivity(false);
     }
 
     void doCheck3DSEnrollment() {

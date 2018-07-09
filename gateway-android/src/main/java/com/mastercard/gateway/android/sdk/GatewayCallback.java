@@ -18,6 +18,16 @@ package com.mastercard.gateway.android.sdk;
 
 
 public interface GatewayCallback {
+
+    /**
+     *
+     * @param response
+     */
     void onSuccess(GatewayMap response);
+
+    /**
+     *
+     * @param throwable
+     */
     void onError(Throwable throwable);
 }

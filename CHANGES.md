@@ -1,5 +1,9 @@
 # CHANGES
 
+### 0.10.1
+* Consuming all query params from 3DS redirect
+* Support for API 47 3DS response data
+
 ### 0.10.0
 * Introduced 3-D Secure support with a custom Activity
 
