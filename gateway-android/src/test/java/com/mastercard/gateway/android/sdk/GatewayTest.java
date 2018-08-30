@@ -192,7 +192,7 @@ public class GatewayTest {
         doReturn(socketFactory).when(context).getSocketFactory();
 
         String expectedMethod = "PUT";
-        String expectedUserAgent = Gateway.USER_AGENT_PREFIX + "/" + BuildConfig.VERSION_NAME;
+        String expectedUserAgent = Gateway.USER_AGENT;
         String expectedContentType = "application/json";
 
 
