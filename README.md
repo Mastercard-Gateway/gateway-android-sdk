@@ -1,4 +1,4 @@
-#### \*\*DISCLAIMER: This SDK is currently in pilot phase. Pending a `1.X.X` release, the interface is subject to change. Please direct all support inquiries to your acquirer.
+#### \*\*DISCLAIMER: This SDK is currently in pilot phase. Pending a `1.X.X` release, the interface is subject to change. Currently, this SDK supports Gateway API versions 46 and below. Please direct all support inquiries to your acquirer.
 
 # Gateway Android SDK
 
