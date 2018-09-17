@@ -88,7 +88,8 @@ public class Gateway {
     static final int CONNECTION_TIMEOUT = 15000;
     static final int READ_TIMEOUT = 60000;
     static final int REQUEST_3D_SECURE = 14137;
-    static final String USER_AGENT_PREFIX = "Gateway-Android-SDK";
+    static final String API_OPERATION = "UPDATE_PAYER_DATA";
+    static final String USER_AGENT = "Gateway-Android-SDK/" + BuildConfig.VERSION_NAME;
     static final String INTERMEDIATE_CA = "-----BEGIN CERTIFICATE-----\n" +
             "MIIFAzCCA+ugAwIBAgIEUdNg7jANBgkqhkiG9w0BAQsFADCBvjELMAkGA1UEBhMC\n" +
             "VVMxFjAUBgNVBAoTDUVudHJ1c3QsIEluYy4xKDAmBgNVBAsTH1NlZSB3d3cuZW50\n" +
@@ -199,7 +200,8 @@ public class Gateway {
      */
     public void updateSession(String sessionId, String apiVersion, GatewayMap payload, GatewayCallback callback) {
         String url = getUpdateSessionUrl(sessionId, apiVersion);
-        payload.put("apiOperation", "UPDATE_PAYER_DATA");
+        payload.put("apiOperation", API_OPERATION);
+        payload.put("device.browser", USER_AGENT);
         runGatewayRequest(url, Method.PUT, payload, callback);
     }
 
@@ -218,7 +220,8 @@ public class Gateway {
      */
     public Single<GatewayMap> updateSession(String sessionId, String apiVersion, GatewayMap payload) {
         String url = getUpdateSessionUrl(sessionId, apiVersion);
-        payload.put("apiOperation", "UPDATE_PAYER_DATA");
+        payload.put("apiOperation", API_OPERATION);
+        payload.put("device.browser", USER_AGENT);
         return runGatewayRequest(url, Method.PUT, payload);
     }
 
@@ -450,7 +453,7 @@ public class Gateway {
         c.setConnectTimeout(CONNECTION_TIMEOUT);
         c.setReadTimeout(READ_TIMEOUT);
         c.setRequestMethod(method.name());
-        c.setRequestProperty("User-Agent", USER_AGENT_PREFIX + "/" + BuildConfig.VERSION_NAME);
+        c.setRequestProperty("User-Agent", USER_AGENT);
         c.setRequestProperty("Content-Type", "application/json");
         c.setDoOutput(true);
 
