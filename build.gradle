@@ -22,5 +22,5 @@ task clean(type: Delete) {
 }
 
 ext {
-    libraryVersionName = '1.0.1-SNAPSHOT'
+    libraryVersionName = '1.0.1'
 }
