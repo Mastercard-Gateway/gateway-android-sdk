@@ -15,7 +15,5 @@ interface Gateway3DSecureView {
     void loadWebViewUrl(Uri uri);
     void intentToEmail(Uri uri);
     void complete(Map<String, String> data);
-//    void error(int errorResId);
-//    void success(String summaryStatus, String threeDSecureId);
     void cancel();
 }

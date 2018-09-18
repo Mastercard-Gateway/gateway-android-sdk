@@ -66,7 +66,7 @@ public class ApiController {
     }
 
     interface Check3DSecureEnrollmentCallback {
-        void onSuccess(String summaryStatus, String threeDSecureId, String html);
+        void onSuccess(GatewayMap response);
 
         void onError(Throwable throwable);
     }
@@ -118,20 +118,7 @@ public class ApiController {
                 if (message.obj instanceof Throwable) {
                     callback.onError((Throwable) message.obj);
                 } else {
-                    GatewayMap response = (GatewayMap) message.obj;
-
-                    String summaryStatus = null;
-                    String html = null;
-
-                    if (response.containsKey("gatewayResponse.3DSecure.summaryStatus")) {
-                        summaryStatus = (String) response.get("gatewayResponse.3DSecure.summaryStatus");
-                    }
-
-                    if (response.containsKey("gatewayResponse.3DSecure.authenticationRedirect.simple.htmlBodyContent")) {
-                        html = (String) response.get("gatewayResponse.3DSecure.authenticationRedirect.simple.htmlBodyContent");
-                    }
-                    
-                    callback.onSuccess(summaryStatus, threeDSecureId, html);
+                    callback.onSuccess((GatewayMap) message.obj);
                 }
             }
             return true;
@@ -207,10 +194,6 @@ public class ApiController {
 
         if (!response.containsKey("gatewayResponse")) {
             throw new RuntimeException("Could not read gateway response");
-        }
-
-        if (!response.containsKey("gatewayResponse.result") || !"SUCCESS".equalsIgnoreCase((String) response.get("gatewayResponse.result"))) {
-            throw new RuntimeException("Check 3DS enrollment result: " + response.get("gatewayResponse.result"));
         }
 
         return response;

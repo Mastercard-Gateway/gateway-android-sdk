@@ -35,7 +35,7 @@ public class ConfirmActivity extends AppCompatActivity implements Gateway3DSecur
 
     ActivityConfirmBinding binding;
     ApiController apiController = ApiController.getInstance();
-    String sessionId;
+    String sessionId, apiVersion;
 
     String orderId;
     String transactionId;
@@ -48,6 +48,7 @@ public class ConfirmActivity extends AppCompatActivity implements Gateway3DSecur
 
         apiController.setMerchantServerUrl(BuildConfig.MERCHANT_SERVER_URL);
         sessionId = getIntent().getStringExtra("SESSION_ID");
+        apiVersion = getIntent().getStringExtra("API_VERSION");
 
         amount = "1.00";
         currency = "USD";
@@ -113,14 +114,47 @@ public class ConfirmActivity extends AppCompatActivity implements Gateway3DSecur
 
     class Check3DSecureEnrollmentCallback implements ApiController.Check3DSecureEnrollmentCallback {
         @Override
-        public void onSuccess(String summaryStatus, String threeDSecureId, String html) {
-            if ("CARD_ENROLLED".equalsIgnoreCase(summaryStatus)) {
-                Gateway.start3DSecureActivity(ConfirmActivity.this, html);
-            } else if ("CARD_NOT_ENROLLED".equalsIgnoreCase(summaryStatus) || "AUTHENTICATION_NOT_AVAILABLE".equalsIgnoreCase(summaryStatus)) {
-                // for these 2 cases, you still provide the 3DSecureId with the pay operation
-                doConfirm(threeDSecureId);
-            } else {
-                doConfirm();
+        public void onSuccess(GatewayMap response) {
+            int apiVersionInt = Integer.valueOf(apiVersion);
+            String threeDSecureId = (String) response.get("gatewayResponse.3DSecureID");
+
+            String html = null;
+            if (response.containsKey("gatewayResponse.3DSecure.authenticationRedirect.simple.htmlBodyContent")) {
+                html = (String) response.get("gatewayResponse.3DSecure.authenticationRedirect.simple.htmlBodyContent");
+            }
+
+            // for API versions <= 46, you must use the summary status field to determine next steps for 3DS
+            if (apiVersionInt <= 46) {
+                String summaryStatus = (String) response.get("gatewayResponse.3DSecure.summaryStatus");
+
+                if ("CARD_ENROLLED".equalsIgnoreCase(summaryStatus)) {
+                    Gateway.start3DSecureActivity(ConfirmActivity.this, html);
+                } else if ("CARD_NOT_ENROLLED".equalsIgnoreCase(summaryStatus) || "AUTHENTICATION_NOT_AVAILABLE".equalsIgnoreCase(summaryStatus)) {
+                    // for these 2 cases, you still provide the 3DSecureId with the pay operation
+                    doConfirm(threeDSecureId);
+                } else {
+                    doConfirm();
+                }
+            }
+
+            // for API versions >= 47, you must look to the gateway recommendation and the presence of 3DS info in the payload
+            else {
+                String gatewayRecommendation = (String) response.get("gatewayResponse.response.gatewayRecommendation");
+
+                // if DO_NOT_PROCEED returned in recommendation, should stop transaction
+                if ("DO_NOT_PROCEED".equalsIgnoreCase(gatewayRecommendation)) {
+                    startResultActivity(false);
+                }
+
+                // if PROCEED in recommendation, and we have HTML for 3ds, perform 3DS
+                else if (html != null) {
+                    Gateway.start3DSecureActivity(ConfirmActivity.this, html);
+                }
+
+                // if PROCEED in recommendation, but no HTML, finish the transaction without 3DS
+                else {
+                    doConfirm(threeDSecureId);
+                }
             }
         }
 
