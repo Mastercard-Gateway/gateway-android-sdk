@@ -10,8 +10,13 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -120,47 +125,27 @@ public class Gateway3DSecurePresenterTest {
 
         Gateway3DSecurePresenter presenterSpy = spy(presenter);
 
+        Map<String, String> queryData = new HashMap<>();
+        doReturn(queryData).when(presenterSpy).parseQueryString(mockUri);
+
         presenterSpy.webViewUrlChanges(mockUri);
 
-        verify(presenterSpy).handle3DSecureResult(mockUri);
+        verify(mockView).complete(queryData);
     }
 
     @Test
-    public void testHandle3DSecureResultCallsErrorOnMissingSummaryStatus() throws Exception {
-        Uri mockUri = mock(Uri.class);
-        doReturn(null).when(mockUri).getQueryParameter(Gateway3DSecurePresenter.QUERY_SUMMARY_STATUS);
-        doReturn("some3DSecureId").when(mockUri).getQueryParameter(Gateway3DSecurePresenter.QUERY_3DSECURE_ID);
-        presenter.view = mockView;
+    public void testParseQueryStringWorksCorrectly() {
+        Uri testUri = Uri.parse("gatewaysdk://3dsecure?3DSecureId=someid&summaryStatus=allgood&otherData=extra+info&moreData=stuff");
 
-        presenter.handle3DSecureResult(mockUri);
+        Map<String, String> data = presenter.parseQueryString(testUri);
 
-        verify(mockView).error(R.string.gateway_error_missing_summary_status);
-    }
-
-    @Test
-    public void testHandle3DSecureResultCallsErrorOnMissing3DSecureId() throws Exception {
-        Uri mockUri = mock(Uri.class);
-        doReturn("someSummaryStatus").when(mockUri).getQueryParameter(Gateway3DSecurePresenter.QUERY_SUMMARY_STATUS);
-        doReturn(null).when(mockUri).getQueryParameter(Gateway3DSecurePresenter.QUERY_3DSECURE_ID);
-        presenter.view = mockView;
-
-        presenter.handle3DSecureResult(mockUri);
-
-        verify(mockView).error(R.string.gateway_error_missing_3d_secure_id);
-    }
-
-    @Test
-    public void testHandle3DSecureResultWorksAsIntended() throws Exception {
-        String expectedSummaryStatus = "someSummaryStatus";
-        String expected3DSecureId = "some3DSecureId";
-
-        Uri mockUri = mock(Uri.class);
-        doReturn(expectedSummaryStatus).when(mockUri).getQueryParameter(Gateway3DSecurePresenter.QUERY_SUMMARY_STATUS);
-        doReturn(expected3DSecureId).when(mockUri).getQueryParameter(Gateway3DSecurePresenter.QUERY_3DSECURE_ID);
-        presenter.view = mockView;
-
-        presenter.handle3DSecureResult(mockUri);
-
-        verify(mockView).success(expectedSummaryStatus, expected3DSecureId);
+        assertTrue(data.containsKey("3DSecureId"));
+        assertTrue(data.containsKey("summaryStatus"));
+        assertTrue(data.containsKey("otherData"));
+        assertTrue(data.containsKey("moreData"));
+        assertEquals("someid", data.get("3DSecureId"));
+        assertEquals("allgood", data.get("summaryStatus"));
+        assertEquals("extra info", data.get("otherData"));
+        assertEquals("stuff", data.get("moreData"));
     }
 }

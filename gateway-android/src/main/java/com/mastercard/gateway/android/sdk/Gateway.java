@@ -40,6 +40,7 @@ import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Set;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -92,9 +93,10 @@ public class Gateway {
     static final int MIN_API_VERSION = 39;
     static final int CONNECTION_TIMEOUT = 15000;
     static final int READ_TIMEOUT = 60000;
-    static final int REQUEST_3D_SECURE = 10000;
-    static final int REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA = 10001;
-    static final String USER_AGENT_PREFIX = "Gateway-Android-SDK";
+    static final int REQUEST_3D_SECURE = 14137;
+    static final int REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA = 14138;
+    static final String API_OPERATION = "UPDATE_PAYER_DATA";
+    static final String USER_AGENT = "Gateway-Android-SDK/" + BuildConfig.VERSION_NAME;
     static final String INTERMEDIATE_CA = "-----BEGIN CERTIFICATE-----\n" +
             "MIIFAzCCA+ugAwIBAgIEUdNg7jANBgkqhkiG9w0BAQsFADCBvjELMAkGA1UEBhMC\n" +
             "VVMxFjAUBgNVBAoTDUVudHJ1c3QsIEluYy4xKDAmBgNVBAsTH1NlZSB3d3cuZW50\n" +
@@ -205,7 +207,8 @@ public class Gateway {
      */
     public void updateSession(String sessionId, String apiVersion, GatewayMap payload, GatewayCallback callback) {
         String url = getUpdateSessionUrl(sessionId, apiVersion);
-        payload.put("apiOperation", "UPDATE_PAYER_DATA");
+        payload.put("apiOperation", API_OPERATION);
+        payload.put("device.browser", USER_AGENT);
         runGatewayRequest(url, Method.PUT, payload, callback);
     }
 
@@ -224,7 +227,8 @@ public class Gateway {
      */
     public Single<GatewayMap> updateSession(String sessionId, String apiVersion, GatewayMap payload) {
         String url = getUpdateSessionUrl(sessionId, apiVersion);
-        payload.put("apiOperation", "UPDATE_PAYER_DATA");
+        payload.put("apiOperation", API_OPERATION);
+        payload.put("device.browser", USER_AGENT);
         return runGatewayRequest(url, Method.PUT, payload);
     }
 
@@ -271,24 +275,16 @@ public class Gateway {
      * @see Gateway#start3DSecureActivity(Activity, String, String)
      */
     public static boolean handle3DSecureResult(int requestCode, int resultCode, Intent data, Gateway3DSecureCallback callback) {
-        if (data == null || callback == null) {
+        if (callback == null) {
             return false;
         }
 
         if (requestCode == REQUEST_3D_SECURE) {
             if (resultCode == Activity.RESULT_OK) {
-                // check for error
-                String errorMessage = data.getStringExtra(Gateway3DSecureActivity.EXTRA_ERROR);
-                if (errorMessage != null) {
-                    callback.on3DSecureError(errorMessage);
-                    return true;
-                }
+                String acsResultJson = data.getStringExtra(Gateway3DSecureActivity.EXTRA_ACS_RESULT);
+                GatewayMap acsResult = new GatewayMap(acsResultJson);
 
-                // get the basic txn details
-                String threeDSecureId = data.getStringExtra(Gateway3DSecureActivity.EXTRA_3D_SECURE_ID);
-                String summaryStatus = data.getStringExtra(Gateway3DSecureActivity.EXTRA_SUMMARY_STATUS);
-
-                callback.on3DSecureComplete(summaryStatus, threeDSecureId);
+                callback.on3DSecureComplete(acsResult);
             } else {
                 callback.on3DSecureCancel();
             }
@@ -501,7 +497,7 @@ public class Gateway {
         c.setConnectTimeout(CONNECTION_TIMEOUT);
         c.setReadTimeout(READ_TIMEOUT);
         c.setRequestMethod(method.name());
-        c.setRequestProperty("User-Agent", USER_AGENT_PREFIX + "/" + BuildConfig.VERSION_NAME);
+        c.setRequestProperty("User-Agent", USER_AGENT);
         c.setRequestProperty("Content-Type", "application/json");
         c.setDoOutput(true);
 

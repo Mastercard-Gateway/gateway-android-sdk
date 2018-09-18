@@ -251,22 +251,93 @@ public class ProcessPaymentActivity extends AppCompatActivity {
 
     class Check3DSecureEnrollmentCallback implements ApiController.Check3DSecureEnrollmentCallback {
         @Override
-        public void onSuccess(String summaryStatus, String threeDSecureId, String html) {
-            if ("CARD_ENROLLED".equalsIgnoreCase(summaryStatus)) {
-                Gateway.start3DSecureActivity(ProcessPaymentActivity.this, html);
-                return;
+        public void onSuccess(GatewayMap response) {
+            int apiVersionInt = Integer.valueOf(apiVersion);
+            String threeDSecureId = (String) response.get("gatewayResponse.3DSecureID");
+
+            String html = null;
+            if (response.containsKey("gatewayResponse.3DSecure.authenticationRedirect.simple.htmlBodyContent")) {
+                html = (String) response.get("gatewayResponse.3DSecure.authenticationRedirect.simple.htmlBodyContent");
             }
 
-            binding.check3dsProgress.setVisibility(View.GONE);
-            binding.check3dsSuccess.setVisibility(View.VISIBLE);
-            ProcessPaymentActivity.this.threeDSecureId = null;
+//            // for API versions <= 46, you must use the summary status field to determine next steps for 3DS
+//            if (apiVersionInt <= 46) {
+//                String summaryStatus = (String) response.get("gatewayResponse.3DSecure.summaryStatus");
+//
+//                if ("CARD_ENROLLED".equalsIgnoreCase(summaryStatus)) {
+//                    Gateway.start3DSecureActivity(ProcessPaymentActivity.this, html);
+//                } else if ("CARD_NOT_ENROLLED".equalsIgnoreCase(summaryStatus) || "AUTHENTICATION_NOT_AVAILABLE".equalsIgnoreCase(summaryStatus)) {
+//                    // for these 2 cases, you still provide the 3DSecureId with the pay operation
+//                    doConfirm(threeDSecureId);
+//                } else {
+//                    doConfirm();
+//                }
+//            }
+//
+//            // for API versions >= 47, you must look to the gateway recommendation and the presence of 3DS info in the payload
+//            else {
+//                String gatewayRecommendation = (String) response.get("gatewayResponse.response.gatewayRecommendation");
+//
+//                // if DO_NOT_PROCEED returned in recommendation, should stop transaction
+//                if ("DO_NOT_PROCEED".equalsIgnoreCase(gatewayRecommendation)) {
+//                    startResultActivity(false);
+//                }
+//
+//                // if PROCEED in recommendation, and we have HTML for 3ds, perform 3DS
+//                else if (html != null) {
+//                    Gateway.start3DSecureActivity(ConfirmActivity.this, html);
+//                }
+//
+//                // if PROCEED in recommendation, but no HTML, finish the transaction without 3DS
+//                else {
+//                    doConfirm(threeDSecureId);
+//                }
+//            }
 
-            // for these 2 cases, you still provide the 3DSecureId with the pay operation
-            if ("CARD_NOT_ENROLLED".equalsIgnoreCase(summaryStatus) || "AUTHENTICATION_NOT_AVAILABLE".equalsIgnoreCase(summaryStatus)) {
+            // for API versions <= 46, you must use the summary status field to determine next steps for 3DS
+            if (apiVersionInt <= 46) {
+                String summaryStatus = (String) response.get("gatewayResponse.3DSecure.summaryStatus");
+
+                if ("CARD_ENROLLED".equalsIgnoreCase(summaryStatus)) {
+                    Gateway.start3DSecureActivity(ProcessPaymentActivity.this, html);
+                    return;
+                }
+
+                binding.check3dsProgress.setVisibility(View.GONE);
+                binding.check3dsSuccess.setVisibility(View.VISIBLE);
+                ProcessPaymentActivity.this.threeDSecureId = null;
+
+                // for these 2 cases, you still provide the 3DSecureId with the pay operation
+                if ("CARD_NOT_ENROLLED".equalsIgnoreCase(summaryStatus) || "AUTHENTICATION_NOT_AVAILABLE".equalsIgnoreCase(summaryStatus)) {
+                    ProcessPaymentActivity.this.threeDSecureId = threeDSecureId;
+                }
+
+                processPayment();
+            }
+
+            // for API versions >= 47, you must look to the gateway recommendation and the presence of 3DS info in the payload
+            else {
+                String gatewayRecommendation = (String) response.get("gatewayResponse.response.gatewayRecommendation");
+
+                // if DO_NOT_PROCEED returned in recommendation, should stop transaction
+                if ("DO_NOT_PROCEED".equalsIgnoreCase(gatewayRecommendation)) {
+                    binding.check3dsProgress.setVisibility(View.GONE);
+                    binding.check3dsError.setVisibility(View.VISIBLE);
+
+                    resetButtons();
+                    return;
+                }
+
+                // if PROCEED in recommendation, and we have HTML for 3ds, perform 3DS
+                if (html != null) {
+                    Gateway.start3DSecureActivity(ProcessPaymentActivity.this, html);
+                    return;
+                }
+
                 ProcessPaymentActivity.this.threeDSecureId = threeDSecureId;
-            }
 
-            processPayment();
+                processPayment();
+            }
         }
 
         @Override
@@ -289,21 +360,27 @@ public class ProcessPaymentActivity extends AppCompatActivity {
         }
 
         @Override
-        public void on3DSecureError(String errorMessage) {
-            binding.check3dsProgress.setVisibility(View.GONE);
-            binding.check3dsError.setVisibility(View.VISIBLE);
+        public void on3DSecureComplete(GatewayMap result) {
+            int apiVersionInt = Integer.valueOf(apiVersion);
 
-            resetButtons();
-        }
+            if (apiVersionInt <= 46) {
+                // TODO check summary status
 
-        @Override
-        public void on3DSecureComplete(String summaryStatus, String threeDSecureId) {
-            binding.check3dsProgress.setVisibility(View.GONE);
-            binding.check3dsSuccess.setVisibility(View.VISIBLE);
+            } else {
+                if ("DO_NOT_PROCEED".equalsIgnoreCase((String) result.get("response.gatewayRecommendation"))) {
+                    binding.check3dsProgress.setVisibility(View.GONE);
+                    binding.check3dsError.setVisibility(View.VISIBLE);
 
-            ProcessPaymentActivity.this.threeDSecureId = threeDSecureId;
+                    resetButtons();
+                } else {
+                    binding.check3dsProgress.setVisibility(View.GONE);
+                    binding.check3dsSuccess.setVisibility(View.VISIBLE);
 
-            processPayment();
+                    ProcessPaymentActivity.this.threeDSecureId = threeDSecureId;
+
+                    processPayment();
+                }
+            }
         }
     }
 

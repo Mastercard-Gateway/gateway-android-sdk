@@ -67,7 +67,7 @@ public class ApiController {
     }
 
     interface Check3DSecureEnrollmentCallback {
-        void onSuccess(String summaryStatus, String threeDSecureId, String html);
+        void onSuccess(GatewayMap response);
 
         void onError(Throwable throwable);
     }
@@ -119,20 +119,7 @@ public class ApiController {
                 if (message.obj instanceof Throwable) {
                     callback.onError((Throwable) message.obj);
                 } else {
-                    GatewayMap response = (GatewayMap) message.obj;
-
-                    String summaryStatus = null;
-                    String html = null;
-
-                    if (response.containsKey("gatewayResponse.3DSecure.summaryStatus")) {
-                        summaryStatus = (String) response.get("gatewayResponse.3DSecure.summaryStatus");
-                    }
-
-                    if (response.containsKey("gatewayResponse.3DSecure.authenticationRedirect.simple.htmlBodyContent")) {
-                        html = (String) response.get("gatewayResponse.3DSecure.authenticationRedirect.simple.htmlBodyContent");
-                    }
-                    
-                    callback.onSuccess(summaryStatus, threeDSecureId, html);
+                    callback.onSuccess((GatewayMap) message.obj);
                 }
             }
             return true;
@@ -220,6 +207,7 @@ public class ApiController {
                 .set("order.amount", amount)
                 .set("order.currency", currency)
                 .set("sourceOfFunds.type", "CARD")
+                .set("transaction.source", "INTERNET")
                 .set("transaction.frequency", "SINGLE");
 
         if (threeDSecureId != null) {

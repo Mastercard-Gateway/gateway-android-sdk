@@ -21,7 +21,7 @@ public interface GatewayGooglePayCallback {
     /**
      * Called when an error occurs during a GooglePay transaction
      *
-     * @param errorCode The corresponding error code (see {@link com.google.android.gms.wallet.WalletConstants} for a list of supported errors)
+     * @param status The corresponding status object of the request
      */
     void onGooglePayError(Status status);
 }
