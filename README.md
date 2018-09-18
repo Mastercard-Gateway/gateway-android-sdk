@@ -1,5 +1,3 @@
-#### \*\*DISCLAIMER: Currently, this SDK supports Gateway API versions 46 and below. Please direct all support inquiries to your acquirer.
-
 # Gateway Android SDK
 
 [![Download](https://api.bintray.com/packages/mpgs/Android/gateway-android-sdk/images/download.svg)](https://bintray.com/mpgs/Android/gateway-android-sdk/_latestVersion)

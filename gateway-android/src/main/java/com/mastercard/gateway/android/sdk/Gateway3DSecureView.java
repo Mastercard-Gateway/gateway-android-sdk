@@ -3,6 +3,8 @@ package com.mastercard.gateway.android.sdk;
 
 import android.net.Uri;
 
+import java.util.Map;
+
 interface Gateway3DSecureView {
 
     String getDefaultTitle();
@@ -12,7 +14,6 @@ interface Gateway3DSecureView {
     void setWebViewHtml(String html);
     void loadWebViewUrl(Uri uri);
     void intentToEmail(Uri uri);
-    void error(int errorResId);
-    void success(String summaryStatus, String threeDSecureId);
+    void complete(Map<String, String> data);
     void cancel();
 }
