@@ -2,11 +2,13 @@ package com.mastercard.gateway.android.sdk;
 
 import android.net.Uri;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 class Gateway3DSecurePresenter {
 
     static final String REDIRECT_SCHEME = "gatewaysdk";
-    static final String QUERY_SUMMARY_STATUS = "summaryStatus";
-    static final String QUERY_3DSECURE_ID = "3DSecureId";
 
     Gateway3DSecureView view;
 
@@ -35,7 +37,7 @@ class Gateway3DSecurePresenter {
     void webViewUrlChanges(Uri uri) {
         String scheme = uri.getScheme();
         if (REDIRECT_SCHEME.equalsIgnoreCase(scheme)) {
-            handle3DSecureResult(uri);
+            view.complete(parseQueryString(uri));
         } else if ("mailto".equalsIgnoreCase(scheme)) {
             view.intentToEmail(uri);
         } else {
@@ -43,17 +45,14 @@ class Gateway3DSecurePresenter {
         }
     }
 
-    void handle3DSecureResult(Uri uri) {
-        String summaryStatus = uri.getQueryParameter(QUERY_SUMMARY_STATUS);
-        String threeDSecureId = uri.getQueryParameter(QUERY_3DSECURE_ID);
+    Map<String, String> parseQueryString(Uri uri) {
+        Map<String, String> data = new HashMap<>();
 
-        // check that we got the correct data back
-        if (summaryStatus == null) {
-            view.error(R.string.gateway_error_missing_summary_status);
-        } else if (threeDSecureId == null) {
-            view.error(R.string.gateway_error_missing_3d_secure_id);
-        } else {
-            view.success(summaryStatus, threeDSecureId);
+        Set<String> params = uri.getQueryParameterNames();
+        for (String param : params) {
+            data.put(param, uri.getQueryParameter(param));
         }
+
+        return data;
     }
 }

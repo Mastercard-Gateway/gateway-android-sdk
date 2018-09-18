@@ -133,6 +133,7 @@ public class PayActivity extends AppCompatActivity {
             Intent intent = new Intent(PayActivity.this, ConfirmActivity.class);
             intent.putExtra("PAN_MASK", maskedCardNumber());
             intent.putExtra("SESSION_ID", sessionId);
+            intent.putExtra("API_VERSION", apiVersion);
             startActivity(intent);
         }
 

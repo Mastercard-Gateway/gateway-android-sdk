@@ -1,5 +1,9 @@
 # CHANGES
 
+### 1.0.1
+* Consuming all query params from 3DS redirect
+* Support for API 47 3DS response data
+
 ### 1.0.0
 * Tag 1.0 Release of the SDK
 * Added User-Agent info to the update session request
