@@ -220,7 +220,9 @@ public class ProcessPaymentActivity extends AppCompatActivity {
 
         @Override
         public void onError(Throwable throwable) {
+            Log.e(ProcessPaymentActivity.class.getSimpleName(), throwable.getMessage(), throwable);
             Toast.makeText(ProcessPaymentActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+
             binding.createSessionProgress.setVisibility(View.GONE);
             binding.createSessionError.setVisibility(View.VISIBLE);
 
@@ -231,7 +233,7 @@ public class ProcessPaymentActivity extends AppCompatActivity {
     class UpdateSessionCallback implements GatewayCallback {
         @Override
         public void onSuccess(GatewayMap response) {
-            Log.i(ProcessPaymentActivity.class.getSimpleName(), "Successful pay");
+            Log.i(ProcessPaymentActivity.class.getSimpleName(), "Successfully updated session");
             binding.updateSessionProgress.setVisibility(View.GONE);
             binding.updateSessionSuccess.setVisibility(View.VISIBLE);
 
@@ -242,6 +244,8 @@ public class ProcessPaymentActivity extends AppCompatActivity {
         @Override
         public void onError(Throwable throwable) {
             Log.e(ProcessPaymentActivity.class.getSimpleName(), throwable.getMessage(), throwable);
+            Toast.makeText(ProcessPaymentActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+
             binding.updateSessionProgress.setVisibility(View.GONE);
             binding.updateSessionError.setVisibility(View.VISIBLE);
 
@@ -259,40 +263,6 @@ public class ProcessPaymentActivity extends AppCompatActivity {
             if (response.containsKey("gatewayResponse.3DSecure.authenticationRedirect.simple.htmlBodyContent")) {
                 html = (String) response.get("gatewayResponse.3DSecure.authenticationRedirect.simple.htmlBodyContent");
             }
-
-//            // for API versions <= 46, you must use the summary status field to determine next steps for 3DS
-//            if (apiVersionInt <= 46) {
-//                String summaryStatus = (String) response.get("gatewayResponse.3DSecure.summaryStatus");
-//
-//                if ("CARD_ENROLLED".equalsIgnoreCase(summaryStatus)) {
-//                    Gateway.start3DSecureActivity(ProcessPaymentActivity.this, html);
-//                } else if ("CARD_NOT_ENROLLED".equalsIgnoreCase(summaryStatus) || "AUTHENTICATION_NOT_AVAILABLE".equalsIgnoreCase(summaryStatus)) {
-//                    // for these 2 cases, you still provide the 3DSecureId with the pay operation
-//                    doConfirm(threeDSecureId);
-//                } else {
-//                    doConfirm();
-//                }
-//            }
-//
-//            // for API versions >= 47, you must look to the gateway recommendation and the presence of 3DS info in the payload
-//            else {
-//                String gatewayRecommendation = (String) response.get("gatewayResponse.response.gatewayRecommendation");
-//
-//                // if DO_NOT_PROCEED returned in recommendation, should stop transaction
-//                if ("DO_NOT_PROCEED".equalsIgnoreCase(gatewayRecommendation)) {
-//                    startResultActivity(false);
-//                }
-//
-//                // if PROCEED in recommendation, and we have HTML for 3ds, perform 3DS
-//                else if (html != null) {
-//                    Gateway.start3DSecureActivity(ConfirmActivity.this, html);
-//                }
-//
-//                // if PROCEED in recommendation, but no HTML, finish the transaction without 3DS
-//                else {
-//                    doConfirm(threeDSecureId);
-//                }
-//            }
 
             // for API versions <= 46, you must use the summary status field to determine next steps for 3DS
             if (apiVersionInt <= 46) {
@@ -342,7 +312,9 @@ public class ProcessPaymentActivity extends AppCompatActivity {
 
         @Override
         public void onError(Throwable throwable) {
-            throwable.printStackTrace();
+            Log.e(ProcessPaymentActivity.class.getSimpleName(), throwable.getMessage(), throwable);
+            Toast.makeText(ProcessPaymentActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+
             binding.check3dsProgress.setVisibility(View.GONE);
             binding.check3dsError.setVisibility(View.VISIBLE);
 
@@ -353,10 +325,7 @@ public class ProcessPaymentActivity extends AppCompatActivity {
     class ThreeDSecureCallback implements Gateway3DSecureCallback {
         @Override
         public void on3DSecureCancel() {
-            binding.check3dsProgress.setVisibility(View.GONE);
-            binding.check3dsError.setVisibility(View.VISIBLE);
-
-            resetButtons();
+            showError();
         }
 
         @Override
@@ -364,23 +333,30 @@ public class ProcessPaymentActivity extends AppCompatActivity {
             int apiVersionInt = Integer.valueOf(apiVersion);
 
             if (apiVersionInt <= 46) {
-                // TODO check summary status
-
-            } else {
+                if ("AUTHENTICATION_FAILED".equalsIgnoreCase((String) result.get("3DSecure.summaryStatus"))) {
+                    showError();
+                    return;
+                }
+            } else { // version >= 47
                 if ("DO_NOT_PROCEED".equalsIgnoreCase((String) result.get("response.gatewayRecommendation"))) {
-                    binding.check3dsProgress.setVisibility(View.GONE);
-                    binding.check3dsError.setVisibility(View.VISIBLE);
-
-                    resetButtons();
-                } else {
-                    binding.check3dsProgress.setVisibility(View.GONE);
-                    binding.check3dsSuccess.setVisibility(View.VISIBLE);
-
-                    ProcessPaymentActivity.this.threeDSecureId = threeDSecureId;
-
-                    processPayment();
+                    showError();
+                    return;
                 }
             }
+
+            binding.check3dsProgress.setVisibility(View.GONE);
+            binding.check3dsSuccess.setVisibility(View.VISIBLE);
+
+            ProcessPaymentActivity.this.threeDSecureId = threeDSecureId;
+
+            processPayment();
+        }
+
+        void showError() {
+            binding.check3dsProgress.setVisibility(View.GONE);
+            binding.check3dsError.setVisibility(View.VISIBLE);
+
+            resetButtons();
         }
     }
 

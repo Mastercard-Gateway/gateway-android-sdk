@@ -197,6 +197,11 @@ public class ApiController {
             throw new RuntimeException("Could not read gateway response");
         }
 
+        // if there is an error result, throw it
+        if (response.containsKey("gatewayResponse.result") && "ERROR".equalsIgnoreCase((String) response.get("gatewayResponse.result"))) {
+            throw new RuntimeException("Check 3DS Enrollment Error: " + response.get("gatewayResponse.error.explanation"));
+        }
+
         return response;
     }
 
