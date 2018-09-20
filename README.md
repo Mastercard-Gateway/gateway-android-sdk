@@ -75,9 +75,9 @@ To configure the sample app, compile and run the app on your device. There are t
 
 ![Sample app configuration](./sample-configuration.png)
 
-The merchant id should have the prefix 'TEST'
-The region options include ASIA_PACIFIC, EUROPE, NORTH_AMERICA, or MTF
-To find the Heroku test server URL, consult the **[Gateway Test Merchant Server]** (ex: https://{your-app-name}.herokuapp.com)
+1. The merchant id should have the prefix 'TEST'
+1. The region options include ASIA_PACIFIC, EUROPE, NORTH_AMERICA, or MTF
+1. To find the Heroku test server URL, consult the **[Gateway Test Merchant Server]** (ex: https://{your-app-name}.herokuapp.com)
 
 
 
