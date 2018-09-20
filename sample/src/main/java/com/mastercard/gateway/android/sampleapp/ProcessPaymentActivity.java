@@ -58,7 +58,13 @@ public class ProcessPaymentActivity extends AppCompatActivity {
 
         // bind buttons
         binding.startButton.setOnClickListener(v -> createSession());
-        binding.confirmButton.setOnClickListener(v -> check3dsEnrollment());
+        binding.confirmButton.setOnClickListener(v -> {
+            if (isGooglePay) {
+                processPayment();
+            } else {
+                check3dsEnrollment();
+            }
+        });
         binding.doneButton.setOnClickListener(v -> finish());
 
         reset();

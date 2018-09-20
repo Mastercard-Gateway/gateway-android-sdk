@@ -40,7 +40,6 @@ import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.Set;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -70,8 +69,7 @@ public class Gateway {
         ASIA_PACIFIC("ap-"),
         EUROPE("eu-"),
         NORTH_AMERICA("na-"),
-        MTF("test-"),
-        QA01("qa01.");
+        MTF("test-");
 
         String prefix;
 

@@ -69,15 +69,20 @@ public class MainActivity extends AppCompatActivity {
 
     void showRegionPicker() {
         Gateway.Region[] regions = Gateway.Region.values();
-        final String[] items = new String[regions.length];
+        final String[] items = new String[regions.length + 1];
+        items[0] = getString(R.string.none);
         for (int i = 0; i < regions.length; i++) {
-            items[i] = regions[i].name();
+            items[i + 1] = regions[i].name();
         }
 
         new AlertDialog.Builder(this)
-                .setTitle("Select Region")
+                .setTitle(R.string.main_select_region)
                 .setItems(items, (dialog, which) -> {
-                    binding.region.setText(items[which]);
+                    if (which == 0) {
+                        binding.region.setText("");
+                    } else {
+                        binding.region.setText(items[which]);
+                    }
                     dialog.cancel();
                 })
                 .show();

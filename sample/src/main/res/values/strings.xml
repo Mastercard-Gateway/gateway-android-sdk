@@ -1,9 +1,12 @@
 <resources>
     <string name="app_name">Gateway SDK Sample App</string>
 
+    <string name="none">None</string>
+
     <string name="main_configuration">Configuration:</string>
     <string name="main_merchant_id">Merchant Id</string>
     <string name="main_region">Region</string>
+    <string name="main_select_region">Select region</string>
     <string name="main_heroku_test_server_url">Heroku Test Server URL</string>
     <string name="main_process_a_payment">Process a Payment</string>
 
