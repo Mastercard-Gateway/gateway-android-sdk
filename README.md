@@ -71,21 +71,13 @@ Included in this project is a sample app that demonstrates how to take a payment
 
 ## Configuration
 
-To configure the sample app, open the *gradle.properties* file. There are three fields which must be completed in order for the sample app to operate correctly.
+To configure the sample app, compile and run the app on your device. There are three fields which must be completed in order for the sample app to operate correctly:
 
-```properties
-# TEST Gateway Merchant ID
-gatewayMerchantId=
+![Sample app configuration](./sample-configuration.png)
 
-# Gateway Region
-#   options include: ASIA_PACIFIC, EUROPE, or NORTH_AMERICA
-gatewayRegion=
-
-# TEST Merchant Server URL (test server app deployed to Heroku)
-# For more information, see: https://github.com/Mastercard-Gateway/gateway-test-merchant-server
-# ex: https://{your-app-name}.herokuapp.com
-merchantServerUrl=
-```
+The merchant id should have the prefix 'TEST'
+The region options include ASIA_PACIFIC, EUROPE, NORTH_AMERICA, or MTF
+To find the Heroku test server URL, consult the **[Gateway Test Merchant Server]** (ex: https://{your-app-name}.herokuapp.com)
 
 
 
