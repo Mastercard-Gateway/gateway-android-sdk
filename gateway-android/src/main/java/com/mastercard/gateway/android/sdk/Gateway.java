@@ -91,8 +91,8 @@ public class Gateway {
     static final int MIN_API_VERSION = 39;
     static final int CONNECTION_TIMEOUT = 15000;
     static final int READ_TIMEOUT = 60000;
-    static final int REQUEST_3D_SECURE = 14137;
-    static final int REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA = 14138;
+    static final int REQUEST_3D_SECURE = 10000;
+    static final int REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA = 10001;
     static final String API_OPERATION = "UPDATE_PAYER_DATA";
     static final String USER_AGENT = "Gateway-Android-SDK/" + BuildConfig.VERSION_NAME;
     static final String INTERMEDIATE_CA = "-----BEGIN CERTIFICATE-----\n" +
@@ -259,7 +259,7 @@ public class Gateway {
     }
 
     /**
-     * A convenience method helper for handling activity result messages returned from {@link Gateway3DSecureActivity}.
+     * A convenience method for handling activity result messages returned from {@link Gateway3DSecureActivity}.
      * This method should be called within the calling Activity's onActivityResult() lifecycle method.
      * This helper only works if the 3-D Secure Activity was launched using the
      * {@link Gateway#start3DSecureActivity(Activity, String, String)} method.
@@ -268,7 +268,7 @@ public class Gateway {
      * @param resultCode The result code returning from the activity result
      * @param data The intent data returning from the activity result
      * @param callback An implementation of {@link Gateway3DSecureCallback}
-     * @return True if handled, False if not
+     * @return True if handled, False otherwise
      * @see Gateway#start3DSecureActivity(Activity, String)
      * @see Gateway#start3DSecureActivity(Activity, String, String)
      */
@@ -295,22 +295,30 @@ public class Gateway {
 
 
     /**
+     * A convenience method for initializing the request to get Google Pay card info
      *
-     * @param paymentsClient
-     * @param request
-     * @param activity
+     * @param paymentsClient An instance of the PaymentClient
+     * @param request A properly formatted PaymentDataRequest
+     * @param activity The calling activity
+     * @see <a href="https://developers.google.com/pay/api/android/guides/tutorial#paymentsclient">Payments Client</a>
+     * @see <a href="https://developers.google.com/pay/api/android/guides/tutorial#paymentdatarequest">Payment Data Request</a>
      */
     public static void requestGooglePayData(PaymentsClient paymentsClient, PaymentDataRequest request, Activity activity) {
         AutoResolveHelper.resolveTask(paymentsClient.loadPaymentData(request), activity, REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA);
     }
 
     /**
+     * A convenience method for handling activity result messages returned from Google Pay.
+     * This method should be called withing the calling Activity's onActivityResult() lifecycle method.
+     * This helper only works if the Google Pay dialog was launched using the
+     * {@link Gateway#requestGooglePayData(PaymentsClient, PaymentDataRequest, Activity)} method.
      *
-     * @param requestCode
-     * @param resultCode
-     * @param data
-     * @param callback
-     * @return
+     * @param requestCode The request code returning from the activity result
+     * @param resultCode The result code returning from the activity result
+     * @param data The intent data returning from the activity result
+     * @param callback An implementation of {@link GatewayGooglePayCallback}
+     * @return True if handled, False otherwise
+     * @see Gateway#requestGooglePayData(PaymentsClient, PaymentDataRequest, Activity)
      */
     public static boolean handleGooglePayResult(int requestCode, int resultCode, Intent data, GatewayGooglePayCallback callback) {
         if (callback == null) {

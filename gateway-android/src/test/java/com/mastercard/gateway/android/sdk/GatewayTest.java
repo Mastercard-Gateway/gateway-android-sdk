@@ -1,12 +1,23 @@
 package com.mastercard.gateway.android.sdk;
 
 
+import android.app.Activity;
+import android.content.Intent;
+import android.telecom.GatewayInfo;
+
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.wallet.AutoResolveHelper;
+import com.google.android.gms.wallet.PaymentData;
+
+import org.apache.tools.ant.filters.StringInputStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
@@ -15,13 +26,19 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 
+import io.reactivex.Single;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.booleanThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -70,6 +87,178 @@ public class GatewayTest {
         gateway.setRegion(Gateway.Region.ASIA_PACIFIC);
 
         assertEquals(Gateway.Region.ASIA_PACIFIC, gateway.region);
+    }
+
+    @Test
+    public void testUpdateSessionWorksAsExpected() {
+        String sessionId = "session_id";
+        String apiVersion = "1";
+        GatewayMap payload = new GatewayMap();
+        GatewayCallback callback = mock(GatewayCallback.class);
+        String expectedUrl = "some url";
+
+        doReturn(expectedUrl).when(gateway).getUpdateSessionUrl(sessionId, apiVersion);
+        doNothing().when(gateway).runGatewayRequest(any(), any(), any(), any());
+
+        gateway.updateSession(sessionId, apiVersion, payload, callback);
+
+        assertTrue(payload.containsKey("apiOperation"));
+        assertTrue(payload.containsKey("device.browser"));
+        assertEquals(Gateway.API_OPERATION, payload.get("apiOperation"));
+        assertEquals(Gateway.USER_AGENT, payload.get("device.browser"));
+
+        verify(gateway).runGatewayRequest(expectedUrl, Gateway.Method.PUT, payload, callback);
+    }
+
+    @Test
+    public void testUpdateSessionRxWorksAsExpected() {
+        String sessionId = "session_id";
+        String apiVersion = "1";
+        GatewayMap payload = new GatewayMap();
+        Single<GatewayMap> expectedResponse = Single.just(new GatewayMap());
+        String expectedUrl = "some url";
+
+        doReturn(expectedUrl).when(gateway).getUpdateSessionUrl(sessionId, apiVersion);
+        doReturn(expectedResponse).when(gateway).runGatewayRequest(any(), any(), any());
+
+        Single<GatewayMap> response = gateway.updateSession(sessionId, apiVersion, payload);
+
+        assertTrue(payload.containsKey("apiOperation"));
+        assertTrue(payload.containsKey("device.browser"));
+        assertEquals(Gateway.API_OPERATION, payload.get("apiOperation"));
+        assertEquals(Gateway.USER_AGENT, payload.get("device.browser"));
+
+        verify(gateway).runGatewayRequest(expectedUrl, Gateway.Method.PUT, payload);
+
+        assertEquals(expectedResponse, response);
+    }
+
+    @Test
+    public void testHandle3DSecureResultReturnsFalseWithNullCallback() {
+        assertFalse(Gateway.handle3DSecureResult(0, 0, null, null));
+    }
+
+    @Test
+    public void testHandle3DSSecureResultReturnsFalseIfInvalidRequestCode() {
+        int invalidRequestCode = 10;
+        Gateway3DSecureCallback callback = mock(Gateway3DSecureCallback.class);
+
+        assertFalse(Gateway.handle3DSecureResult(invalidRequestCode, 0, null, callback));
+    }
+
+    @Test
+    public void testHandle3DSecureResultCallsCancelIfResultNotOk() {
+        int validRequestCode = Gateway.REQUEST_3D_SECURE;
+        int resultCode = Activity.RESULT_CANCELED;
+        Gateway3DSecureCallback callback = mock(Gateway3DSecureCallback.class);
+
+        boolean result = Gateway.handle3DSecureResult(validRequestCode, resultCode, null, callback);
+
+        assertTrue(result);
+        verify(callback).on3DSecureCancel();
+    }
+
+    @Test
+    public void testHandle3DSecureResultCallsCompleteIfResultOK() {
+        int validRequestCode = Gateway.REQUEST_3D_SECURE;
+        int resultCode = Activity.RESULT_OK;
+        Intent data = mock(Intent.class);
+        String acsResultJson = "{\"foo\":\"bar\"}";
+
+        Gateway3DSecureCallback callback = spy(new Gateway3DSecureCallback() {
+            @Override
+            public void on3DSecureComplete(GatewayMap response) {
+                assertNotNull(response);
+                assertTrue(response.containsKey("foo"));
+                assertEquals("bar", response.get("foo"));
+            }
+
+            @Override
+            public void on3DSecureCancel() {
+                fail("Should never have called cancel");
+            }
+        });
+
+        doReturn(acsResultJson).when(data).getStringExtra(Gateway3DSecureActivity.EXTRA_ACS_RESULT);
+
+
+        boolean result = Gateway.handle3DSecureResult(validRequestCode, resultCode, data, callback);
+
+        assertTrue(result);
+        verify(callback).on3DSecureComplete(any());
+    }
+
+    @Test
+    public void testHandleGooglePayResultReturnsFalseWithNullCallback() {
+        assertFalse(Gateway.handleGooglePayResult(0, 0, null, null));
+    }
+
+    @Test
+    public void testHandleGooglePayResultReturnsFalseIfInvalidRequestCode() {
+        int invalidRequestCode = 10;
+        GatewayGooglePayCallback callback = mock(GatewayGooglePayCallback.class);
+
+        assertFalse(Gateway.handleGooglePayResult(invalidRequestCode, 0, null, callback));
+    }
+
+    @Test
+    public void testHandleGooglePayResultCallsError() {
+        int requestCode = Gateway.REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA;
+        int resultCode = AutoResolveHelper.RESULT_ERROR;
+
+        // mock autoresolvehelper method
+        Status mockStatus = mock(Status.class);
+        Intent mockData = mock(Intent.class);
+        doReturn(mockStatus).when(mockData).getParcelableExtra("com.google.android.gms.common.api.AutoResolveHelper.status");
+
+        GatewayGooglePayCallback callback = spy(new GatewayGooglePayCallback() {
+            @Override
+            public void onReceivedPaymentData(PaymentData paymentData) {
+                fail("Should not have received payment data");
+            }
+
+            @Override
+            public void onGooglePayCancelled() {
+                fail("Should not have called cancelled");
+            }
+
+            @Override
+            public void onGooglePayError(Status status) {
+                assertEquals(mockStatus, status);
+            }
+        });
+
+        boolean result = Gateway.handleGooglePayResult(requestCode, resultCode, mockData, callback);
+
+        assertTrue(result);
+        verify(callback).onGooglePayError(any());
+    }
+
+    @Test
+    public void testHandleGooglePayResultCallsCancelled() {
+        int requestCode = Gateway.REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA;
+        int resultCode = Activity.RESULT_CANCELED;
+
+        GatewayGooglePayCallback callback = mock(GatewayGooglePayCallback.class);
+
+        boolean result = Gateway.handleGooglePayResult(requestCode, resultCode, null, callback);
+
+        assertTrue(result);
+        verify(callback).onGooglePayCancelled();
+    }
+
+    @Test
+    public void testHandleGooglePayResultCallsPaymentDataOnSuccess() {
+        int requestCode = Gateway.REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA;
+        int resultCode = Activity.RESULT_OK;
+        Intent data = new Intent();
+
+        GatewayGooglePayCallback callback = mock(GatewayGooglePayCallback.class);
+
+        boolean result = Gateway.handleGooglePayResult(requestCode, resultCode, data, callback);
+
+        assertTrue(result);
+        verify(callback).onReceivedPaymentData(any());
     }
 
     @Test
@@ -206,5 +395,29 @@ public class GatewayTest {
         assertEquals(expectedUserAgent, c.getRequestProperty("User-Agent"));
         assertEquals(expectedContentType, c.getRequestProperty("Content-Type"));
         assertTrue(c.getDoOutput());
+    }
+
+    @Test
+    public void testIsStatusOkWorksAsIntended() {
+        int tooLow = 199;
+        int tooHigh = 300;
+        int justRight = 200;
+
+        assertFalse(gateway.isStatusCodeOk(tooLow));
+        assertFalse(gateway.isStatusCodeOk(tooHigh));
+        assertTrue(gateway.isStatusCodeOk(justRight));
+    }
+
+    @Test
+    public void testInputStreamToStringWorksAsExpected() {
+        String expectedResult = "here is some string data";
+        InputStream testInputStream = new StringInputStream(expectedResult);
+
+        try {
+            String result = gateway.inputStreamToString(testInputStream);
+            assertEquals(expectedResult, result);
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
     }
 }

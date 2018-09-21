@@ -2,8 +2,6 @@ package com.mastercard.gateway.android.sdk;
 
 import android.net.Uri;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 class Gateway3DSecurePresenter {
@@ -37,7 +35,7 @@ class Gateway3DSecurePresenter {
     void webViewUrlChanges(Uri uri) {
         String scheme = uri.getScheme();
         if (REDIRECT_SCHEME.equalsIgnoreCase(scheme)) {
-            view.complete(getACSResultFromQueryString(uri));
+            view.complete(getACSResultFromUri(uri));
         } else if ("mailto".equalsIgnoreCase(scheme)) {
             view.intentToEmail(uri);
         } else {
@@ -45,7 +43,7 @@ class Gateway3DSecurePresenter {
         }
     }
 
-    String getACSResultFromQueryString(Uri uri) {
+    String getACSResultFromUri(Uri uri) {
         String result = null;
 
         Set<String> params = uri.getQueryParameterNames();

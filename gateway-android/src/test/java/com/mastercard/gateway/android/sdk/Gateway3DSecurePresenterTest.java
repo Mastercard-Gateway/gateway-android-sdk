@@ -10,9 +10,6 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
@@ -125,27 +122,20 @@ public class Gateway3DSecurePresenterTest {
 
         Gateway3DSecurePresenter presenterSpy = spy(presenter);
 
-        Map<String, String> queryData = new HashMap<>();
-        doReturn(queryData).when(presenterSpy).parseQueryString(mockUri);
+        String acsResult = "{}";
+        doReturn(acsResult).when(presenterSpy).getACSResultFromUri(mockUri);
 
         presenterSpy.webViewUrlChanges(mockUri);
 
-        verify(mockView).complete(queryData);
+        verify(mockView).complete(acsResult);
     }
 
     @Test
-    public void testParseQueryStringWorksCorrectly() {
-        Uri testUri = Uri.parse("gatewaysdk://3dsecure?3DSecureId=someid&summaryStatus=allgood&otherData=extra+info&moreData=stuff");
+    public void testGetACSResultFromUriWorksCorrectly() {
+        Uri testUri = Uri.parse("gatewaysdk://3dsecure?acsResult={}");
 
-        Map<String, String> data = presenter.parseQueryString(testUri);
+        String acsResult = presenter.getACSResultFromUri(testUri);
 
-        assertTrue(data.containsKey("3DSecureId"));
-        assertTrue(data.containsKey("summaryStatus"));
-        assertTrue(data.containsKey("otherData"));
-        assertTrue(data.containsKey("moreData"));
-        assertEquals("someid", data.get("3DSecureId"));
-        assertEquals("allgood", data.get("summaryStatus"));
-        assertEquals("extra info", data.get("otherData"));
-        assertEquals("stuff", data.get("moreData"));
+        assertEquals("{}", acsResult);
     }
 }
