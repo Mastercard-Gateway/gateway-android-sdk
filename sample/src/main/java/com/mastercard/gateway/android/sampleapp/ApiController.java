@@ -234,7 +234,7 @@ public class ApiController {
         }
 
         if (!response.containsKey("gatewayResponse.result") || !"SUCCESS".equalsIgnoreCase((String) response.get("gatewayResponse.result"))) {
-            throw new RuntimeException("Payment result: " + response.get("gatewayResponse.result") + "; Payload: " + jsonResponse);
+            throw new RuntimeException("Error processing payment");
         }
 
         return (String) response.get("gatewayResponse.result");

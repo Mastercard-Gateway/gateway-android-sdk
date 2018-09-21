@@ -3,8 +3,11 @@ package com.mastercard.gateway.android.sampleapp;
 import android.app.Activity;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.graphics.Paint;
 import android.os.Bundle;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -59,6 +62,7 @@ public class ProcessPaymentActivity extends AppCompatActivity {
         // bind buttons
         binding.startButton.setOnClickListener(v -> createSession());
         binding.confirmButton.setOnClickListener(v -> {
+            // 3DS is not applicable to Google Pay transactions
             if (isGooglePay) {
                 processPayment();
             } else {
@@ -67,7 +71,7 @@ public class ProcessPaymentActivity extends AppCompatActivity {
         });
         binding.doneButton.setOnClickListener(v -> finish());
 
-        reset();
+        initUI();
     }
 
     @Override
@@ -91,6 +95,8 @@ public class ProcessPaymentActivity extends AppCompatActivity {
                 if (googlePayToken != null) {
                     isGooglePay = true;
 
+                    binding.check3dsLabel.setPaintFlags(binding.check3dsLabel.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+
                     String paymentToken = data.getStringExtra(CollectCardInfoActivity.EXTRA_PAYMENT_TOKEN);
 
                     updateSession(paymentToken);
@@ -109,7 +115,7 @@ public class ProcessPaymentActivity extends AppCompatActivity {
             } else {
                 binding.collectCardInfoError.setVisibility(View.VISIBLE);
 
-                resetButtons();
+                showResult(R.drawable.failed, R.string.pay_error_card_info_not_collected);
             }
 
             return;
@@ -118,7 +124,7 @@ public class ProcessPaymentActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    void reset() {
+    void initUI() {
         binding.createSessionProgress.setVisibility(View.GONE);
         binding.createSessionSuccess.setVisibility(View.GONE);
         binding.createSessionError.setVisibility(View.GONE);
@@ -139,10 +145,6 @@ public class ProcessPaymentActivity extends AppCompatActivity {
         binding.processPaymentSuccess.setVisibility(View.GONE);
         binding.processPaymentError.setVisibility(View.GONE);
 
-        resetButtons();
-    }
-
-    void resetButtons() {
         binding.startButton.setEnabled(true);
         binding.confirmButton.setEnabled(true);
 
@@ -152,8 +154,6 @@ public class ProcessPaymentActivity extends AppCompatActivity {
     }
 
     void createSession() {
-        reset();
-
         binding.startButton.setEnabled(false);
         binding.createSessionProgress.setVisibility(View.VISIBLE);
 
@@ -210,6 +210,14 @@ public class ProcessPaymentActivity extends AppCompatActivity {
         apiController.completeSession(sessionId, orderId, transactionId, AMOUNT, CURRENCY, threeDSecureId, isGooglePay, new CompleteSessionCallback());
     }
 
+    void showResult(@DrawableRes int iconId, @StringRes int messageId) {
+        binding.resultIcon.setImageResource(iconId);
+        binding.resultText.setText(messageId);
+
+        binding.groupConfirm.setVisibility(View.GONE);
+        binding.groupResult.setVisibility(View.VISIBLE);
+    }
+
 
     class CreateSessionCallback implements ApiController.CreateSessionCallback {
         @Override
@@ -227,12 +235,11 @@ public class ProcessPaymentActivity extends AppCompatActivity {
         @Override
         public void onError(Throwable throwable) {
             Log.e(ProcessPaymentActivity.class.getSimpleName(), throwable.getMessage(), throwable);
-            Toast.makeText(ProcessPaymentActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
 
             binding.createSessionProgress.setVisibility(View.GONE);
             binding.createSessionError.setVisibility(View.VISIBLE);
 
-            resetButtons();
+            showResult(R.drawable.failed, R.string.pay_error_unable_to_create_session);
         }
     }
 
@@ -250,12 +257,11 @@ public class ProcessPaymentActivity extends AppCompatActivity {
         @Override
         public void onError(Throwable throwable) {
             Log.e(ProcessPaymentActivity.class.getSimpleName(), throwable.getMessage(), throwable);
-            Toast.makeText(ProcessPaymentActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
 
             binding.updateSessionProgress.setVisibility(View.GONE);
             binding.updateSessionError.setVisibility(View.VISIBLE);
 
-            resetButtons();
+            showResult(R.drawable.failed, R.string.pay_error_unable_to_update_session);
         }
     }
 
@@ -300,7 +306,7 @@ public class ProcessPaymentActivity extends AppCompatActivity {
                     binding.check3dsProgress.setVisibility(View.GONE);
                     binding.check3dsError.setVisibility(View.VISIBLE);
 
-                    resetButtons();
+                    showResult(R.drawable.failed, R.string.pay_error_3ds_authentication_failed);
                     return;
                 }
 
@@ -319,12 +325,11 @@ public class ProcessPaymentActivity extends AppCompatActivity {
         @Override
         public void onError(Throwable throwable) {
             Log.e(ProcessPaymentActivity.class.getSimpleName(), throwable.getMessage(), throwable);
-            Toast.makeText(ProcessPaymentActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
 
             binding.check3dsProgress.setVisibility(View.GONE);
             binding.check3dsError.setVisibility(View.VISIBLE);
 
-            resetButtons();
+            showResult(R.drawable.failed, R.string.pay_error_3ds_authentication_failed);
         }
     }
 
@@ -362,35 +367,27 @@ public class ProcessPaymentActivity extends AppCompatActivity {
             binding.check3dsProgress.setVisibility(View.GONE);
             binding.check3dsError.setVisibility(View.VISIBLE);
 
-            resetButtons();
+            showResult(R.drawable.failed, R.string.pay_error_3ds_authentication_failed);
         }
     }
 
     class CompleteSessionCallback implements ApiController.CompleteSessionCallback {
         @Override
         public void onSuccess(String result) {
-            binding.resultIcon.setImageResource(R.drawable.success);
-            binding.resultText.setText(R.string.pay_you_payment_was_successful);
-
             binding.processPaymentProgress.setVisibility(View.GONE);
             binding.processPaymentSuccess.setVisibility(View.VISIBLE);
 
-            binding.groupConfirm.setVisibility(View.GONE);
-            binding.groupResult.setVisibility(View.VISIBLE);
+            showResult(R.drawable.success, R.string.pay_you_payment_was_successful);
         }
 
         @Override
         public void onError(Throwable throwable) {
-            throwable.printStackTrace();
-
-            binding.resultIcon.setImageResource(R.drawable.failed);
-            binding.resultText.setText(R.string.pay_error_processing_your_payment);
+            Log.e(ProcessPaymentActivity.class.getSimpleName(), throwable.getMessage(), throwable);
 
             binding.processPaymentProgress.setVisibility(View.GONE);
             binding.processPaymentError.setVisibility(View.VISIBLE);
 
-            binding.groupConfirm.setVisibility(View.GONE);
-            binding.groupResult.setVisibility(View.VISIBLE);
+            showResult(R.drawable.failed, R.string.pay_error_processing_your_payment);
         }
     }
 }

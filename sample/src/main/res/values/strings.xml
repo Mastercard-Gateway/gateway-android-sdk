@@ -20,8 +20,12 @@
 
     <!-- strings related to process payment screen -->
     <string name="result_cdesc">result</string>
-    <string name="pay_you_payment_was_successful">Your payment was successful!</string>
-    <string name="pay_error_processing_your_payment">Error processing your payment!</string>
+    <string name="pay_you_payment_was_successful">Your payment was successful</string>
+    <string name="pay_error_card_info_not_collected">Card info not collected</string>
+    <string name="pay_error_processing_your_payment">Error processing your payment</string>
+    <string name="pay_error_3ds_authentication_failed">3DS authentication failed</string>
+    <string name="pay_error_unable_to_update_session">Unable to update session</string>
+    <string name="pay_error_unable_to_create_session">Unable to create session</string>
     <string name="pay_steps">Steps:</string>
     <string name="pay_1_create_session">1. Create Session</string>
     <string name="pay_2_collect_card_info">2. Collect Card Info</string>
