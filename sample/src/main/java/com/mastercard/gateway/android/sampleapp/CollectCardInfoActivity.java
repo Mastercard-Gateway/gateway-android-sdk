@@ -15,18 +15,19 @@ import android.widget.Toast;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.Task;
-import com.google.android.gms.wallet.CardRequirements;
 import com.google.android.gms.wallet.IsReadyToPayRequest;
 import com.google.android.gms.wallet.PaymentData;
 import com.google.android.gms.wallet.PaymentDataRequest;
-import com.google.android.gms.wallet.PaymentMethodTokenizationParameters;
 import com.google.android.gms.wallet.PaymentsClient;
-import com.google.android.gms.wallet.TransactionInfo;
 import com.google.android.gms.wallet.Wallet;
 import com.google.android.gms.wallet.WalletConstants;
 import com.mastercard.gateway.android.sampleapp.databinding.ActivityCollectCardInfoBinding;
 import com.mastercard.gateway.android.sdk.Gateway;
 import com.mastercard.gateway.android.sdk.GatewayGooglePayCallback;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Arrays;
 
@@ -134,18 +135,34 @@ public class CollectCardInfoActivity extends AppCompatActivity {
     }
 
     void googlePayButtonClicked() {
-        PaymentDataRequest request = createPaymentDataRequest();
-
-        // use the Gateway convenience handler for launching the Google Pay flow
-        Gateway.requestGooglePayData(paymentsClient, request, CollectCardInfoActivity.this);
+        try {
+            PaymentDataRequest request = PaymentDataRequest.fromJson(getPaymentDataRequest().toString());
+            if (request != null) {
+                // use the Gateway convenience handler for launching the Google Pay flow
+                Gateway.requestGooglePayData(paymentsClient, request, CollectCardInfoActivity.this);
+            }
+        } catch (JSONException e) {
+            Toast.makeText(this, "Could not request payment data", Toast.LENGTH_SHORT).show();
+        }
     }
 
-    void returnCardInfo(PaymentData paymentData) {
+    void returnCardInfo(JSONObject paymentData) {
         Intent i = new Intent();
-        i.putExtra(EXTRA_CARD_DESCRIPTION, paymentData.getCardInfo().getCardDescription());
-        i.putExtra(EXTRA_PAYMENT_TOKEN, paymentData.getPaymentMethodToken().getToken());
 
-        setResult(Activity.RESULT_OK, i);
+        try {
+            JSONObject paymentMethodData = paymentData.getJSONObject("paymentMethodData");
+            String description = paymentMethodData.getString("description");
+            String token = paymentMethodData.getJSONObject("tokenizationData")
+                    .getString("token");
+
+            i.putExtra(EXTRA_CARD_DESCRIPTION, description);
+            i.putExtra(EXTRA_PAYMENT_TOKEN, token);
+
+            setResult(Activity.RESULT_OK, i);
+        } catch (Exception e) {
+            setResult(Activity.RESULT_CANCELED, i);
+        }
+
         finish();
     }
 
@@ -157,54 +174,95 @@ public class CollectCardInfoActivity extends AppCompatActivity {
     }
 
     void isReadyToPay() {
-        IsReadyToPayRequest request = IsReadyToPayRequest.newBuilder()
-                .addAllowedPaymentMethod(WalletConstants.PAYMENT_METHOD_CARD)
-                .addAllowedPaymentMethod(WalletConstants.PAYMENT_METHOD_TOKENIZED_CARD)
-                .build();
+        try {
+            IsReadyToPayRequest request = IsReadyToPayRequest.fromJson(getIsReadyToPayRequest().toString());
 
-        Task<Boolean> task = paymentsClient.isReadyToPay(request);
-        task.addOnCompleteListener(task1 -> {
-            try {
-                boolean result = task1.getResult(ApiException.class);
-                if (result) {
-                    // Show Google as payment option.
-                    binding.orSeparator.setVisibility(View.VISIBLE);
-                    binding.googlePayButton.setVisibility(View.VISIBLE);
-                } else {
-                    // Hide Google as payment option.
-                    binding.orSeparator.setVisibility(View.GONE);
-                    binding.googlePayButton.setVisibility(View.GONE);
+            Task<Boolean> task = paymentsClient.isReadyToPay(request);
+            task.addOnCompleteListener(task12 -> {
+                try {
+                    boolean result = task12.getResult(ApiException.class);
+                    if (result) {
+                        // Show Google as payment option.
+                        binding.orSeparator.setVisibility(View.VISIBLE);
+                        binding.googlePayButton.setVisibility(View.VISIBLE);
+                    } else {
+                        // Hide Google as payment option.
+                        binding.orSeparator.setVisibility(View.GONE);
+                        binding.googlePayButton.setVisibility(View.GONE);
+                    }
+                } catch (ApiException e) {
                 }
-            } catch (ApiException exception) {
-            }
-        });
+            });
+        } catch (JSONException e) {
+            // do nothing
+        }
     }
 
-    PaymentDataRequest createPaymentDataRequest() {
-        PaymentDataRequest.Builder request = PaymentDataRequest.newBuilder()
-                .setTransactionInfo(TransactionInfo.newBuilder()
-                        .setTotalPriceStatus(WalletConstants.TOTAL_PRICE_STATUS_FINAL)
-                        .setTotalPrice(googlePayTxnAmount)
-                        .setCurrencyCode(googlePayTxnCurrency)
-                        .build())
-                .addAllowedPaymentMethod(WalletConstants.PAYMENT_METHOD_CARD)
-                .addAllowedPaymentMethod(WalletConstants.PAYMENT_METHOD_TOKENIZED_CARD)
-                .setCardRequirements(CardRequirements.newBuilder()
-                        .addAllowedCardNetworks(Arrays.asList(
-                                WalletConstants.CARD_NETWORK_AMEX,
-                                WalletConstants.CARD_NETWORK_DISCOVER,
-                                WalletConstants.CARD_NETWORK_VISA,
-                                WalletConstants.CARD_NETWORK_MASTERCARD))
-                        .build());
+    JSONObject getIsReadyToPayRequest() throws JSONException {
+        return getBaseRequest()
+                .put("allowedPaymentMethods", new JSONArray()
+                        .put(getBaseCardPaymentMethod()));
+    }
 
-        PaymentMethodTokenizationParameters params = PaymentMethodTokenizationParameters.newBuilder()
-                .setPaymentMethodTokenizationType(WalletConstants.PAYMENT_METHOD_TOKENIZATION_TYPE_PAYMENT_GATEWAY)
-                .addParameter("gateway", "mpgs")
-                .addParameter("gatewayMerchantId", Config.MERCHANT_ID.getValue(this))
-                .build();
+    JSONObject getCardPaymentMethod() throws JSONException {
+        return getBaseCardPaymentMethod()
+                .put("tokenizationSpecification", getTokenizationSpecification());
+    }
 
-        request.setPaymentMethodTokenizationParameters(params);
-        return request.build();
+    JSONObject getBaseRequest() throws JSONException {
+        return new JSONObject()
+                .put("apiVersion", 2)
+                .put("apiVersionMinor", 0);
+    }
+
+    JSONObject getBaseCardPaymentMethod() throws JSONException {
+        return new JSONObject()
+                .put("type", "CARD")
+                .put("parameters", new JSONObject()
+                        .put("allowedAuthMethods", getAllowedCardAuthMethods())
+                        .put("allowedCardNetworks", getAllowedCardNetworks()));
+    }
+
+    JSONArray getAllowedCardNetworks() {
+        return new JSONArray()
+                .put("AMEX")
+                .put("DISCOVER")
+                .put("MASTERCARD")
+                .put("VISA");
+    }
+
+    JSONArray getAllowedCardAuthMethods() {
+        return new JSONArray()
+                .put("PAN_ONLY")
+                .put("CRYPTOGRAM_3DS");
+    }
+
+    JSONObject getTokenizationSpecification() throws JSONException {
+        return new JSONObject()
+                .put("type", "PAYMENT_GATEWAY")
+                .put("parameters", new JSONObject()
+                        .put("gateway", "mpgs")
+                        .put("gatewayMerchantId", Config.MERCHANT_ID.getValue(this)));
+    }
+
+    JSONObject getTransactionInfo() throws JSONException {
+        return new JSONObject()
+                .put("totalPrice", googlePayTxnAmount)
+                .put("totalPriceStatus", "FINAL")
+                .put("currencyCode", googlePayTxnCurrency);
+    }
+
+    JSONObject getMerchantInfo() throws JSONException {
+        return new JSONObject()
+                .put("merchantName", "Example Merchant");
+    }
+
+    JSONObject getPaymentDataRequest() throws JSONException {
+        return getBaseRequest()
+                .put("allowedPaymentMethods", new JSONArray()
+                        .put(getCardPaymentMethod()))
+                .put("transactionInfo", getTransactionInfo())
+                .put("merchantInfo", getMerchantInfo());
     }
 
     class TextChangeListener implements TextWatcher {
@@ -226,8 +284,15 @@ public class CollectCardInfoActivity extends AppCompatActivity {
 
     class GooglePayCallback implements GatewayGooglePayCallback {
         @Override
-        public void onReceivedPaymentData(PaymentData paymentData) {
-            Log.d(GooglePayCallback.class.getSimpleName(), "ReceivedPaymentData: " + paymentData.getCardInfo().getCardDescription());
+        public void onReceivedPaymentData(JSONObject paymentData) {
+            try {
+                String description = paymentData.getJSONObject("paymentMethodData")
+                        .getString("description");
+
+                Log.d(GooglePayCallback.class.getSimpleName(), "ReceivedPaymentData: " + description);
+            } catch (Exception e) {
+
+            }
 
             returnCardInfo(paymentData);
         }

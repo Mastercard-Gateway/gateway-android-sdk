@@ -24,10 +24,13 @@ import android.os.Message;
 
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.wallet.AutoResolveHelper;
+
 import com.google.android.gms.wallet.PaymentData;
 import com.google.android.gms.wallet.PaymentDataRequest;
 import com.google.android.gms.wallet.PaymentsClient;
 import com.google.gson.Gson;
+
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -327,8 +330,13 @@ public class Gateway {
 
         if (requestCode == REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA) {
             if (resultCode == Activity.RESULT_OK) {
-                PaymentData paymentData = PaymentData.getFromIntent(data);
-                callback.onReceivedPaymentData(paymentData);
+                try {
+                    PaymentData paymentData = PaymentData.getFromIntent(data);
+                    JSONObject json = new JSONObject(paymentData.toJson());
+                    callback.onReceivedPaymentData(json);
+                } catch (Exception e) {
+                    callback.onGooglePayError(Status.RESULT_INTERNAL_ERROR);
+                }
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 callback.onGooglePayCancelled();
             } else if (resultCode == AutoResolveHelper.RESULT_ERROR) {

@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
 
     defaultConfig {
         applicationId 'com.mastercard.gateway.android.sampleapp'
         minSdkVersion 19
-        targetSdkVersion 27
+        targetSdkVersion 28
         versionCode 1
         versionName '1.0.0'
 
@@ -39,10 +39,10 @@ android {
 }
 
 ext {
-    supportLibraryVersion = '27.1.1'
-    constraintLayoutVersion = '1.1.0'
+    supportLibraryVersion = '28.0.0'
+    constraintLayoutVersion = '1.1.3'
     gsonVersion = '2.8.2'
-    playServicesWalletVersion = '15.0.0'
+    playServicesWalletVersion = '16.0.0'
     materialValuesVersion = '1.1.1'
 
     jUnitVersion = '4.12'

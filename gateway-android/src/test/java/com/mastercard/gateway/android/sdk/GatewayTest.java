@@ -10,6 +10,7 @@ import com.google.android.gms.wallet.AutoResolveHelper;
 import com.google.android.gms.wallet.PaymentData;
 
 import org.apache.tools.ant.filters.StringInputStream;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -213,7 +214,7 @@ public class GatewayTest {
 
         GatewayGooglePayCallback callback = spy(new GatewayGooglePayCallback() {
             @Override
-            public void onReceivedPaymentData(PaymentData paymentData) {
+            public void onReceivedPaymentData(JSONObject paymentData) {
                 fail("Should not have received payment data");
             }
 
@@ -251,7 +252,9 @@ public class GatewayTest {
     public void testHandleGooglePayResultCallsPaymentDataOnSuccess() {
         int requestCode = Gateway.REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA;
         int resultCode = Activity.RESULT_OK;
+        PaymentData pData = PaymentData.fromJson("{}");
         Intent data = new Intent();
+        pData.putIntoIntent(data);
 
         GatewayGooglePayCallback callback = mock(GatewayGooglePayCallback.class);
 
