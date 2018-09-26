@@ -252,6 +252,11 @@ public class Gateway {
      */
     public static void start3DSecureActivity(Activity activity, String html, String title) {
         Intent intent = new Intent(activity, Gateway3DSecureActivity.class);
+        start3DSecureActivity(activity, html, title, intent);
+    }
+
+    // separated for testability
+    static void start3DSecureActivity(Activity activity, String html, String title, Intent intent) {
         intent.putExtra(Gateway3DSecureActivity.EXTRA_HTML, html); // required
 
         if (title != null) {

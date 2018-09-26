@@ -135,6 +135,36 @@ public class GatewayTest {
     }
 
     @Test
+    public void testStart3DSecureActivitySkipsTitleIfNull() {
+        Activity activity = mock(Activity.class);
+        Intent intent = new Intent();
+        String testHtml = "html";
+
+        Gateway.start3DSecureActivity(activity, testHtml, null, intent);
+
+        verify(activity).startActivityForResult(intent, Gateway.REQUEST_3D_SECURE);
+        assertTrue(intent.hasExtra(Gateway3DSecureActivity.EXTRA_HTML));
+        assertFalse(intent.hasExtra(Gateway3DSecureActivity.EXTRA_TITLE));
+        assertEquals(testHtml, intent.getStringExtra(Gateway3DSecureActivity.EXTRA_HTML));
+    }
+
+    @Test
+    public void testStart3DSecureActivityWorksAsExpected() {
+        Activity activity = mock(Activity.class);
+        Intent intent = new Intent();
+        String testHtml = "html";
+        String testTitle = "title";
+
+        Gateway.start3DSecureActivity(activity, testHtml, testTitle, intent);
+
+        verify(activity).startActivityForResult(intent, Gateway.REQUEST_3D_SECURE);
+        assertTrue(intent.hasExtra(Gateway3DSecureActivity.EXTRA_HTML));
+        assertTrue(intent.hasExtra(Gateway3DSecureActivity.EXTRA_TITLE));
+        assertEquals(testHtml, intent.getStringExtra(Gateway3DSecureActivity.EXTRA_HTML));
+        assertEquals(testTitle, intent.getStringExtra(Gateway3DSecureActivity.EXTRA_TITLE));
+    }
+
+    @Test
     public void testHandle3DSecureResultReturnsFalseWithNullCallback() {
         assertFalse(Gateway.handle3DSecureResult(0, 0, null, null));
     }
