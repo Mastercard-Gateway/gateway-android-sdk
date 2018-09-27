@@ -13,11 +13,10 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import java.util.Map;
 import java.util.Set;
 
 
-public class Gateway3DSecureActivity extends AppCompatActivity implements Gateway3DSecureView {
+public class Gateway3DSecureActivity extends AppCompatActivity {
 
     /**
      * The HTML used to initialize the WebView. Should be the HTML content returned from the Gateway
@@ -36,10 +35,11 @@ public class Gateway3DSecureActivity extends AppCompatActivity implements Gatewa
     public static final String EXTRA_ACS_RESULT = "com.mastercard.gateway.android.ACS_RESULT";
 
 
+    static final String REDIRECT_SCHEME = "gatewaysdk";
+
     Toolbar toolbar;
     WebView webView;
 
-    Gateway3DSecurePresenter presenter = new Gateway3DSecurePresenter();
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
@@ -49,7 +49,7 @@ public class Gateway3DSecureActivity extends AppCompatActivity implements Gatewa
 
         // init toolbar
         toolbar = findViewById(R.id.toolbar);
-        toolbar.setNavigationOnClickListener(view -> cancel());
+        toolbar.setNavigationOnClickListener(view -> onBackPressed());
 
         // init web view
         webView = findViewById(R.id.webview);
@@ -58,23 +58,30 @@ public class Gateway3DSecureActivity extends AppCompatActivity implements Gatewa
         webView.getSettings().setJavaScriptEnabled(true);
         webView.setWebViewClient(buildWebViewClient());
 
-        presenter.attachView(this);
+        init();
     }
 
-    @Override
-    protected void onDestroy() {
-        presenter.detachView();
+    void init() {
+        // init html
+        String extraHtml = getExtraHtml();
+        if (extraHtml == null) {
+            onBackPressed();
+            return;
+        } else {
+            setWebViewHtml(extraHtml);
+        }
 
-        super.onDestroy();
+        // init title
+        String defaultTitle = getDefaultTitle();
+        String extraTitle = getExtraTitle();
+        setToolbarTitle(extraTitle != null ? extraTitle : defaultTitle);
     }
 
-    @Override
-    public String getDefaultTitle() {
+    String getDefaultTitle() {
         return getString(R.string.gateway_3d_secure_authentication);
     }
 
-    @Override
-    public String getExtraTitle() {
+    String getExtraTitle() {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             return extras.getString(EXTRA_TITLE);
@@ -83,8 +90,7 @@ public class Gateway3DSecureActivity extends AppCompatActivity implements Gatewa
         return null;
     }
 
-    @Override
-    public String getExtraHtml() {
+    String getExtraHtml() {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             return extras.getString(EXTRA_HTML);
@@ -93,49 +99,72 @@ public class Gateway3DSecureActivity extends AppCompatActivity implements Gatewa
         return null;
     }
 
-    @Override
-    public void setToolbarTitle(String title) {
+    void setToolbarTitle(String title) {
         toolbar.setTitle(title);
     }
 
-    @Override
-    public void setWebViewHtml(String html) {
+    void setWebViewHtml(String html) {
         webView.loadData(html, "text/html", "utf-8");
     }
 
-    @Override
-    public void loadWebViewUrl(Uri uri) {
+    void webViewUrlChanges(Uri uri) {
+        String scheme = uri.getScheme();
+        if (REDIRECT_SCHEME.equalsIgnoreCase(scheme)) {
+            complete(getACSResultFromUri(uri));
+        } else if ("mailto".equalsIgnoreCase(scheme)) {
+            intentToEmail(uri);
+        } else {
+            loadWebViewUrl(uri);
+        }
+    }
+
+    void complete(String acsResult) {
+        Intent intent = new Intent();
+        complete(acsResult, intent);
+    }
+
+    // separate for testability
+    void complete(String acsResult, Intent intent) {
+        intent.putExtra(EXTRA_ACS_RESULT, acsResult);
+        setResult(Activity.RESULT_OK, intent);
+        finish();
+    }
+
+    void loadWebViewUrl(Uri uri) {
         webView.loadUrl(uri.toString());
     }
 
-    @Override
-    public void intentToEmail(Uri uri) {
+    void intentToEmail(Uri uri) {
         Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
-        emailIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        emailIntent.setData(uri);
-
-        startActivity(emailIntent);
+        intentToEmail(uri, emailIntent);
     }
 
-    @Override
-    public void cancel() {
-        onBackPressed();
+    // separate for testability
+    void intentToEmail(Uri uri, Intent intent) {
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setData(uri);
+
+        startActivity(intent);
     }
 
-    @Override
-    public void complete(String acsResult) {
-        Intent intent = new Intent();
-        intent.putExtra(EXTRA_ACS_RESULT, acsResult);
+    String getACSResultFromUri(Uri uri) {
+        String result = null;
 
-        setResult(Activity.RESULT_OK, intent);
-        finish();
+        Set<String> params = uri.getQueryParameterNames();
+        for (String param : params) {
+            if ("acsResult".equalsIgnoreCase(param)) {
+                result = uri.getQueryParameter(param);
+            }
+        }
+
+        return result;
     }
 
     WebViewClient buildWebViewClient() {
         return new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                presenter.webViewUrlChanges(Uri.parse(url));
+                webViewUrlChanges(Uri.parse(url));
                 return true;
             }
         };
