@@ -1,5 +1,9 @@
 # CHANGES
 
+### 1.1.0
+* Adding support for Google Pay
+* New sample app UI
+
 ### 1.0.1
 * Consuming all query params from 3DS redirect
 * Support for API 47 3DS response data
