@@ -18,6 +18,7 @@ package com.mastercard.gateway.android.sampleapp;
 
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.BoolRes;
 import android.util.Base64;
 import android.util.Log;
 import android.util.Pair;
@@ -135,7 +136,7 @@ public class ApiController {
         }).start();
     }
 
-    public void completeSession(final String sessionId, final String orderId, final String transactionId, final String amount, final String currency, final String threeDSecureId, final CompleteSessionCallback callback) {
+    public void completeSession(final String sessionId, final String orderId, final String transactionId, final String amount, final String currency, final String threeDSecureId, final Boolean isGooglePay, final CompleteSessionCallback callback) {
         final Handler handler = new Handler(message -> {
             if (callback != null) {
                 if (message.obj instanceof Throwable) {
@@ -150,7 +151,7 @@ public class ApiController {
         new Thread(() -> {
             Message m = handler.obtainMessage();
             try {
-                m.obj = executeCompleteSession(sessionId, orderId, transactionId, amount, currency, threeDSecureId);
+                m.obj = executeCompleteSession(sessionId, orderId, transactionId, amount, currency, threeDSecureId, isGooglePay);
             } catch (Exception e) {
                 m.obj = e;
             }
@@ -196,20 +197,30 @@ public class ApiController {
             throw new RuntimeException("Could not read gateway response");
         }
 
+        // if there is an error result, throw it
+        if (response.containsKey("gatewayResponse.result") && "ERROR".equalsIgnoreCase((String) response.get("gatewayResponse.result"))) {
+            throw new RuntimeException("Check 3DS Enrollment Error: " + response.get("gatewayResponse.error.explanation"));
+        }
+
         return response;
     }
 
-    String executeCompleteSession(String sessionId, String orderId, String transactionId, String amount, String currency, String threeDSecureId) throws Exception {
+    String executeCompleteSession(String sessionId, String orderId, String transactionId, String amount, String currency, String threeDSecureId, Boolean isGooglePay) throws Exception {
         GatewayMap request = new GatewayMap()
                 .set("apiOperation", "PAY")
                 .set("session.id", sessionId)
                 .set("order.amount", amount)
                 .set("order.currency", currency)
                 .set("sourceOfFunds.type", "CARD")
+                .set("transaction.source", "INTERNET")
                 .set("transaction.frequency", "SINGLE");
 
         if (threeDSecureId != null) {
             request.put("3DSecureId", threeDSecureId);
+        }
+
+        if (isGooglePay) {
+            request.put("order.walletProvider", "GOOGLE_PAY");
         }
 
         String jsonRequest = GSON.toJson(request);
@@ -223,7 +234,7 @@ public class ApiController {
         }
 
         if (!response.containsKey("gatewayResponse.result") || !"SUCCESS".equalsIgnoreCase((String) response.get("gatewayResponse.result"))) {
-            throw new RuntimeException("Payment result: " + response.get("gatewayResponse.result") + "; Payload: " + jsonResponse);
+            throw new RuntimeException("Error processing payment");
         }
 
         return (String) response.get("gatewayResponse.result");

@@ -22,7 +22,15 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.wallet.AutoResolveHelper;
+
+import com.google.android.gms.wallet.PaymentData;
+import com.google.android.gms.wallet.PaymentDataRequest;
+import com.google.android.gms.wallet.PaymentsClient;
 import com.google.gson.Gson;
+
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -35,7 +43,6 @@ import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.Set;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -62,10 +69,10 @@ public class Gateway {
      * The available gateway regions
      */
     public enum Region {
-        ASIA_PACIFIC("ap"),
-        EUROPE("eu"),
-        NORTH_AMERICA("na"),
-        MTF("test");
+        ASIA_PACIFIC("ap-"),
+        EUROPE("eu-"),
+        NORTH_AMERICA("na-"),
+        MTF("test-");
 
         String prefix;
 
@@ -87,7 +94,8 @@ public class Gateway {
     static final int MIN_API_VERSION = 39;
     static final int CONNECTION_TIMEOUT = 15000;
     static final int READ_TIMEOUT = 60000;
-    static final int REQUEST_3D_SECURE = 14137;
+    static final int REQUEST_3D_SECURE = 10000;
+    static final int REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA = 10001;
     static final String API_OPERATION = "UPDATE_PAYER_DATA";
     static final String USER_AGENT = "Gateway-Android-SDK/" + BuildConfig.VERSION_NAME;
     static final String INTERMEDIATE_CA = "-----BEGIN CERTIFICATE-----\n" +
@@ -244,6 +252,11 @@ public class Gateway {
      */
     public static void start3DSecureActivity(Activity activity, String html, String title) {
         Intent intent = new Intent(activity, Gateway3DSecureActivity.class);
+        start3DSecureActivity(activity, html, title, intent);
+    }
+
+    // separated for testability
+    static void start3DSecureActivity(Activity activity, String html, String title, Intent intent) {
         intent.putExtra(Gateway3DSecureActivity.EXTRA_HTML, html); // required
 
         if (title != null) {
@@ -254,7 +267,7 @@ public class Gateway {
     }
 
     /**
-     * A convenience method helper for handling activity result messages returned from {@link Gateway3DSecureActivity}.
+     * A convenience method for handling activity result messages returned from {@link Gateway3DSecureActivity}.
      * This method should be called within the calling Activity's onActivityResult() lifecycle method.
      * This helper only works if the 3-D Secure Activity was launched using the
      * {@link Gateway#start3DSecureActivity(Activity, String, String)} method.
@@ -263,27 +276,77 @@ public class Gateway {
      * @param resultCode The result code returning from the activity result
      * @param data The intent data returning from the activity result
      * @param callback An implementation of {@link Gateway3DSecureCallback}
-     * @return True if handled, False if not
+     * @return True if handled, False otherwise
      * @see Gateway#start3DSecureActivity(Activity, String)
      * @see Gateway#start3DSecureActivity(Activity, String, String)
      */
     public static boolean handle3DSecureResult(int requestCode, int resultCode, Intent data, Gateway3DSecureCallback callback) {
-        if (data == null || callback == null) {
+        if (callback == null) {
             return false;
         }
 
         if (requestCode == REQUEST_3D_SECURE) {
             if (resultCode == Activity.RESULT_OK) {
-                GatewayMap response = new GatewayMap();
+                String acsResultJson = data.getStringExtra(Gateway3DSecureActivity.EXTRA_ACS_RESULT);
+                GatewayMap acsResult = new GatewayMap(acsResultJson);
 
-                Set<String> keys = data.getExtras().keySet();
-                for (String key : keys) {
-                    response.put(key, data.getStringExtra(key));
-                }
-
-                callback.on3DSecureComplete(response);
+                callback.on3DSecureComplete(acsResult);
             } else {
                 callback.on3DSecureCancel();
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+
+    /**
+     * A convenience method for initializing the request to get Google Pay card info
+     *
+     * @param paymentsClient An instance of the PaymentClient
+     * @param request A properly formatted PaymentDataRequest
+     * @param activity The calling activity
+     * @see <a href="https://developers.google.com/pay/api/android/guides/tutorial#paymentsclient">Payments Client</a>
+     * @see <a href="https://developers.google.com/pay/api/android/guides/tutorial#paymentdatarequest">Payment Data Request</a>
+     */
+    public static void requestGooglePayData(PaymentsClient paymentsClient, PaymentDataRequest request, Activity activity) {
+        AutoResolveHelper.resolveTask(paymentsClient.loadPaymentData(request), activity, REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA);
+    }
+
+    /**
+     * A convenience method for handling activity result messages returned from Google Pay.
+     * This method should be called withing the calling Activity's onActivityResult() lifecycle method.
+     * This helper only works if the Google Pay dialog was launched using the
+     * {@link Gateway#requestGooglePayData(PaymentsClient, PaymentDataRequest, Activity)} method.
+     *
+     * @param requestCode The request code returning from the activity result
+     * @param resultCode The result code returning from the activity result
+     * @param data The intent data returning from the activity result
+     * @param callback An implementation of {@link GatewayGooglePayCallback}
+     * @return True if handled, False otherwise
+     * @see Gateway#requestGooglePayData(PaymentsClient, PaymentDataRequest, Activity)
+     */
+    public static boolean handleGooglePayResult(int requestCode, int resultCode, Intent data, GatewayGooglePayCallback callback) {
+        if (callback == null) {
+            return false;
+        }
+
+        if (requestCode == REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA) {
+            if (resultCode == Activity.RESULT_OK) {
+                try {
+                    PaymentData paymentData = PaymentData.getFromIntent(data);
+                    JSONObject json = new JSONObject(paymentData.toJson());
+                    callback.onReceivedPaymentData(json);
+                } catch (Exception e) {
+                    callback.onGooglePayError(Status.RESULT_INTERNAL_ERROR);
+                }
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                callback.onGooglePayCancelled();
+            } else if (resultCode == AutoResolveHelper.RESULT_ERROR) {
+                Status status = AutoResolveHelper.getStatusFromIntent(data);
+                callback.onGooglePayError(status);
             }
 
             return true;
@@ -302,7 +365,7 @@ public class Gateway {
             throw new IllegalStateException("You must initialize the the Gateway instance with a Region before use");
         }
 
-        return "https://" + region.getPrefix() + "-gateway.mastercard.com/api/rest/version/" + apiVersion;
+        return "https://" + region.getPrefix() + "gateway.mastercard.com/api/rest/version/" + apiVersion;
     }
 
     String getUpdateSessionUrl(String sessionId, String apiVersion) {

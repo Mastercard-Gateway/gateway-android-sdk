@@ -11,9 +11,15 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <!-- Enables the Google Pay API -->
+        <meta-data
+            android:name="com.google.android.gms.wallet.api.enabled"
+            android:value="true" />
+
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -22,20 +28,19 @@
         </activity>
 
         <activity
-            android:name=".PayActivity"
-            android:label="@string/app_name" />
+            android:name=".CollectCardInfoActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
 
         <activity
-            android:name=".ConfirmActivity"
-            android:label="@string/app_name" />
-
-        <activity
-            android:name=".ResultActivity"
-            android:label="@string/app_name" />
+            android:name=".ProcessPaymentActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
 
         <activity
             android:name="com.mastercard.gateway.android.sdk.Gateway3DSecureActivity"
-            android:label="@string/gateway_3d_secure_authentication" />
+            android:label="@string/gateway_3d_secure_authentication"
+            android:screenOrientation="portrait" />
 
     </application>
 
