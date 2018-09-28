@@ -1,30 +1,41 @@
 <resources>
     <string name="app_name">Gateway SDK Sample App</string>
 
-    <string name="main_simple_store">Simple Store</string>
-    <string name="main_modern_green_lounge_chair">Modern Green Lounge Chair</string>
-    <string name="main_1">$1</string>
-    <string name="main_check_out">Check out</string>
+    <string name="none">None</string>
 
-    <string name="pay_enter_payment_details">Enter payment details</string>
-    <string name="pay_name_on_card">Name on card</string>
-    <string name="pay_card_number">Card number</string>
-    <string name="pay_expiry_month">Expiry month (MM)</string>
-    <string name="pay_expiry_year">Expiry year (YY)</string>
-    <string name="pay_cvv">CVV</string>
-    <string name="pay_continue">Continue</string>
-    <string name="pay_error_could_not_update_session">Could not update session</string>
+    <string name="main_configuration">Configuration:</string>
+    <string name="main_merchant_id">Merchant Id</string>
+    <string name="main_region">Region</string>
+    <string name="main_select_region">Select region</string>
+    <string name="main_heroku_test_server_url">Heroku Test Server URL</string>
+    <string name="main_process_a_payment">Process a Payment</string>
 
-    <string name="confirm_please_confirm_the_following_payment_information">Please confirm the following\npayment information.</string>
-    <string name="confirm_card_number">Card number</string>
-    <string name="confirm_amount">Amount</string>
-    <string name="confirm_1_00">$1.00</string>
-    <string name="confirm_and_pay">Confirm and Pay</string>
+    <string name="collect_card_name_on_card">Name on card</string>
+    <string name="collect_card_number">Card number</string>
+    <string name="collect_card_expiry_month">Expiry month (MM)</string>
+    <string name="collect_card_expiry_year">Expiry year (YY)</string>
+    <string name="collect_card_cvv">CVV</string>
+    <string name="collect_card_continue">Continue</string>
+    <string name="collect_card_or">- or -</string>
 
-    <!-- Strings related to result screen -->
-    <string name="result">Result</string>
-    <string name="result_start_again">Start again</string>
-    <string name="result_you_payment_was_successful">Your payment was successful!</string>
-    <string name="result_error_processing_your_payment">Error processing your payment!</string>
+    <!-- strings related to process payment screen -->
+    <string name="result_cdesc">result</string>
+    <string name="pay_you_payment_was_successful">Your payment was successful</string>
+    <string name="pay_error_card_info_not_collected">Card info not collected</string>
+    <string name="pay_error_processing_your_payment">Error processing your payment</string>
+    <string name="pay_error_3ds_authentication_failed">3DS authentication failed</string>
+    <string name="pay_error_unable_to_update_session">Unable to update session</string>
+    <string name="pay_error_unable_to_create_session">Unable to create session</string>
+    <string name="pay_steps">Steps:</string>
+    <string name="pay_1_create_session">1. Create Session</string>
+    <string name="pay_2_collect_card_info">2. Collect Card Info</string>
+    <string name="pay_3_update_session_with_payer_data">3. Update Session with Payer Data</string>
+    <string name="pay_4_check_3ds_enrollment">4. Check 3DS Enrollment</string>
+    <string name="pay_5_process_payment">5. Process Payment</string>
+    <string name="pay_process_payment_for_1">Process Payment for $1</string>
+    <string name="pay_confirm_payment_details">Confirm Payment Details</string>
+    <string name="pay_1_dollar">$1.00</string>
+    <string name="pay_confirm_and_pay">Confirm and Pay</string>
+    <string name="pay_done">Done</string>
 
 </resources>

@@ -4,12 +4,12 @@ apply plugin: 'maven-publish'
 
 android {
 
-    compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 27
+        targetSdkVersion 28
         versionName libraryVersionName
 
         consumerProguardFiles 'proguard.pro'
@@ -43,20 +43,30 @@ configurations {
 }
 
 ext {
-    supportLibraryVersion = '27.1.1'
+    supportLibraryVersion = '28.0.0'
     gsonVersion = '2.8.2'
     rxJavaVersion = '2.1.10'
+    playServicesWalletVersion = '16.0.0'
 
     jUnitVersion = '4.12'
-    robolectricVersion = '3.7.1'
+    robolectricVersion = '4.0-alpha-3'
     mockitoVersion = '2.13.0'
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    // required
     implementation "com.android.support:appcompat-v7:$supportLibraryVersion"
     implementation "com.google.code.gson:gson:$gsonVersion"
+
+    // optional for rx java
     optional "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
+
+    // optional for google pay
+    optional "com.android.support:support-v4:$supportLibraryVersion"
+    optional "com.google.android.gms:play-services-wallet:$playServicesWalletVersion"
+
     compileOnly "com.android.support:support-annotations:$supportLibraryVersion"
 
     testImplementation "junit:junit:$jUnitVersion"
@@ -92,7 +102,7 @@ publishing {
             artifactId project.name
             version = libraryVersionName
 
-            artifact bundleRelease
+            artifact bundleReleaseAar
             artifact androidJavadocsJar
             artifact androidSourcesJar
 

@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/appbar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:title="Process Payment" />
+
+        </android.support.design.widget.AppBarLayout>
+
+        <android.support.constraint.Guideline
+            android:id="@+id/guideline_start"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="@dimen/material_baseline_grid_2x" />
+
+        <android.support.constraint.Guideline
+            android:id="@+id/guideline_end"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="@dimen/material_baseline_grid_2x" />
+
+        <android.support.constraint.Guideline
+            android:id="@+id/guideline_icons"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="@dimen/material_baseline_grid_4x" />
+
+        <TextView
+            android:id="@+id/steps_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/material_baseline_grid_2x"
+            android:text="@string/pay_steps"
+            android:textColor="@color/material_color_black"
+            android:textSize="@dimen/material_typography_regular_title_text_size"
+            app:layout_constraintStart_toEndOf="@+id/guideline_start"
+            app:layout_constraintTop_toBottomOf="@+id/appbar" />
+
+        <TextView
+            android:id="@+id/create_session_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/material_baseline_grid_2x"
+            android:text="@string/pay_1_create_session"
+            app:layout_constraintStart_toEndOf="@+id/guideline_start"
+            app:layout_constraintTop_toBottomOf="@+id/steps_label" />
+
+        <TextView
+            android:id="@+id/collect_card_info_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/material_baseline_grid_2x"
+            android:text="@string/pay_2_collect_card_info"
+            app:layout_constraintStart_toEndOf="@+id/guideline_start"
+            app:layout_constraintTop_toBottomOf="@+id/create_session_label" />
+
+        <TextView
+            android:id="@+id/update_session_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/material_baseline_grid_2x"
+            android:text="@string/pay_3_update_session_with_payer_data"
+            app:layout_constraintStart_toEndOf="@+id/guideline_start"
+            app:layout_constraintTop_toBottomOf="@+id/collect_card_info_label" />
+
+        <TextView
+            android:id="@+id/check_3ds_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/material_baseline_grid_2x"
+            android:text="@string/pay_4_check_3ds_enrollment"
+            app:layout_constraintStart_toEndOf="@+id/guideline_start"
+            app:layout_constraintTop_toBottomOf="@+id/update_session_label" />
+
+        <TextView
+            android:id="@+id/process_payment_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/material_baseline_grid_2x"
+            android:text="@string/pay_5_process_payment"
+            app:layout_constraintStart_toEndOf="@+id/guideline_start"
+            app:layout_constraintTop_toBottomOf="@+id/check_3ds_label" />
+
+        <ProgressBar
+            android:id="@+id/create_session_progress"
+            style="@android:style/Widget.ProgressBar.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:indeterminate="true"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@+id/create_session_label"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_icons"
+            app:layout_constraintStart_toStartOf="@+id/guideline_icons"
+            app:layout_constraintTop_toTopOf="@+id/create_session_label"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/create_session_success"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/create_session_label"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_icons"
+            app:layout_constraintStart_toStartOf="@+id/guideline_icons"
+            app:layout_constraintTop_toTopOf="@+id/create_session_label"
+            app:srcCompat="@drawable/ic_check_green_24dp"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/create_session_error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/create_session_label"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_icons"
+            app:layout_constraintStart_toStartOf="@+id/guideline_icons"
+            app:layout_constraintTop_toTopOf="@+id/create_session_label"
+            app:srcCompat="@drawable/ic_error_red_24dp"
+            tools:visibility="visible" />
+
+        <ProgressBar
+            android:id="@+id/collect_card_info_progress"
+            style="@android:style/Widget.ProgressBar.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:indeterminate="true"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@+id/collect_card_info_label"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_icons"
+            app:layout_constraintStart_toStartOf="@+id/guideline_icons"
+            app:layout_constraintTop_toTopOf="@+id/collect_card_info_label"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/collect_card_info_success"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/collect_card_info_label"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_icons"
+            app:layout_constraintStart_toStartOf="@+id/guideline_icons"
+            app:layout_constraintTop_toTopOf="@+id/collect_card_info_label"
+            app:srcCompat="@drawable/ic_check_green_24dp"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/collect_card_info_error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/collect_card_info_label"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_icons"
+            app:layout_constraintStart_toStartOf="@+id/guideline_icons"
+            app:layout_constraintTop_toTopOf="@+id/collect_card_info_label"
+            app:srcCompat="@drawable/ic_error_red_24dp"
+            tools:visibility="visible" />
+
+        <ProgressBar
+            android:id="@+id/update_session_progress"
+            style="@android:style/Widget.ProgressBar.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/update_session_label"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_icons"
+            app:layout_constraintStart_toStartOf="@+id/guideline_icons"
+            app:layout_constraintTop_toTopOf="@+id/update_session_label"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/update_session_success"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/update_session_label"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_icons"
+            app:layout_constraintStart_toStartOf="@+id/guideline_icons"
+            app:layout_constraintTop_toTopOf="@+id/update_session_label"
+            app:srcCompat="@drawable/ic_check_green_24dp"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/update_session_error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/update_session_label"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_icons"
+            app:layout_constraintStart_toStartOf="@+id/guideline_icons"
+            app:layout_constraintTop_toTopOf="@+id/update_session_label"
+            app:srcCompat="@drawable/ic_error_red_24dp"
+            tools:visibility="visible" />
+
+        <ProgressBar
+            android:id="@+id/check_3ds_progress"
+            style="@android:style/Widget.ProgressBar.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/check_3ds_label"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_icons"
+            app:layout_constraintStart_toStartOf="@+id/guideline_icons"
+            app:layout_constraintTop_toTopOf="@+id/check_3ds_label"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/check_3ds_success"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/check_3ds_label"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_icons"
+            app:layout_constraintStart_toStartOf="@+id/guideline_icons"
+            app:layout_constraintTop_toTopOf="@+id/check_3ds_label"
+            app:srcCompat="@drawable/ic_check_green_24dp"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/check_3ds_error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/check_3ds_label"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_icons"
+            app:layout_constraintStart_toStartOf="@+id/guideline_icons"
+            app:layout_constraintTop_toTopOf="@+id/check_3ds_label"
+            app:srcCompat="@drawable/ic_error_red_24dp"
+            tools:visibility="visible" />
+
+        <ProgressBar
+            android:id="@+id/process_payment_progress"
+            style="@android:style/Widget.ProgressBar.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/process_payment_label"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_icons"
+            app:layout_constraintStart_toStartOf="@+id/guideline_icons"
+            app:layout_constraintTop_toTopOf="@+id/process_payment_label"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/process_payment_success"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/process_payment_label"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_icons"
+            app:layout_constraintStart_toStartOf="@+id/guideline_icons"
+            app:layout_constraintTop_toTopOf="@+id/process_payment_label"
+            app:srcCompat="@drawable/ic_check_green_24dp"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/process_payment_error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/process_payment_label"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_icons"
+            app:layout_constraintStart_toStartOf="@+id/guideline_icons"
+            app:layout_constraintTop_toTopOf="@+id/process_payment_label"
+            app:srcCompat="@drawable/ic_error_red_24dp"
+            tools:visibility="visible" />
+
+
+        <Button
+            android:id="@+id/start_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/material_baseline_grid_2x"
+            android:text="@string/pay_process_payment_for_1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+            app:layout_constraintStart_toStartOf="@+id/guideline_start" />
+
+        <android.support.constraint.Group
+            android:id="@+id/group_confirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            app:constraint_referenced_ids="confirm_label,confirm_card_description,confirm_amount,confirm_button" />
+
+        <TextView
+            android:id="@+id/confirm_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/pay_confirm_payment_details"
+            android:textColor="@color/material_color_black"
+            android:textSize="@dimen/material_typography_regular_title_text_size"
+            app:layout_constraintBottom_toTopOf="@+id/confirm_card_description"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="@+id/guideline_start"
+            app:layout_constraintTop_toBottomOf="@+id/process_payment_label"
+            app:layout_constraintVertical_chainStyle="packed" />
+
+        <TextView
+            android:id="@+id/confirm_card_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/material_baseline_grid_2x"
+            app:layout_constraintBottom_toTopOf="@+id/confirm_amount"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+            app:layout_constraintStart_toStartOf="@+id/guideline_start"
+            app:layout_constraintTop_toBottomOf="@+id/confirm_label"
+            tools:text="Mastercard **** 4444" />
+
+        <TextView
+            android:id="@+id/confirm_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/pay_1_dollar"
+            app:layout_constraintBottom_toTopOf="@+id/start_button"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+            app:layout_constraintStart_toStartOf="@+id/guideline_start"
+            app:layout_constraintTop_toBottomOf="@+id/confirm_card_description" />
+
+        <Button
+            android:id="@+id/confirm_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/material_baseline_grid_2x"
+            android:text="@string/pay_confirm_and_pay"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+            app:layout_constraintStart_toStartOf="@+id/guideline_start" />
+
+        <android.support.constraint.Group
+            android:id="@+id/group_result"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:constraint_referenced_ids="result_icon,result_text,done_button" />
+
+        <ImageView
+            android:id="@+id/result_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/result_cdesc"
+            app:layout_constraintBottom_toTopOf="@+id/done_button"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+            app:layout_constraintStart_toStartOf="@+id/guideline_start"
+            app:layout_constraintTop_toBottomOf="@+id/process_payment_label"
+            tools:src="@drawable/success" />
+
+        <TextView
+            android:id="@+id/result_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/result_icon"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+            app:layout_constraintStart_toStartOf="@+id/guideline_start"
+            tools:text="Successful Transaction!" />
+
+        <Button
+            android:id="@+id/done_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/material_baseline_grid_2x"
+            android:text="@string/pay_done"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+            app:layout_constraintStart_toStartOf="@+id/guideline_start" />
+
+    </android.support.constraint.ConstraintLayout>
+
+</layout>
