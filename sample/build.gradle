@@ -42,7 +42,7 @@ ext {
     supportLibraryVersion = '28.0.0'
     constraintLayoutVersion = '1.1.3'
     gsonVersion = '2.8.2'
-    playServicesWalletVersion = '16.0.0'
+    playServicesWalletVersion = '16.0.1'
     materialValuesVersion = '1.1.1'
 
     jUnitVersion = '4.12'

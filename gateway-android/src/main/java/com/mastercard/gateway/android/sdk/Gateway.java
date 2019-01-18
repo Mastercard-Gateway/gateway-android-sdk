@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Base64;
 
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.wallet.AutoResolveHelper;
@@ -208,9 +209,15 @@ public class Gateway {
      */
     public void updateSession(String sessionId, String apiVersion, GatewayMap payload, GatewayCallback callback) {
         String url = getUpdateSessionUrl(sessionId, apiVersion);
-        payload.put("apiOperation", API_OPERATION);
         payload.put("device.browser", USER_AGENT);
-        runGatewayRequest(url, Method.PUT, payload, callback);
+
+        // version 50 of the API dropped the requirement for the apiOperation parameter
+        // 50+ uses the standard Update Session API
+        if (Integer.parseInt(apiVersion) < 50) {
+            payload.put("apiOperation", API_OPERATION);
+        }
+
+        runGatewayRequest(url, sessionId, Method.PUT, payload, callback);
     }
 
     /**
@@ -228,9 +235,15 @@ public class Gateway {
      */
     public Single<GatewayMap> updateSession(String sessionId, String apiVersion, GatewayMap payload) {
         String url = getUpdateSessionUrl(sessionId, apiVersion);
-        payload.put("apiOperation", API_OPERATION);
         payload.put("device.browser", USER_AGENT);
-        return runGatewayRequest(url, Method.PUT, payload);
+
+        // version 50 of the API dropped the requirement for the apiOperation parameter
+        // 50+ uses the standard Update Session API
+        if (Integer.parseInt(apiVersion) < 50) {
+            payload.put("apiOperation", API_OPERATION);
+        }
+
+        return runGatewayRequest(url, sessionId, Method.PUT, payload);
     }
 
     /**
@@ -380,14 +393,14 @@ public class Gateway {
         return getApiUrl(apiVersion) + "/merchant/" + merchantId + "/session/" + sessionId;
     }
 
-    void runGatewayRequest(String url, Method method, GatewayMap payload, GatewayCallback callback) {
+    void runGatewayRequest(String url, String sessionId, Method method, GatewayMap payload, GatewayCallback callback) {
         // create handler on current thread
         Handler handler = new Handler(msg -> handleCallbackMessage(callback, msg.obj));
 
         new Thread(() -> {
             Message m = handler.obtainMessage();
             try {
-                m.obj = executeGatewayRequest(url, method, payload);
+                m.obj = executeGatewayRequest(url, sessionId, method, payload);
             } catch (Exception e) {
                 m.obj = e;
             }
@@ -396,8 +409,8 @@ public class Gateway {
         }).start();
     }
 
-    Single<GatewayMap> runGatewayRequest(String url, Method method, GatewayMap payload) {
-        return Single.fromCallable(() -> executeGatewayRequest(url, method, payload));
+    Single<GatewayMap> runGatewayRequest(String url, String sessionId, Method method, GatewayMap payload) {
+        return Single.fromCallable(() -> executeGatewayRequest(url, sessionId, method, payload));
     }
 
     // handler callback method when executing a request on a new thread
@@ -413,7 +426,7 @@ public class Gateway {
         return true;
     }
 
-    GatewayMap executeGatewayRequest(String endpoint, Method method, GatewayMap payload) throws Exception {
+    GatewayMap executeGatewayRequest(String endpoint, String sessionId, Method method, GatewayMap payload) throws Exception {
         // init ssl context with limiting trust managers
         SSLContext context = createSslContext();
 
@@ -421,7 +434,7 @@ public class Gateway {
         URL url = new URL(endpoint);
 
         // init connection
-        HttpsURLConnection c = createHttpsUrlConnection(url, context, method);
+        HttpsURLConnection c = createHttpsUrlConnection(url, sessionId, context, method);
 
         // encode request data to json
         String requestData = gson.toJson(payload);
@@ -510,7 +523,7 @@ public class Gateway {
         return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
     }
 
-    HttpsURLConnection createHttpsUrlConnection(URL url, SSLContext context, Method method) throws IOException {
+    HttpsURLConnection createHttpsUrlConnection(URL url, String sessionId, SSLContext context, Method method) throws IOException {
         HttpsURLConnection c = (HttpsURLConnection) url.openConnection();
         c.setSSLSocketFactory(context.getSocketFactory());
         c.setConnectTimeout(CONNECTION_TIMEOUT);
@@ -518,11 +531,16 @@ public class Gateway {
         c.setRequestMethod(method.name());
         c.setRequestProperty("User-Agent", USER_AGENT);
         c.setRequestProperty("Content-Type", "application/json");
+        c.addRequestProperty("Authorization", createAuthHeader(sessionId));
         c.setDoOutput(true);
 
         return c;
     }
 
+    String createAuthHeader(String sessionId) {
+        String value = "merchant." + merchantId + ":" + sessionId;
+        return Base64.encodeToString(value.getBytes(), Base64.DEFAULT);
+    }
 
     boolean isStatusCodeOk(int statusCode) {
         return (statusCode >= 200 && statusCode < 300);
