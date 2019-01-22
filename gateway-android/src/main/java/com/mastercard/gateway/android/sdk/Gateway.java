@@ -44,6 +44,8 @@ import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -208,16 +210,9 @@ public class Gateway {
      * @throws IllegalArgumentException If the provided session id is null
      */
     public void updateSession(String sessionId, String apiVersion, GatewayMap payload, GatewayCallback callback) {
-        String url = getUpdateSessionUrl(sessionId, apiVersion);
-        payload.put("device.browser", USER_AGENT);
+        GatewayRequest request = buildUpdateSessionRequest(sessionId, apiVersion, payload);
 
-        // version 50 of the API dropped the requirement for the apiOperation parameter
-        // 50+ uses the standard Update Session API
-        if (Integer.parseInt(apiVersion) < 50) {
-            payload.put("apiOperation", API_OPERATION);
-        }
-
-        runGatewayRequest(url, sessionId, Method.PUT, payload, callback);
+        runGatewayRequest(request, callback);
     }
 
     /**
@@ -234,16 +229,28 @@ public class Gateway {
      * @see <a href="http://reactivex.io/RxJava/javadoc/io/reactivex/Single.html">RxJava: Single</a>
      */
     public Single<GatewayMap> updateSession(String sessionId, String apiVersion, GatewayMap payload) {
-        String url = getUpdateSessionUrl(sessionId, apiVersion);
-        payload.put("device.browser", USER_AGENT);
+        GatewayRequest request = buildUpdateSessionRequest(sessionId, apiVersion, payload);
+
+        return runGatewayRequest(request);
+    }
+
+    GatewayRequest buildUpdateSessionRequest(String sessionId, String apiVersion, GatewayMap payload) {
+        GatewayRequest request = new GatewayRequest();
+        request.url = getUpdateSessionUrl(sessionId, apiVersion);
+        request.method = Method.PUT;
+        request.payload = payload;
+        request.payload.put("device.browser", USER_AGENT);
 
         // version 50 of the API dropped the requirement for the apiOperation parameter
         // 50+ uses the standard Update Session API
         if (Integer.parseInt(apiVersion) < 50) {
-            payload.put("apiOperation", API_OPERATION);
+            request.payload.put("apiOperation", API_OPERATION);
+        } else {
+            // Auth header required for v50+
+            request.extraHeaders.put("Authorization", createAuthHeader(sessionId));
         }
 
-        return runGatewayRequest(url, sessionId, Method.PUT, payload);
+        return request;
     }
 
     /**
@@ -393,14 +400,14 @@ public class Gateway {
         return getApiUrl(apiVersion) + "/merchant/" + merchantId + "/session/" + sessionId;
     }
 
-    void runGatewayRequest(String url, String sessionId, Method method, GatewayMap payload, GatewayCallback callback) {
+    void runGatewayRequest(GatewayRequest request, GatewayCallback callback) {
         // create handler on current thread
         Handler handler = new Handler(msg -> handleCallbackMessage(callback, msg.obj));
 
         new Thread(() -> {
             Message m = handler.obtainMessage();
             try {
-                m.obj = executeGatewayRequest(url, sessionId, method, payload);
+                m.obj = executeGatewayRequest(request);
             } catch (Exception e) {
                 m.obj = e;
             }
@@ -409,8 +416,8 @@ public class Gateway {
         }).start();
     }
 
-    Single<GatewayMap> runGatewayRequest(String url, String sessionId, Method method, GatewayMap payload) {
-        return Single.fromCallable(() -> executeGatewayRequest(url, sessionId, method, payload));
+    Single<GatewayMap> runGatewayRequest(GatewayRequest request) {
+        return Single.fromCallable(() -> executeGatewayRequest(request));
     }
 
     // handler callback method when executing a request on a new thread
@@ -426,18 +433,12 @@ public class Gateway {
         return true;
     }
 
-    GatewayMap executeGatewayRequest(String endpoint, String sessionId, Method method, GatewayMap payload) throws Exception {
-        // init ssl context with limiting trust managers
-        SSLContext context = createSslContext();
-
-        // parse url
-        URL url = new URL(endpoint);
-
+    GatewayMap executeGatewayRequest(GatewayRequest request) throws Exception {
         // init connection
-        HttpsURLConnection c = createHttpsUrlConnection(url, sessionId, context, method);
+        HttpsURLConnection c = createHttpsUrlConnection(request);
 
         // encode request data to json
-        String requestData = gson.toJson(payload);
+        String requestData = gson.toJson(request.payload);
 
         // log request data
         logger.logRequest(c, requestData);
@@ -523,16 +524,29 @@ public class Gateway {
         return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
     }
 
-    HttpsURLConnection createHttpsUrlConnection(URL url, String sessionId, SSLContext context, Method method) throws IOException {
+    HttpsURLConnection createHttpsUrlConnection(GatewayRequest request) throws Exception {
+        // parse url
+        URL url = new URL(request.url);
+
+        // init ssl context with limiting trust managers
+        SSLContext context = createSslContext();
+
         HttpsURLConnection c = (HttpsURLConnection) url.openConnection();
         c.setSSLSocketFactory(context.getSocketFactory());
         c.setConnectTimeout(CONNECTION_TIMEOUT);
         c.setReadTimeout(READ_TIMEOUT);
-        c.setRequestMethod(method.name());
+        c.setRequestMethod(request.method.name());
+        c.setDoOutput(true);
+
         c.setRequestProperty("User-Agent", USER_AGENT);
         c.setRequestProperty("Content-Type", "application/json");
-        c.setRequestProperty("Authorization", createAuthHeader(sessionId));
-        c.setDoOutput(true);
+
+        // add extra headers
+        if (request.extraHeaders != null) {
+            for (String key : request.extraHeaders.keySet()) {
+                c.setRequestProperty(key, request.extraHeaders.get(key));
+            }
+        }
 
         return c;
     }
