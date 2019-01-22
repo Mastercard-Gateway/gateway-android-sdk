@@ -531,7 +531,7 @@ public class Gateway {
         c.setRequestMethod(method.name());
         c.setRequestProperty("User-Agent", USER_AGENT);
         c.setRequestProperty("Content-Type", "application/json");
-        c.addRequestProperty("Authorization", createAuthHeader(sessionId));
+        c.setRequestProperty("Authorization", createAuthHeader(sessionId));
         c.setDoOutput(true);
 
         return c;
@@ -539,7 +539,7 @@ public class Gateway {
 
     String createAuthHeader(String sessionId) {
         String value = "merchant." + merchantId + ":" + sessionId;
-        return Base64.encodeToString(value.getBytes(), Base64.DEFAULT);
+        return "Basic " + Base64.encodeToString(value.getBytes(), Base64.NO_WRAP);
     }
 
     boolean isStatusCodeOk(int statusCode) {

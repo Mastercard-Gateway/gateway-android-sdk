@@ -21,6 +21,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.List;
+import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -96,7 +98,7 @@ public class GatewayTest {
         String expectedUrl = "some url";
 
         doReturn(expectedUrl).when(gateway).getUpdateSessionUrl(sessionId, apiVersion);
-        doNothing().when(gateway).runGatewayRequest(any(), any(), any(), any());
+        doNothing().when(gateway).runGatewayRequest(any(), any(), any(), any(), any());
 
         gateway.updateSession(sessionId, apiVersion, payload, callback);
 
@@ -105,7 +107,7 @@ public class GatewayTest {
         assertEquals(Gateway.API_OPERATION, payload.get("apiOperation"));
         assertEquals(Gateway.USER_AGENT, payload.get("device.browser"));
 
-        verify(gateway).runGatewayRequest(expectedUrl, Gateway.Method.PUT, payload, callback);
+        verify(gateway).runGatewayRequest(expectedUrl, sessionId, Gateway.Method.PUT, payload, callback);
     }
 
     @Test
@@ -117,7 +119,7 @@ public class GatewayTest {
         String expectedUrl = "some url";
 
         doReturn(expectedUrl).when(gateway).getUpdateSessionUrl(sessionId, apiVersion);
-        doReturn(expectedResponse).when(gateway).runGatewayRequest(any(), any(), any());
+        doReturn(expectedResponse).when(gateway).runGatewayRequest(any(), any(), any(), any());
 
         Single<GatewayMap> response = gateway.updateSession(sessionId, apiVersion, payload);
 
@@ -126,7 +128,7 @@ public class GatewayTest {
         assertEquals(Gateway.API_OPERATION, payload.get("apiOperation"));
         assertEquals(Gateway.USER_AGENT, payload.get("device.browser"));
 
-        verify(gateway).runGatewayRequest(expectedUrl, Gateway.Method.PUT, payload);
+        verify(gateway).runGatewayRequest(expectedUrl, sessionId, Gateway.Method.PUT, payload);
 
         assertEquals(expectedResponse, response);
     }
@@ -405,6 +407,7 @@ public class GatewayTest {
     public void testCreateConnectionWorksAsIntended() throws Exception {
         String endpoint = "https://www.mastercard.com";
         URL url = new URL(endpoint);
+        String sessionId = "asdasd123123";
 
         SSLContext context = mock(SSLContext.class);
         SSLSocketFactory socketFactory = mock(SSLSocketFactory.class);
@@ -414,8 +417,7 @@ public class GatewayTest {
         String expectedUserAgent = Gateway.USER_AGENT;
         String expectedContentType = "application/json";
 
-
-        HttpsURLConnection c = gateway.createHttpsUrlConnection(url, context, Gateway.Method.PUT);
+        HttpsURLConnection c = gateway.createHttpsUrlConnection(url, sessionId, context, Gateway.Method.PUT);
 
         assertEquals(url, c.getURL());
         assertEquals(socketFactory, c.getSSLSocketFactory());
@@ -449,5 +451,17 @@ public class GatewayTest {
         } catch (IOException e) {
             fail(e.getMessage());
         }
+    }
+
+    @Test
+    public void testCreateAuthHeaderWorksAsExpected() {
+        String sessionId = "somesession";
+        gateway.merchantId = "MERCHANT_ID";
+
+        String expectedAuthHeader = "Basic bWVyY2hhbnQuTUVSQ0hBTlRfSUQ6c29tZXNlc3Npb24=";
+
+        String authHeader = gateway.createAuthHeader(sessionId);
+
+        assertEquals(expectedAuthHeader, authHeader);
     }
 }
