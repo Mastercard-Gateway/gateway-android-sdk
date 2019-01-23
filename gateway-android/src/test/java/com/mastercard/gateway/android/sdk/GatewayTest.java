@@ -130,48 +130,6 @@ public class GatewayTest {
         assertEquals(expectedAuthHeader, request.extraHeaders.get("Authorization"));
     }
 
-//    @Test
-//    public void testUpdateSessionWorksAsExpected() {
-//        GatewayRequest mockRequest = mock(GatewayRequest.class);
-//        GatewayCallback mockCallback = mock(GatewayCallback.class);
-//
-//        doReturn(mockRequest).when(gateway).buildUpdateSessionRequest(any(), any(), any());
-//        doNothing().when(gateway).runGatewayRequest(any(), any());
-//
-//
-//        String sessionId = "session_id";
-//        String apiVersion = "1";
-//        GatewayMap payload = new GatewayMap();
-//
-//
-//        gateway.updateSession(sessionId, apiVersion, payload, mockCallback);
-//
-//        verify(gateway).runGatewayRequest(mockRequest, mockCallback);
-//    }
-//
-//    @Test
-//    public void testUpdateSessionRxWorksAsExpected() {
-//        String sessionId = "session_id";
-//        String apiVersion = "1";
-//        GatewayMap payload = new GatewayMap();
-//        Single<GatewayMap> expectedResponse = Single.just(new GatewayMap());
-//        String expectedUrl = "some url";
-//
-//        doReturn(expectedUrl).when(gateway).getUpdateSessionUrl(sessionId, apiVersion);
-//        doReturn(expectedResponse).when(gateway).runGatewayRequest(any(), any(), any(), any());
-//
-//        Single<GatewayMap> response = gateway.updateSession(sessionId, apiVersion, payload);
-//
-//        assertTrue(payload.containsKey("apiOperation"));
-//        assertTrue(payload.containsKey("device.browser"));
-//        assertEquals(Gateway.API_OPERATION, payload.get("apiOperation"));
-//        assertEquals(Gateway.USER_AGENT, payload.get("device.browser"));
-//
-//        verify(gateway).runGatewayRequest(expectedUrl, Gateway.Method.PUT, payload, null);
-//
-//        assertEquals(expectedResponse, response);
-//    }
-
     @Test
     public void testStart3DSecureActivitySkipsTitleIfNull() {
         Activity activity = mock(Activity.class);
