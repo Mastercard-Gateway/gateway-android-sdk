@@ -17,11 +17,13 @@ Once you have updated a session with card information from the app, you may then
 
 ## Installation
 
-This library is hosted in the jCenter repository. To import the Android SDK, include it as a dependency in your build.gradle file. Be sure to replace `X.X.X` with the version number in the shield above.
+This library is hosted in the jCenter repository. To import the Android SDK, include it as a dependency in your build.gradle file. Be sure to replace `X.X.X` with the version number in the shield above. (Minimum supported Android SDK version 19)
 
 ```groovy
 implementation 'com.mastercard.gateway:gateway-android:X.X.X'
 ```
+
+[**Release Notes**](https://github.com/Mastercard-Gateway/gateway-android-sdk/wiki/Release-Notes)
 
 
 ## Configuration
