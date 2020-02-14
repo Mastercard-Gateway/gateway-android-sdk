@@ -34,21 +34,15 @@ import com.google.gson.Gson;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
-import java.security.KeyStore;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.SSLSocketFactory;
 
 import io.reactivex.Single;
 
@@ -70,11 +64,12 @@ public class Gateway {
      * The available gateway regions
      */
     public enum Region {
-        ASIA_PACIFIC("ap-"),
-        EUROPE("eu-"),
-        NORTH_AMERICA("na-"),
+        ASIA_PACIFIC("ap."),
+        EUROPE("eu."),
+        NORTH_AMERICA("na."),
         INDIA("in."),
-        MTF("test-");
+        CHINA("cn."),
+        MTF("mtf.");
 
         String prefix;
 
@@ -100,35 +95,6 @@ public class Gateway {
     static final int REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA = 10001;
     static final String API_OPERATION = "UPDATE_PAYER_DATA";
     static final String USER_AGENT = "Gateway-Android-SDK/" + BuildConfig.VERSION_NAME;
-    static final String INTERMEDIATE_CA = "-----BEGIN CERTIFICATE-----\n" +
-            "MIIFAzCCA+ugAwIBAgIEUdNg7jANBgkqhkiG9w0BAQsFADCBvjELMAkGA1UEBhMC\n" +
-            "VVMxFjAUBgNVBAoTDUVudHJ1c3QsIEluYy4xKDAmBgNVBAsTH1NlZSB3d3cuZW50\n" +
-            "cnVzdC5uZXQvbGVnYWwtdGVybXMxOTA3BgNVBAsTMChjKSAyMDA5IEVudHJ1c3Qs\n" +
-            "IEluYy4gLSBmb3IgYXV0aG9yaXplZCB1c2Ugb25seTEyMDAGA1UEAxMpRW50cnVz\n" +
-            "dCBSb290IENlcnRpZmljYXRpb24gQXV0aG9yaXR5IC0gRzIwHhcNMTQxMDIyMTcw\n" +
-            "NTE0WhcNMjQxMDIzMDczMzIyWjCBujELMAkGA1UEBhMCVVMxFjAUBgNVBAoTDUVu\n" +
-            "dHJ1c3QsIEluYy4xKDAmBgNVBAsTH1NlZSB3d3cuZW50cnVzdC5uZXQvbGVnYWwt\n" +
-            "dGVybXMxOTA3BgNVBAsTMChjKSAyMDEyIEVudHJ1c3QsIEluYy4gLSBmb3IgYXV0\n" +
-            "aG9yaXplZCB1c2Ugb25seTEuMCwGA1UEAxMlRW50cnVzdCBDZXJ0aWZpY2F0aW9u\n" +
-            "IEF1dGhvcml0eSAtIEwxSzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB\n" +
-            "ANo/ltBNuS9E59s5XptQ7lylYdpBZ1MJqgCajld/KWvbx+EhJKo60I1HI9Ltchbw\n" +
-            "kSHSXbe4S6iDj7eRMmjPziWTLLJ9l8j+wbQXugmeA5CTe3xJgyJoipveR8MxmHou\n" +
-            "fUAL0u8+07KMqo9Iqf8A6ClYBve2k1qUcyYmrVgO5UK41epzeWRoUyW4hM+Ueq4G\n" +
-            "RQyja03Qxr7qGKQ28JKyuhyIjzpSf/debYMcnfAf5cPW3aV4kj2wbSzqyc+UQRlx\n" +
-            "RGi6RzwE6V26PvA19xW2nvIuFR4/R8jIOKdzRV1NsDuxjhcpN+rdBQEiu5Q2Ko1b\n" +
-            "Nf5TGS8IRsEqsxpiHU4r2RsCAwEAAaOCAQkwggEFMA4GA1UdDwEB/wQEAwIBBjAP\n" +
-            "BgNVHRMECDAGAQH/AgEAMDMGCCsGAQUFBwEBBCcwJTAjBggrBgEFBQcwAYYXaHR0\n" +
-            "cDovL29jc3AuZW50cnVzdC5uZXQwMAYDVR0fBCkwJzAloCOgIYYfaHR0cDovL2Ny\n" +
-            "bC5lbnRydXN0Lm5ldC9nMmNhLmNybDA7BgNVHSAENDAyMDAGBFUdIAAwKDAmBggr\n" +
-            "BgEFBQcCARYaaHR0cDovL3d3dy5lbnRydXN0Lm5ldC9ycGEwHQYDVR0OBBYEFIKi\n" +
-            "cHTdvFM/z3vU981/p2DGCky/MB8GA1UdIwQYMBaAFGpyJnrQHu995ztpUdRsjZ+Q\n" +
-            "EmarMA0GCSqGSIb3DQEBCwUAA4IBAQA/HBpb/0AiHY81DC2qmSerwBEycNc2KGml\n" +
-            "jbEnmUK+xJPrSFdDcSPE5U6trkNvknbFGe/KvG9CTBaahqkEOMdl8PUM4ErfovrO\n" +
-            "GhGonGkvG9/q4jLzzky8RgzAiYDRh2uiz2vUf/31YFJnV6Bt0WRBFG00Yu0GbCTy\n" +
-            "BrwoAq8DLcIzBfvLqhboZRBD9Wlc44FYmc1r07jHexlVyUDOeVW4c4npXEBmQxJ/\n" +
-            "B7hlVtWNw6f1sbZlnsCDNn8WRTx0S5OKPPEr9TVwc3vnggSxGJgO1JxvGvz8pzOl\n" +
-            "u7sY82t6XTKH920l5OJ2hiEeEUbNdg5vT6QhcQqEpy02qUgiUX6C\n" +
-            "-----END CERTIFICATE-----\n";
 
 
     Logger logger = new BaseLogger();
@@ -490,48 +456,12 @@ public class Gateway {
         throw exception;
     }
 
-    SSLContext createSslContext() throws Exception {
-        // create and initialize a KeyStore
-        KeyStore keyStore = createSslKeyStore();
-
-        // create a TrustManager that trusts the INTERMEDIATE_CA in our KeyStore
-        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        tmf.init(keyStore);
-
-        TrustManager[] trustManagers = tmf.getTrustManagers();
-
-        SSLContext context = SSLContext.getInstance("TLS");
-        context.init(null, trustManagers, null);
-
-        return context;
-    }
-
-    KeyStore createSslKeyStore() throws Exception {
-        KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        keyStore.load(null, null);
-
-        // add our trusted cert to the keystore
-        keyStore.setCertificateEntry("gateway.mastercard.com", readCertificate(INTERMEDIATE_CA));
-
-        return keyStore;
-    }
-
-    X509Certificate readCertificate(String cert) throws CertificateException {
-        byte[] bytes = cert.getBytes();
-        InputStream is = new ByteArrayInputStream(bytes);
-
-        return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
-    }
-
     HttpsURLConnection createHttpsUrlConnection(GatewayRequest request) throws Exception {
         // parse url
         URL url = new URL(request.url);
 
-        // init ssl context with limiting trust managers
-        SSLContext context = createSslContext();
-
         HttpsURLConnection c = (HttpsURLConnection) url.openConnection();
-        c.setSSLSocketFactory(context.getSocketFactory());
+        c.setSSLSocketFactory(createSocketFactory());
         c.setConnectTimeout(CONNECTION_TIMEOUT);
         c.setReadTimeout(READ_TIMEOUT);
         c.setRequestMethod(request.method.name());
@@ -548,6 +478,14 @@ public class Gateway {
         }
 
         return c;
+    }
+
+    SSLSocketFactory createSocketFactory() throws Exception {
+        // custom ssl context to enforce certificate pinning
+        SSLContext sslContext = new GatewaySSLContextProvider().createSSLContext();
+
+        // custom socket factory to enable TLSv1.2 on all supported devices
+        return new GatewayTLSSocketFactory(sslContext);
     }
 
     String createAuthHeader(String sessionId) {

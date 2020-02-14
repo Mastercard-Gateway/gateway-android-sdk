@@ -16,10 +16,11 @@
 
 package com.mastercard.gateway.android.sdk;
 
-import java.net.HttpURLConnection;
+
+import javax.net.ssl.HttpsURLConnection;
 
 interface Logger {
-    void logRequest(HttpURLConnection c, String data);
-    void logResponse(HttpURLConnection c, String data);
+    void logRequest(HttpsURLConnection c, String data);
+    void logResponse(HttpsURLConnection c, String data);
     void logDebug(String message);
 }

@@ -321,7 +321,7 @@ public class GatewayTest {
     @Test
     public void testGetApiUrlWorksAsIntended() throws Exception {
         gateway.region = Gateway.Region.NORTH_AMERICA;
-        String expectedUrl = "https://na-gateway.mastercard.com/api/rest/version/" + Gateway.MIN_API_VERSION;
+        String expectedUrl = "https://na.gateway.mastercard.com/api/rest/version/" + Gateway.MIN_API_VERSION;
 
         assertEquals(expectedUrl, gateway.getApiUrl(String.valueOf(Gateway.MIN_API_VERSION)));
     }
@@ -355,7 +355,7 @@ public class GatewayTest {
     public void testGetUpdateSessionUrlWorksAsIntended() throws Exception {
         gateway.merchantId = "somemerchant";
         gateway.region = Gateway.Region.NORTH_AMERICA;
-        String expectedUrl = "https://na-gateway.mastercard.com/api/rest/version/" + Gateway.MIN_API_VERSION + "/merchant/somemerchant/session/sess1234";
+        String expectedUrl = "https://na.gateway.mastercard.com/api/rest/version/" + Gateway.MIN_API_VERSION + "/merchant/somemerchant/session/sess1234";
 
         String actualUrl = gateway.getUpdateSessionUrl("sess1234", String.valueOf(Gateway.MIN_API_VERSION));
 
@@ -383,33 +383,13 @@ public class GatewayTest {
     }
 
     @Test
-    public void testCreateSslKeystoreContainsInternalCertificate() throws Exception {
-        doReturn(mock(X509Certificate.class)).when(gateway).readCertificate(any());
-
-        KeyStore keyStore = gateway.createSslKeyStore();
-
-        assertTrue(keyStore.containsAlias("gateway.mastercard.com"));
-    }
-
-    @Test
-    public void testReadingInternalCertificateWorksAsExpected() throws Exception {
-        X509Certificate certificate = gateway.readCertificate(Gateway.INTERMEDIATE_CA);
-        String expectedSerialNo = "1372807406";
-
-        assertNotNull(certificate);
-        assertEquals(expectedSerialNo, certificate.getSerialNumber().toString());
-    }
-
-    @Test
     public void testCreateConnectionWorksAsIntended() throws Exception {
         GatewayRequest request = new GatewayRequest();
         request.url = "https://www.mastercard.com";
         request.method = Gateway.Method.PUT;
 
-        SSLContext context = mock(SSLContext.class);
         SSLSocketFactory socketFactory = mock(SSLSocketFactory.class);
-        doReturn(socketFactory).when(context).getSocketFactory();
-        doReturn(context).when(gateway).createSslContext();
+        doReturn(socketFactory).when(gateway).createSocketFactory();
 
         HttpsURLConnection c = gateway.createHttpsUrlConnection(request);
 
