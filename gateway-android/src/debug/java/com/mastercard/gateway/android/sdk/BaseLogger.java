@@ -3,15 +3,16 @@ package com.mastercard.gateway.android.sdk;
 
 import android.util.Log;
 
-import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.net.ssl.HttpsURLConnection;
+
 class BaseLogger implements Logger {
 
     @Override
-    public void logRequest(HttpURLConnection c, String data) {
+    public void logRequest(HttpsURLConnection c, String data) {
         String log = "REQUEST: " + c.getRequestMethod() + " " + c.getURL().toString();
 
         if (data != null) {
@@ -35,7 +36,7 @@ class BaseLogger implements Logger {
     }
 
     @Override
-    public void logResponse(HttpURLConnection c, String data) {
+    public void logResponse(HttpsURLConnection c, String data) {
         String log = "RESPONSE: ";
 
         // log response headers
@@ -58,6 +59,8 @@ class BaseLogger implements Logger {
                 i++;
             }
         }
+
+        log += "\n-- Cipher Suite: " + c.getCipherSuite();
 
         String[] parts = log.split("\n");
         for (String part : parts) {
