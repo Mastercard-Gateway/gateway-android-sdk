@@ -70,11 +70,12 @@ public class Gateway {
      * The available gateway regions
      */
     public enum Region {
-        ASIA_PACIFIC("ap-"),
-        EUROPE("eu-"),
-        NORTH_AMERICA("na-"),
+        ASIA_PACIFIC("ap."),
+        EUROPE("eu."),
+        NORTH_AMERICA("na."),
         INDIA("in."),
-        MTF("test-");
+        CHINA("cn."),
+        MTF("mtf.");
 
         String prefix;
 

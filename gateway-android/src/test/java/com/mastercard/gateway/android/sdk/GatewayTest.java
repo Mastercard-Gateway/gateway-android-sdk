@@ -321,7 +321,7 @@ public class GatewayTest {
     @Test
     public void testGetApiUrlWorksAsIntended() throws Exception {
         gateway.region = Gateway.Region.NORTH_AMERICA;
-        String expectedUrl = "https://na-gateway.mastercard.com/api/rest/version/" + Gateway.MIN_API_VERSION;
+        String expectedUrl = "https://na.gateway.mastercard.com/api/rest/version/" + Gateway.MIN_API_VERSION;
 
         assertEquals(expectedUrl, gateway.getApiUrl(String.valueOf(Gateway.MIN_API_VERSION)));
     }
@@ -355,7 +355,7 @@ public class GatewayTest {
     public void testGetUpdateSessionUrlWorksAsIntended() throws Exception {
         gateway.merchantId = "somemerchant";
         gateway.region = Gateway.Region.NORTH_AMERICA;
-        String expectedUrl = "https://na-gateway.mastercard.com/api/rest/version/" + Gateway.MIN_API_VERSION + "/merchant/somemerchant/session/sess1234";
+        String expectedUrl = "https://na.gateway.mastercard.com/api/rest/version/" + Gateway.MIN_API_VERSION + "/merchant/somemerchant/session/sess1234";
 
         String actualUrl = gateway.getUpdateSessionUrl("sess1234", String.valueOf(Gateway.MIN_API_VERSION));
 
