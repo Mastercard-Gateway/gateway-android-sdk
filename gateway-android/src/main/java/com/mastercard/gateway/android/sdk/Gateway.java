@@ -485,7 +485,7 @@ public class Gateway {
         SSLContext sslContext = new GatewaySSLContextProvider().createSSLContext();
 
         // custom socket factory to enable TLSv1.2 on all supported devices
-        return new TLSSocketFactory(sslContext);
+        return new GatewayTLSSocketFactory(sslContext);
     }
 
     String createAuthHeader(String sessionId) {

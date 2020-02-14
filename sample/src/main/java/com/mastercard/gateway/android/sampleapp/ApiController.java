@@ -249,9 +249,7 @@ public class ApiController {
      * @throws KeyManagementException   if initialization of the context fails
      */
     void initialiseSslContext() throws NoSuchAlgorithmException, KeyManagementException {
-        SSLContext context = SSLContext.getInstance("TLS");
-        context.init(null, null, null);
-        HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
+        HttpsURLConnection.setDefaultSSLSocketFactory(new TLSSocketFactory());
     }
 
     /**

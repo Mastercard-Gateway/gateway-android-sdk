@@ -1,22 +1,24 @@
-package com.mastercard.gateway.android.sdk;
+package com.mastercard.gateway.android.sampleapp;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
-/**
- * Custom SSL socket factory required to enable TLSv1.2 on KitKat devices and below
- */
+
 public class TLSSocketFactory extends SSLSocketFactory {
 
     private SSLSocketFactory internalSSLSocketFactory;
 
-    public TLSSocketFactory(SSLContext context) {
+    public TLSSocketFactory() throws KeyManagementException, NoSuchAlgorithmException {
+        SSLContext context = SSLContext.getInstance("TLS");
+        context.init(null, null, null);
         internalSSLSocketFactory = context.getSocketFactory();
     }
 
