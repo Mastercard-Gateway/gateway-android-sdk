@@ -21,7 +21,7 @@ cache:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
 
-script: ./gradlew clean --refresh-dependencies gateway-android:lintRelease gateway-android:testReleaseUnitTest gateway-android:assembleRelease gateway-android:androidSourcesJar gateway-android:androidJavadocsJar gateway-android:generatePomFileForAarPublication
+script: travis_retry ./gradlew clean --refresh-dependencies gateway-android:lintRelease gateway-android:testReleaseUnitTest gateway-android:assembleRelease gateway-android:androidSourcesJar gateway-android:androidJavadocsJar gateway-android:generatePomFileForAarPublication
 
 deploy:
   provider: script
