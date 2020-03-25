@@ -1,17 +1,16 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 29
 
     defaultConfig {
         applicationId 'com.mastercard.gateway.android.sampleapp'
         minSdkVersion 19
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 1
         versionName '1.0.0'
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         vectorDrawables {
             useSupportLibrary true
@@ -38,36 +37,24 @@ android {
     }
 }
 
-ext {
-    supportLibraryVersion = '28.0.0'
-    constraintLayoutVersion = '1.1.3'
-    gsonVersion = '2.8.2'
-    playServicesWalletVersion = '16.0.1'
-    materialValuesVersion = '1.1.1'
-
-    jUnitVersion = '4.12'
-    espressoVersion = '2.2.2'
-    testRunnerVersion = '0.5'
-}
-
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation "com.google.code.gson:gson:$gsonVersion"
-    implementation "com.android.support:appcompat-v7:$supportLibraryVersion"
-    implementation "com.android.support:design:$supportLibraryVersion"
-    implementation "com.android.support:support-v4:$supportLibraryVersion"
-    implementation "com.android.support.constraint:constraint-layout:$constraintLayoutVersion"
-    implementation "com.google.android.gms:play-services-wallet:$playServicesWalletVersion"
-    implementation "blue.aodev:material-values:$materialValuesVersion"
+    implementation 'com.google.code.gson:gson:2.8.2'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'com.google.android.material:material:1.1.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'com.google.android.gms:play-services-wallet:18.0.0'
+    implementation 'blue.aodev:material-values:1.1.1'
 
     implementation project(':gateway-android')
 
     // Espresso testing
-    androidTestImplementation "junit:junit:$jUnitVersion"
-    androidTestImplementation("com.android.support.test.espresso:espresso-core:$espressoVersion") {
+    androidTestImplementation 'junit:junit:4.12'
+    androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0') {
         exclude module: 'support-annotations'
     }
-    androidTestImplementation("com.android.support.test:runner:$testRunnerVersion") {
+    androidTestImplementation('androidx.test:runner:1.1.0') {
         exclude module: 'support-annotations'
     }
 }
