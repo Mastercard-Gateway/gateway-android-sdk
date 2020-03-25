@@ -90,9 +90,11 @@ publishing {
             artifactId project.name
             version = libraryVersionName
 
-            artifact bundleReleaseAar
-            artifact androidJavadocsJar
-            artifact androidSourcesJar
+            afterEvaluate {
+                artifact bundleReleaseAar
+                artifact androidJavadocsJar
+                artifact androidSourcesJar
+            }
 
             pom.withXml {
                 def root = asNode()
