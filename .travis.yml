@@ -7,6 +7,8 @@ android:
     - tools
     - build-tools-29.0.3
     - android-29
+    - extra-google-m2repository
+    - extra-android-m2repository
 
 # workaround for license accepting issue
 before_install:
@@ -18,6 +20,7 @@ before_cache:
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
 cache:
   directories:
+    - $HOME/.m2
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
 
