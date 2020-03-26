@@ -18,15 +18,13 @@ package com.mastercard.gateway.android.sampleapp;
 
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.BoolRes;
+import androidx.annotation.BoolRes;
 import android.util.Base64;
 import android.util.Log;
 import android.util.Pair;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
 import com.mastercard.gateway.android.sdk.GatewayMap;
 
 import java.io.BufferedReader;
@@ -40,10 +38,8 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
 
 import static android.text.TextUtils.isEmpty;
 

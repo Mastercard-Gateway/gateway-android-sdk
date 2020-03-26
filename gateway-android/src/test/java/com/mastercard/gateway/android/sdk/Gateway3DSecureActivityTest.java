@@ -3,6 +3,7 @@ package com.mastercard.gateway.android.sdk;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.webkit.WebView;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -124,6 +125,17 @@ public class Gateway3DSecureActivityTest {
         String html = activity.getExtraHtml();
 
         assertEquals(expectedHtml, html);
+    }
+
+    @Test
+    public void testSetWebViewHtmlEncodesBase64() {
+        String testHtml = "<html></html>";
+        String expectedEncodedHtml = "PGh0bWw+PC9odG1sPg";
+
+        activity.webView = mock(WebView.class);
+        activity.setWebViewHtml(testHtml);
+
+        verify(activity.webView).loadData(expectedEncodedHtml, "text/html", "base64");
     }
 
     @Test
