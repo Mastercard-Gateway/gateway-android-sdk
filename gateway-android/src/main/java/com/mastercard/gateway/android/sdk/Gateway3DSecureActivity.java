@@ -106,7 +106,7 @@ public class Gateway3DSecureActivity extends AppCompatActivity {
     }
 
     void setWebViewHtml(String html) {
-        String encoded = Base64.encodeToString(html.getBytes(), Base64.NO_PADDING);
+        String encoded = Base64.encodeToString(html.getBytes(), Base64.NO_PADDING | Base64.NO_WRAP);
         webView.loadData(encoded, "text/html", "base64");
     }
 
