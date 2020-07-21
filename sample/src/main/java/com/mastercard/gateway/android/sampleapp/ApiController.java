@@ -46,7 +46,9 @@ import static android.text.TextUtils.isEmpty;
 /**
  * ApiController object used to send create and update session requests. Conforms to the singleton
  * pattern.
- */
+ *
+ * NOTE: This code is sample code only and is not intended to be used for production applications.  Any use in production applications is at your own risk.
+*/
 public class ApiController {
 
     private static final ApiController INSTANCE = new ApiController();
@@ -208,8 +210,8 @@ public class ApiController {
                 .set("order.amount", amount)
                 .set("order.currency", currency)
                 .set("sourceOfFunds.type", "CARD")
-                .set("transaction.source", "INTERNET")
-                .set("transaction.frequency", "SINGLE");
+                // .set("transaction.frequency", "SINGLE") // NOTE: 'transaction.frequency` is only applicable to API versions <=53
+                .set("transaction.source", "INTERNET");
 
         if (threeDSecureId != null) {
             request.put("3DSecureId", threeDSecureId);
