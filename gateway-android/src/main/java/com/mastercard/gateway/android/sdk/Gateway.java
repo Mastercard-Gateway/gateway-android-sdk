@@ -69,7 +69,8 @@ public class Gateway {
         NORTH_AMERICA("na."),
         INDIA("in."),
         CHINA("cn."),
-        MTF("mtf.");
+        MTF("mtf."),
+        OTHER("");
 
         String prefix;
 
@@ -94,13 +95,14 @@ public class Gateway {
     static final int REQUEST_3D_SECURE = 10000;
     static final int REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA = 10001;
     static final String API_OPERATION = "UPDATE_PAYER_DATA";
-    static final String USER_AGENT = "Gateway-Android-SDK/" + BuildConfig.VERSION_NAME;
+    static final String USER_AGENT = "Gateway-Android-SDK/1.1.4";
 
 
     Logger logger = new BaseLogger();
     Gson gson = new Gson();
     String merchantId;
     Region region;
+    private String otherPrefix;
 
 
     /**
@@ -158,6 +160,18 @@ public class Gateway {
 
         this.region = region;
 
+        return this;
+    }
+
+    public String getOtherPrefix() {
+        return this.otherPrefix;
+    }
+
+    public Gateway setOtherPrefix(String otherPrefix) {
+        if (region != Region.OTHER) {
+            throw new IllegalArgumentException("You can only set a prefix for Region.OTHER");
+        }
+        this.otherPrefix = otherPrefix;
         return this;
     }
 
@@ -349,8 +363,17 @@ public class Gateway {
         if (region == null) {
             throw new IllegalStateException("You must initialize the the Gateway instance with a Region before use");
         }
+        String prefix;
+        if (region == Region.OTHER) {
+            if (otherPrefix == null) {
+                throw new IllegalStateException("You must setOtherPrefix() when using Region.OTHER");
+            }
+            prefix = otherPrefix + ".";
+        } else {
+            prefix = region.getPrefix();
+        }
 
-        return "https://" + region.getPrefix() + "gateway.mastercard.com/api/rest/version/" + apiVersion;
+        return "https://" + prefix + "gateway.mastercard.com/api/rest/version/" + apiVersion;
     }
 
     String getUpdateSessionUrl(String sessionId, String apiVersion) {
