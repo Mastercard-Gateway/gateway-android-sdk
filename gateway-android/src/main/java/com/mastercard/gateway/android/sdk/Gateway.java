@@ -95,7 +95,7 @@ public class Gateway {
     static final int REQUEST_3D_SECURE = 10000;
     static final int REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA = 10001;
     static final String API_OPERATION = "UPDATE_PAYER_DATA";
-    static final String USER_AGENT = "Gateway-Android-SDK/1.1.4";
+    static final String USER_AGENT = "Gateway-Android-SDK/" + BuildConfig.VERSION_NAME;
 
 
     Logger logger = new BaseLogger();
