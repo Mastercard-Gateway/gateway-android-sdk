@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.1.5] - 2022-12-28
+### Changed
+- Pinned certificate updated. New Expiry December 2030
+
 ## [1.1.4] - 2020-03-26
 ### Fixed
 - Issue where WebView was not displaying the 3DS HTML on apps targeting API >=29
