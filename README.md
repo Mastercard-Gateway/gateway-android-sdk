@@ -1,5 +1,5 @@
 # Gateway Android SDK
-This Mobile SDK supports 3DS 1 only. If you require EMV 3DS support, please obtain the version 2 Mobile SDK by following these instructions: https://na.gateway.mastercard.com/api/documentation/integrationGuidelines/mobileSDK/emv3DSsdk.html
+**This Mobile SDK supports 3-D Secure 1 only.** If you require EMV 3DS support, please obtain the version 2 Mobile SDK by following these instructions: https://na.gateway.mastercard.com/api/documentation/integrationGuidelines/mobileSDK/emv3DSsdk.html
 
 [![Download](https://api.bintray.com/packages/mpgs/Android/gateway-android-sdk/images/download.svg)](https://bintray.com/mpgs/Android/gateway-android-sdk/_latestVersion)
 [![Build Status](https://travis-ci.org/Mastercard-Gateway/gateway-android-sdk.svg?branch=master)](https://travis-ci.org/Mastercard-Gateway/gateway-android-sdk)
