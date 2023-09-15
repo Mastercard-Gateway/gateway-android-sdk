@@ -69,7 +69,8 @@ public class Gateway {
         NORTH_AMERICA("na."),
         INDIA("in."),
         CHINA("cn."),
-        MTF("mtf.");
+        MTF("mtf."),
+        OTHER("");
 
         String prefix;
 
@@ -101,6 +102,7 @@ public class Gateway {
     Gson gson = new Gson();
     String merchantId;
     Region region;
+    private String otherPrefix;
 
 
     /**
@@ -158,6 +160,18 @@ public class Gateway {
 
         this.region = region;
 
+        return this;
+    }
+
+    public String getOtherPrefix() {
+        return this.otherPrefix;
+    }
+
+    public Gateway setOtherPrefix(String otherPrefix) {
+        if (region != Region.OTHER) {
+            throw new IllegalArgumentException("You can only set a prefix for Region.OTHER");
+        }
+        this.otherPrefix = otherPrefix;
         return this;
     }
 
@@ -349,8 +363,17 @@ public class Gateway {
         if (region == null) {
             throw new IllegalStateException("You must initialize the the Gateway instance with a Region before use");
         }
+        String prefix;
+        if (region == Region.OTHER) {
+            if (otherPrefix == null) {
+                throw new IllegalStateException("You must setOtherPrefix() when using Region.OTHER");
+            }
+            prefix = otherPrefix + ".";
+        } else {
+            prefix = region.getPrefix();
+        }
 
-        return "https://" + region.getPrefix() + "gateway.mastercard.com/api/rest/version/" + apiVersion;
+        return "https://" + prefix + "gateway.mastercard.com/api/rest/version/" + apiVersion;
     }
 
     String getUpdateSessionUrl(String sessionId, String apiVersion) {

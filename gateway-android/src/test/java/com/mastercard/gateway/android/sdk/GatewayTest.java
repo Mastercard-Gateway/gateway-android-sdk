@@ -438,4 +438,13 @@ public class GatewayTest {
 
         assertEquals(expectedAuthHeader, authHeader);
     }
+
+    @Test
+    public void testGetApiUrlWithOtherPrefixWorksAsIntended() throws Exception {
+        gateway.region = Gateway.Region.OTHER;
+        gateway.setOtherPrefix("piggybank");
+        String expectedUrl = "https://piggybank.gateway.mastercard.com/api/rest/version/" + Gateway.MIN_API_VERSION;
+
+        assertEquals(expectedUrl, gateway.getApiUrl(String.valueOf(Gateway.MIN_API_VERSION)));
+    }
 }
