@@ -34,13 +34,23 @@ public class TestGatewaySSLContextProvider {
 
         KeyStore keyStore = trustProvider.createKeyStore();
 
-        assertTrue(keyStore.containsAlias("gateway.mastercard.com"));
+        assertTrue(keyStore.containsAlias("gateway.mastercard.com.ca_entrust"));
+        assertTrue(keyStore.containsAlias("gateway.mastercard.com.ca_digicert"));
     }
 
     @Test
-    public void testReadingInternalCertificateWorksAsExpected() throws Exception {
-        X509Certificate certificate = trustProvider.readCertificate(GatewaySSLContextProvider.INTERMEDIATE_CA);
-        String expectedSerialNo = "1372807406";
+    public void testReadingRootEntrustCertificateWorksAsExpected() throws Exception {
+        X509Certificate certificate = trustProvider.readCertificate(GatewaySSLContextProvider.ROOT_CERTIFICATE_ENTRUST);
+        String expectedSerialNo = "1246989352";
+
+        assertNotNull(certificate);
+        assertEquals(expectedSerialNo, certificate.getSerialNumber().toString());
+    }
+
+    @Test
+    public void testReadingRootDigiCertificateWorksAsExpected() throws Exception {
+        X509Certificate certificate = trustProvider.readCertificate(GatewaySSLContextProvider.ROOT_CERTIFICATE_DIGICERT);
+        String expectedSerialNo = "10944719598952040374951832963794454346";
 
         assertNotNull(certificate);
         assertEquals(expectedSerialNo, certificate.getSerialNumber().toString());
