@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [1.1.6] - 2025-02-21
+## [1.1.7] - 2025-02-21
 ### Added
 - DigiCert updated. New Expiry Jan 15, 2038
 
