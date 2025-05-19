@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [1.1.8] - 2025-03-25
-### Changed
+### Added
 - Updated Gson library to version 2.12.1 to address security vulnerabilities. 
 
 ## [1.1.7] - 2025-02-21
