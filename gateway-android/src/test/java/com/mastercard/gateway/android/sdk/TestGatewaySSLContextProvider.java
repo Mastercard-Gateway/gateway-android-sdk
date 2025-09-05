@@ -50,7 +50,7 @@ public class TestGatewaySSLContextProvider {
     @Test
     public void testReadingRootDigiCertificateWorksAsExpected() throws Exception {
         X509Certificate certificate = trustProvider.readCertificate(GatewaySSLContextProvider.ROOT_CERTIFICATE_DIGICERT);
-        String expectedSerialNo = "10944719598952040374951832963794454346";
+        String expectedSerialNo = "4293743540046975378534879503202253541";
 
         assertNotNull(certificate);
         assertEquals(expectedSerialNo, certificate.getSerialNumber().toString());

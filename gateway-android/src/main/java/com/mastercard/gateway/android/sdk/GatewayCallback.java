@@ -24,12 +24,31 @@ public interface GatewayCallback {
      *
      * @param response A response map
      */
-    void onSuccess(GatewayMap response);
+    default void onSuccess(GatewayMap response) {
+    }
 
     /**
      * Callback executed when error thrown during call to Gateway API
      *
      * @param throwable The exception thrown
      */
-    void onError(Throwable throwable);
+    default void onError(Throwable throwable) {
+    }
+
+    /**
+     * Callback method when webview-based authentication is complete.
+     *
+     * @param result      A response map containing the result
+     * @param requestCode Request code identifying the flow
+     */
+    default void onComplete(GatewayMap result, int requestCode) {
+    }
+
+    /**
+     * Callback when a user cancels the flow (typically on back press).
+     *
+     * @param requestCode Request code identifying the flow
+     */
+    default void onCancel(int requestCode) {
+    }
 }

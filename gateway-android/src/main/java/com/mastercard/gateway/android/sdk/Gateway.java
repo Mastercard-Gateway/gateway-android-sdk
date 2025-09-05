@@ -17,6 +17,8 @@
 package com.mastercard.gateway.android.sdk;
 
 
+import static com.mastercard.gateway.android.sdk.Gateway3DSecureActivity.EXTRA_TITLE;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Handler;
@@ -30,6 +32,8 @@ import com.google.android.gms.wallet.PaymentData;
 import com.google.android.gms.wallet.PaymentDataRequest;
 import com.google.android.gms.wallet.PaymentsClient;
 import com.google.gson.Gson;
+import com.mastercard.gateway.android.R;
+import com.mastercard.gateway.android.BuildConfig;
 
 import org.json.JSONObject;
 
@@ -78,7 +82,7 @@ public class Gateway {
             this.prefix = prefix;
         }
 
-        String getPrefix() {
+        public String getPrefix() {
             return prefix;
         }
     }
@@ -93,9 +97,11 @@ public class Gateway {
     static final int CONNECTION_TIMEOUT = 15000;
     static final int READ_TIMEOUT = 60000;
     static final int REQUEST_3D_SECURE = 10000;
+
+    static final int REQUEST_BROWSER_PAYMENT = 10002;
     static final int REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA = 10001;
     static final String API_OPERATION = "UPDATE_PAYER_DATA";
-    static final String USER_AGENT = "Gateway-Android-SDK/" + BuildConfig.VERSION_NAME;
+    static final String USER_AGENT = "Gateway-Android-SDK/" + BuildConfig.SDK_VERSION;
 
 
     Logger logger = new BaseLogger();
@@ -123,7 +129,6 @@ public class Gateway {
      * Sets the current Merchant ID
      *
      * @param merchantId A valid Merchant ID
-     * @return The <tt>Gateway</tt> instance
      * @throws IllegalArgumentException If the provided Merchant ID is null
      */
     public Gateway setMerchantId(String merchantId) {
@@ -149,7 +154,6 @@ public class Gateway {
      * Sets the current {@link Region} to target
      *
      * @param region The region
-     * @return The <tt>Gateway</tt> instance
      * @throws IllegalArgumentException If the provided Merchant ID is null
      */
     public Gateway setRegion(Region region) {
@@ -190,7 +194,6 @@ public class Gateway {
      * @param sessionId  A session ID from the Mastercard Gateway
      * @param apiVersion The API version number used when the session was created
      * @param payload    A map of the request data
-     * @return A <tt>Single</tt> of the response map
      * @throws IllegalArgumentException If the provided session id is null
      * @see <a href="http://reactivex.io/RxJava/javadoc/io/reactivex/Single.html">RxJava: Single</a>
      */
@@ -230,6 +233,28 @@ public class Gateway {
     }
 
     /**
+     * Starts the {@link GatewayBrowserPaymentActivity} for result, initializing it with the provided html
+     *
+     * @param activity The calling activity context
+     * @param html     The initial HTML to render in the web view
+     */
+    public static void startGatewayBrowserPaymentActivity(Activity activity, String html) {
+        startGatewayBrowserPaymentActivity(activity, html, activity.getString(R.string.browser_payment));
+    }
+
+    /**
+     * Starts the {@link GatewayBrowserPaymentActivity} for result, initializing it with the provided html
+     *
+     * @param activity The calling activity context
+     * @param html     The initial HTML to render in the web view
+     * @param title    The initial title for the activity toolbar
+     */
+    public static void startGatewayBrowserPaymentActivity(Activity activity, String html, String title) {
+        Intent intent = new Intent(activity, GatewayBrowserPaymentActivity.class);
+        startGatewayFlow(activity, html, title, intent, REQUEST_BROWSER_PAYMENT);
+    }
+
+    /**
      * Starts the {@link Gateway3DSecureActivity} for result, initializing it with the provided html
      *
      * @param activity The calling activity context
@@ -238,18 +263,18 @@ public class Gateway {
      */
     public static void start3DSecureActivity(Activity activity, String html, String title) {
         Intent intent = new Intent(activity, Gateway3DSecureActivity.class);
-        start3DSecureActivity(activity, html, title, intent);
+        startGatewayFlow(activity, html, title, intent, REQUEST_3D_SECURE);
     }
 
     // separated for testability
-    static void start3DSecureActivity(Activity activity, String html, String title, Intent intent) {
-        intent.putExtra(Gateway3DSecureActivity.EXTRA_HTML, html); // required
+    static void startGatewayFlow(Activity activity, String html, String title, Intent intent, int requestId) {
+        intent.putExtra(BaseGatewayPaymentActivity.EXTRA_HTML, html); // required
 
         if (title != null) {
-            intent.putExtra(Gateway3DSecureActivity.EXTRA_TITLE, title);
+            intent.putExtra(EXTRA_TITLE, title);
         }
 
-        activity.startActivityForResult(intent, REQUEST_3D_SECURE);
+        activity.startActivityForResult(intent, requestId);
     }
 
     /**
@@ -259,28 +284,26 @@ public class Gateway {
      * {@link Gateway#start3DSecureActivity(Activity, String, String)} method.
      *
      * @param requestCode The request code returning from the activity result
-     * @param resultCode The result code returning from the activity result
-     * @param data The intent data returning from the activity result
-     * @param callback An implementation of {@link Gateway3DSecureCallback}
+     * @param resultCode  The result code returning from the activity result
+     * @param data        The intent data returning from the activity result
+     * @param callback    An implementation of {@link GatewayCallback}
      * @return True if handled, False otherwise
      * @see Gateway#start3DSecureActivity(Activity, String)
      * @see Gateway#start3DSecureActivity(Activity, String, String)
      */
-    public static boolean handle3DSecureResult(int requestCode, int resultCode, Intent data, Gateway3DSecureCallback callback) {
+    public static boolean handleGatewayResult(int requestCode, int resultCode, Intent data, GatewayCallback callback) {
         if (callback == null) {
             return false;
         }
-
-        if (requestCode == REQUEST_3D_SECURE) {
+        if (requestCode == REQUEST_3D_SECURE || requestCode == REQUEST_BROWSER_PAYMENT) {
             if (resultCode == Activity.RESULT_OK) {
-                String acsResultJson = data.getStringExtra(Gateway3DSecureActivity.EXTRA_ACS_RESULT);
-                GatewayMap acsResult = new GatewayMap(acsResultJson);
+                String gatewayResultJson = data.getStringExtra(BaseGatewayPaymentActivity.EXTRA_GATEWAY_RESULT);
+                GatewayMap gatewayResult = new GatewayMap(gatewayResultJson);
 
-                callback.on3DSecureComplete(acsResult);
+                callback.onComplete(gatewayResult, requestCode);
             } else {
-                callback.on3DSecureCancel();
+                callback.onCancel(requestCode);
             }
-
             return true;
         }
 
@@ -292,8 +315,8 @@ public class Gateway {
      * A convenience method for initializing the request to get Google Pay card info
      *
      * @param paymentsClient An instance of the PaymentClient
-     * @param request A properly formatted PaymentDataRequest
-     * @param activity The calling activity
+     * @param request        A properly formatted PaymentDataRequest
+     * @param activity       The calling activity
      * @see <a href="https://developers.google.com/pay/api/android/guides/tutorial#paymentsclient">Payments Client</a>
      * @see <a href="https://developers.google.com/pay/api/android/guides/tutorial#paymentdatarequest">Payment Data Request</a>
      */
@@ -308,9 +331,9 @@ public class Gateway {
      * {@link Gateway#requestGooglePayData(PaymentsClient, PaymentDataRequest, Activity)} method.
      *
      * @param requestCode The request code returning from the activity result
-     * @param resultCode The result code returning from the activity result
-     * @param data The intent data returning from the activity result
-     * @param callback An implementation of {@link GatewayGooglePayCallback}
+     * @param resultCode  The result code returning from the activity result
+     * @param data        The intent data returning from the activity result
+     * @param callback    An implementation of {@link GatewayGooglePayCallback}
      * @return True if handled, False otherwise
      * @see Gateway#requestGooglePayData(PaymentsClient, PaymentDataRequest, Activity)
      */
