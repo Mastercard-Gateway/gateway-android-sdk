@@ -1,33 +1,54 @@
 package com.mastercard.gateway.android.sampleapp;
 
 import android.content.Intent;
-import androidx.databinding.DataBindingUtil;
+import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.TextUtils;
-import android.text.TextWatcher;
+import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.mastercard.gateway.android.sampleapp.databinding.ActivityMainBinding;
-import com.mastercard.gateway.android.sdk.Gateway;
+import com.mastercard.gateway.android.sampleapp.utils.RegionInfo;
+import com.mastercard.gateway.android.sampleapp.utils.SimpleTextChangedWatcher;
+import com.mastercard.gateway.android.sampleapp.viewmodel.MainViewModel;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
 
     ActivityMainBinding binding;
-    TextChangeListener textChangeListener = new TextChangeListener();
+    private MainViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        viewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
-        binding.merchantId.setText(Config.MERCHANT_ID.getValue(this));
-        binding.merchantId.addTextChangedListener(textChangeListener);
+        // Watcher that triggers enableButtons + saveSessionData
+        SimpleTextChangedWatcher watcher = new SimpleTextChangedWatcher(() -> {
+            enableButtons();
+            viewModel.saveSessionData(
+                    Objects.requireNonNull(binding.merchantId.getText()).toString(),
+                    Objects.requireNonNull(binding.region.getText()).toString(),
+                    Objects.requireNonNull(binding.merchantServerLink.getText()).toString()
+            );
+        });
 
-        binding.region.setText(Config.REGION.getValue(this));
-        binding.region.addTextChangedListener(textChangeListener);
+        binding.merchantId.setText(viewModel.getMerchantId());
+        binding.merchantId.addTextChangedListener(watcher);
+
+        binding.region.setText(viewModel.getRegion());
+        binding.region.addTextChangedListener(watcher);
         binding.region.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {
                 binding.region.clearFocus();
@@ -35,42 +56,40 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        binding.merchantUrl.setText(Config.MERCHANT_URL.getValue(this));
-        binding.merchantUrl.addTextChangedListener(textChangeListener);
+        binding.merchantServerLink.setText(viewModel.getMerchantServerLink());
+        binding.merchantServerLink.addTextChangedListener(watcher);
 
-        binding.processPaymentButton.setOnClickListener(v -> goTo(ProcessPaymentActivity.class));
+        binding.processPaymentButton.setOnClickListener(v ->
+                goTo(ProcessPaymentActivity.class)
+        );
 
         enableButtons();
     }
 
-    void goTo(Class klass) {
+    void goTo(Class<?> klass) {
         Intent i = new Intent(this, klass);
         startActivity(i);
     }
 
-    void persistConfig() {
-        Config.MERCHANT_ID.setValue(this, binding.merchantId.getText().toString());
-        Config.REGION.setValue(this, binding.region.getText().toString());
-        Config.MERCHANT_URL.setValue(this, binding.merchantUrl.getText().toString());
-
-        // update api controller url
-        ApiController.getInstance().setMerchantServerUrl(Config.MERCHANT_URL.getValue(this));
-    }
-
     void enableButtons() {
         boolean enabled = !TextUtils.isEmpty(binding.merchantId.getText())
-                && !TextUtils.isEmpty(binding.region.getText())
-                && !TextUtils.isEmpty(binding.merchantUrl.getText());
+                && !TextUtils.isEmpty(binding.region.getText());
 
         binding.processPaymentButton.setEnabled(enabled);
     }
 
     void showRegionPicker() {
-        Gateway.Region[] regions = Gateway.Region.values();
-        final String[] items = new String[regions.length + 1];
-        items[0] = getString(R.string.none);
-        for (int i = 0; i < regions.length; i++) {
-            items[i + 1] = regions[i].name();
+        List<RegionInfo> regionsWithExtra = new ArrayList<>();
+        regionsWithExtra.add(new RegionInfo(getString(R.string.none), ""));
+        regionsWithExtra.addAll(viewModel.getRegions());
+
+        String[] items;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            items = regionsWithExtra.stream()
+                    .map(RegionInfo::getName)
+                    .toArray(String[]::new);
+        } else {
+            items = null;
         }
 
         new AlertDialog.Builder(this)
@@ -79,28 +98,11 @@ public class MainActivity extends AppCompatActivity {
                     if (which == 0) {
                         binding.region.setText("");
                     } else {
+                        assert items != null;
                         binding.region.setText(items[which]);
                     }
                     dialog.cancel();
                 })
                 .show();
-    }
-
-    class TextChangeListener implements TextWatcher {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            enableButtons();
-            persistConfig();
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-
-        }
     }
 }

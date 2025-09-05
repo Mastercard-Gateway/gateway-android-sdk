@@ -6,8 +6,12 @@
     <string name="main_configuration">Configuration:</string>
     <string name="main_merchant_id">Merchant Id</string>
     <string name="main_region">Region</string>
+    <string name="main_api">Api</string>
+    <string name="main_currency">Currency</string>
+    <string name="main_amount">Amount</string>
     <string name="main_select_region">Select region</string>
     <string name="main_heroku_test_server_url">Heroku Test Server URL</string>
+    <string name="main_heroku_merchant_server_switch_label">Merchant Server Enabled</string>
     <string name="main_process_a_payment">Process a Payment</string>
 
     <string name="collect_card_name_on_card">Name on card</string>
@@ -24,18 +28,41 @@
     <string name="pay_error_card_info_not_collected">Card info not collected</string>
     <string name="pay_error_processing_your_payment">Error processing your payment</string>
     <string name="pay_error_3ds_authentication_failed">3DS authentication failed</string>
+    <string name="pay_error_3ds_authentication_unavailable">3DS authentication unavailable</string>
+    <string name="pay_error_3ds_authentication_rejected">3DS authentication rejected</string>
+    <string name="pay_error_3ds_authentication_pending">3DS authentication pending</string>
+    <string name="pay_error_browser_payment_declined">Browser payment authentication declined</string>
+    <string name="pay_error_browser_payment_pending">Browser payment authentication pending</string>
+    <string name="pay_error_browser_payment_canceled">Browser payment authentication canceled</string>
     <string name="pay_error_unable_to_update_session">Unable to update session</string>
     <string name="pay_error_unable_to_create_session">Unable to create session</string>
-    <string name="pay_steps">Steps:</string>
+    <string name="pay_error_unable_to_complete_payment">Unable to complete the payment</string>
+    <string name="pay_steps">Steps</string>
+    <string name="pay_status">Status</string>
     <string name="pay_1_create_session">1. Create Session</string>
-    <string name="pay_2_collect_card_info">2. Collect Card Info</string>
-    <string name="pay_3_update_session_with_payer_data">3. Update Session with Payer Data</string>
-    <string name="pay_4_check_3ds_enrollment">4. Check 3DS Enrollment</string>
-    <string name="pay_5_process_payment">5. Process Payment</string>
+
+
+    <string name="pay_2_payment_option_enquiry">2. Payment Option Inquiry</string>
+    <string name="pay_3_select_payment_option">3. Select Payment Option</string>
+    <string name="pay_4_collect_card_info">4. Collect Card Info</string>
+
+    <string name="pay_5_update_session_with_payer_data">5. Update Session with Payer Data</string>
+    <string name="pay_6_initiate_authentication">6. Initiate Authentication</string>
+    <string name="pay_7_authenticate_secure_payment">7. Authenticate 3D Secure Payment</string>
+    <string name="pay_process_payment"> Process Payment</string>
+    <string name="pay_8_process_payment">8. Process Payment</string>
+
+    <string name="pay_4_check_3ds_enrollment">4. Initiate Browser Payment</string>
+    <string name="pay_5_authenticate_browser_payment">5. Authenticate Browser Payment</string>
+
     <string name="pay_process_payment_for_1">Process Payment for $1</string>
+    <string name="pay_dialog_tittle">Payment Option</string>
+    <string name="pay_dialog_text">Select an option to process the payment</string>
     <string name="pay_confirm_payment_details">Confirm Payment Details</string>
     <string name="pay_1_dollar">$1.00</string>
     <string name="pay_confirm_and_pay">Confirm and Pay</string>
     <string name="pay_done">Done</string>
+    <string name="pay_error_browser_payment_authentication_cancelled">Browser Payment Authentication Cancelled</string>
+
 
 </resources>

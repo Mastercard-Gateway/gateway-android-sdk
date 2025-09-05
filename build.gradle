@@ -1,19 +1,24 @@
 buildscript {
+    ext {
+        kotlin_version = '1.9.24'
+    }
     repositories {
-        jcenter()
         google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.3'
-        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.15.1'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
+        classpath 'com.android.tools.build:gradle:8.4.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.google.dagger:hilt-android-gradle-plugin:2.48'
     }
 }
 
 allprojects {
     repositories {
-        jcenter()
         google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
 }
 
@@ -22,5 +27,5 @@ task clean(type: Delete) {
 }
 
 ext {
-    libraryVersionName = '1.1.8'
+    libraryVersionName = '1.1.9-beta01'
 }

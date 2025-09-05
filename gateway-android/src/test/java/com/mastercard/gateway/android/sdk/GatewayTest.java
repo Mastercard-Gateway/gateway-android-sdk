@@ -8,7 +8,6 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.wallet.AutoResolveHelper;
 import com.google.android.gms.wallet.PaymentData;
 
-import org.apache.tools.ant.filters.StringInputStream;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,27 +15,21 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.security.KeyStore;
-import java.security.cert.X509Certificate;
-import java.util.List;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
 
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
-
-import io.reactivex.Single;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -131,12 +124,12 @@ public class GatewayTest {
     }
 
     @Test
-    public void testStart3DSecureActivitySkipsTitleIfNull() {
+    public void testStartGatewayFlowSkipsTitleIfNull() {
         Activity activity = mock(Activity.class);
         Intent intent = new Intent();
         String testHtml = "html";
 
-        Gateway.start3DSecureActivity(activity, testHtml, null, intent);
+        Gateway.startGatewayFlow(activity, testHtml, null, intent, Gateway.REQUEST_3D_SECURE);
 
         verify(activity).startActivityForResult(intent, Gateway.REQUEST_3D_SECURE);
         assertTrue(intent.hasExtra(Gateway3DSecureActivity.EXTRA_HTML));
@@ -145,13 +138,13 @@ public class GatewayTest {
     }
 
     @Test
-    public void testStart3DSecureActivityWorksAsExpected() {
+    public void testStartGatewayFlowWorksAsExpected() {
         Activity activity = mock(Activity.class);
         Intent intent = new Intent();
         String testHtml = "html";
         String testTitle = "title";
 
-        Gateway.start3DSecureActivity(activity, testHtml, testTitle, intent);
+        Gateway.startGatewayFlow(activity, testHtml, testTitle, intent, Gateway.REQUEST_3D_SECURE);
 
         verify(activity).startActivityForResult(intent, Gateway.REQUEST_3D_SECURE);
         assertTrue(intent.hasExtra(Gateway3DSecureActivity.EXTRA_HTML));
@@ -161,58 +154,61 @@ public class GatewayTest {
     }
 
     @Test
-    public void testHandle3DSecureResultReturnsFalseWithNullCallback() {
-        assertFalse(Gateway.handle3DSecureResult(0, 0, null, null));
+    public void testHandleGatewayResultReturnsFalseWithNullCallback() {
+        assertFalse(Gateway.handleGatewayResult(0, 0, null, null));
     }
 
     @Test
     public void testHandle3DSSecureResultReturnsFalseIfInvalidRequestCode() {
         int invalidRequestCode = 10;
-        Gateway3DSecureCallback callback = mock(Gateway3DSecureCallback.class);
+        GatewayCallback callback = mock(GatewayCallback.class);
 
-        assertFalse(Gateway.handle3DSecureResult(invalidRequestCode, 0, null, callback));
+        assertFalse(Gateway.handleGatewayResult(invalidRequestCode, 0, null, callback));
     }
 
     @Test
-    public void testHandle3DSecureResultCallsCancelIfResultNotOk() {
+    public void testHandleGatewayResultCallsCancelIfResultNotOk() {
         int validRequestCode = Gateway.REQUEST_3D_SECURE;
         int resultCode = Activity.RESULT_CANCELED;
-        Gateway3DSecureCallback callback = mock(Gateway3DSecureCallback.class);
+        GatewayCallback callback = mock(GatewayCallback.class);
 
-        boolean result = Gateway.handle3DSecureResult(validRequestCode, resultCode, null, callback);
+        boolean result = Gateway.handleGatewayResult(validRequestCode, resultCode, null, callback);
 
         assertTrue(result);
-        verify(callback).on3DSecureCancel();
+        verify(callback).onCancel(validRequestCode);
     }
 
     @Test
-    public void testHandle3DSecureResultCallsCompleteIfResultOK() {
+    public void testHandleGatewayResultCallsCompleteIfResultOK() {
         int validRequestCode = Gateway.REQUEST_3D_SECURE;
         int resultCode = Activity.RESULT_OK;
         Intent data = mock(Intent.class);
         String acsResultJson = "{\"foo\":\"bar\"}";
 
-        Gateway3DSecureCallback callback = spy(new Gateway3DSecureCallback() {
+        GatewayCallback callback = spy(new GatewayCallback() {
             @Override
-            public void on3DSecureComplete(GatewayMap response) {
+            public void onComplete(GatewayMap response, int resultCode) {
                 assertNotNull(response);
                 assertTrue(response.containsKey("foo"));
                 assertEquals("bar", response.get("foo"));
             }
 
             @Override
-            public void on3DSecureCancel() {
+            public void onCancel(int resultCode) {
                 fail("Should never have called cancel");
             }
         });
 
-        doReturn(acsResultJson).when(data).getStringExtra(Gateway3DSecureActivity.EXTRA_ACS_RESULT);
+        doReturn(acsResultJson)
+                .when(data)
+                .getStringExtra(Gateway3DSecureActivity.EXTRA_GATEWAY_RESULT);
 
-
-        boolean result = Gateway.handle3DSecureResult(validRequestCode, resultCode, data, callback);
+        boolean result = Gateway.handleGatewayResult(validRequestCode, resultCode, data, callback);
 
         assertTrue(result);
-        verify(callback).on3DSecureComplete(any());
+
+        // ✅ Use matchers consistently and check requestCode (not resultCode)
+        verify(callback).onComplete(any(GatewayMap.class), eq(validRequestCode));
     }
 
     @Test
@@ -417,10 +413,10 @@ public class GatewayTest {
     @Test
     public void testInputStreamToStringWorksAsExpected() {
         String expectedResult = "here is some string data";
-        InputStream testInputStream = new StringInputStream(expectedResult);
+        InputStream input = new ByteArrayInputStream(expectedResult.getBytes(StandardCharsets.UTF_8));
 
         try {
-            String result = gateway.inputStreamToString(testInputStream);
+            String result = gateway.inputStreamToString(input);
             assertEquals(expectedResult, result);
         } catch (IOException e) {
             fail(e.getMessage());

@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".SampleApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -18,6 +19,7 @@
 
         <activity
             android:name=".MainActivity"
+            android:exported="true"
             android:label="@string/app_name"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -40,6 +42,11 @@
         <activity
             android:name="com.mastercard.gateway.android.sdk.Gateway3DSecureActivity"
             android:label="@string/gateway_3d_secure_authentication"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name="com.mastercard.gateway.android.sdk.GatewayBrowserPaymentActivity"
+            android:label="@string/browser_payment"
             android:screenOrientation="portrait" />
 
     </application>

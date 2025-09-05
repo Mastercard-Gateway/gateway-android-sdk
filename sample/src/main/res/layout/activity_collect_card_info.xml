@@ -140,10 +140,11 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/material_baseline_grid_1x"
             android:text="@string/collect_card_continue"
-            android:enabled="false"
+            android:enabled="true"
             app:layout_constraintEnd_toStartOf="@+id/guideline_end"
             app:layout_constraintStart_toStartOf="@+id/guideline_start"
-            app:layout_constraintTop_toBottomOf="@+id/card_cvv_layout" />
+            app:layout_constraintTop_toBottomOf="@+id/card_cvv_layout"
+            app:layout_constraintBottom_toTopOf="@+id/or_separator"/>
 
         <TextView
             android:id="@+id/or_separator"
@@ -151,10 +152,10 @@
             android:layout_height="wrap_content"
             android:text="@string/collect_card_or"
             android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@+id/submit_button"
             app:layout_constraintBottom_toTopOf="@+id/google_pay_button"
             app:layout_constraintEnd_toStartOf="@+id/guideline_end"
             app:layout_constraintStart_toStartOf="@+id/guideline_start"
-            app:layout_constraintTop_toBottomOf="@+id/submit_button"
             tools:visibility="visible" />
 
         <include
@@ -164,6 +165,7 @@
             android:layout_height="@dimen/material_baseline_grid_6x"
             android:layout_marginBottom="@dimen/material_baseline_grid_2x"
             android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@+id/or_separator"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/guideline_end"
             app:layout_constraintStart_toStartOf="@+id/guideline_start"
