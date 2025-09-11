@@ -96,10 +96,10 @@ public class Gateway {
     static final int MIN_API_VERSION = 39;
     static final int CONNECTION_TIMEOUT = 15000;
     static final int READ_TIMEOUT = 60000;
-    static final int REQUEST_3D_SECURE = 10000;
+    public static final int REQUEST_3D_SECURE = 10000;
 
-    static final int REQUEST_BROWSER_PAYMENT = 10002;
-    static final int REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA = 10001;
+    public static final int REQUEST_BROWSER_PAYMENT = 10002;
+    public static final int REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA = 10001;
     static final String API_OPERATION = "UPDATE_PAYER_DATA";
     static final String USER_AGENT = "Gateway-Android-SDK/" + BuildConfig.SDK_VERSION;
 
