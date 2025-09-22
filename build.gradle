@@ -11,6 +11,7 @@ buildscript {
         classpath 'com.android.tools.build:gradle:8.4.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.google.dagger:hilt-android-gradle-plugin:2.48'
+        classpath 'io.github.gradle-nexus:publish-plugin:1.1.0'
     }
 }
 
@@ -22,10 +23,42 @@ allprojects {
     }
 }
 
+apply plugin: 'io.github.gradle-nexus.publish-plugin'
+
+apply from: "${rootDir}/sonatype.gradle"
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
 ext {
     libraryVersionName = '1.1.9-beta01'
+}
+
+// Distribution Packaging
+
+task cleanArchive(type: Delete) {
+    delete "$buildDir/Releases"
+}
+
+task cleanDistribution(type: Delete) {
+    delete "$buildDir"
+}
+
+task copyFilesForArchiving(type: Copy) {
+    from("$rootDir") {
+        include "${DISTRIBUTION_REPO}/**"
+    }
+    into "$buildDir/Releases"
+
+    dependsOn cleanArchive
+}
+
+task packageDistribution(type: Zip) {
+    destinationDirectory = file("$buildDir")
+
+    from "$buildDir/Releases"
+
+    dependsOn cleanDistribution
+    dependsOn copyFilesForArchiving
 }
