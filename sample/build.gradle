@@ -58,17 +58,17 @@ dependencies {
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation 'com.google.android.gms:play-services-wallet:18.0.0'
+    implementation 'com.google.android.gms:play-services-wallet:19.5.0'
     implementation 'com.github.esnaultdev:MaterialValues:v1.1.1'
 
     implementation project(':gateway-android')
 
     // retrofit
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:retrofit:3.0.0'
     // gson converter
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-    implementation("com.squareup.retrofit2:adapter-rxjava2:2.9.0")
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
+    implementation 'com.squareup.retrofit2:converter-gson:3.0.0'
+    implementation("com.squareup.retrofit2:adapter-rxjava2:3.0.0")
+    implementation 'com.squareup.okhttp3:logging-interceptor:5.3.0'
 
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0"
     implementation 'androidx.lifecycle:lifecycle-viewmodel:2.6.2'
@@ -88,8 +88,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
 
     // Espresso testing
-    androidTestImplementation 'junit:junit:4.12'
-    androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0') {
+    androidTestImplementation 'junit:junit:4.13.2'
+    androidTestImplementation('androidx.test.espresso:espresso-core:3.7.0') {
         exclude module: 'support-annotations'
     }
     androidTestImplementation('androidx.test:runner:1.1.0') {
