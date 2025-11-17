@@ -8,7 +8,7 @@ buildscript {
         maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.4.0'
+        classpath 'com.android.tools.build:gradle:8.13.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.google.dagger:hilt-android-gradle-plugin:2.48'
     }
@@ -27,5 +27,5 @@ task clean(type: Delete) {
 }
 
 ext {
-    libraryVersionName = '1.1.9-beta01'
+    libraryVersionName = '1.1.9'
 }

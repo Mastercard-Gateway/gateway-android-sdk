@@ -52,7 +52,7 @@ dependencies {
 
     // required
     implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'com.google.code.gson:gson:2.12.1'
+    implementation 'com.google.code.gson:gson:2.13.2'
     implementation 'com.google.android.material:material:1.12.0'
 
     // optional for rx java
@@ -60,13 +60,13 @@ dependencies {
 
     // optional for google pay
     optional 'androidx.legacy:legacy-support-v4:1.0.0'
-    optional 'com.google.android.gms:play-services-wallet:18.0.0'
+    optional 'com.google.android.gms:play-services-wallet:19.5.0'
 
     compileOnly 'androidx.annotation:annotation:1.1.0'
 
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.robolectric:robolectric:4.12.1'
-    testImplementation 'org.mockito:mockito-core:5.14.2'
+    testImplementation 'org.robolectric:robolectric:4.16'
+    testImplementation 'org.mockito:mockito-core:5.20.0'
 }
 
 task androidJavadocs(type: Javadoc) {
