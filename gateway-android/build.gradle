@@ -7,7 +7,7 @@ android {
     namespace = "com.mastercard.gateway.android"
 
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 23
         targetSdk 35
         versionName libraryVersionName
         consumerProguardFiles 'proguard.pro'
