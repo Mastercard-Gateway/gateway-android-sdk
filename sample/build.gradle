@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId 'com.mastercard.gateway.android.sampleapp'
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdk 35
         versionCode 1
         versionName '1.0.0'
