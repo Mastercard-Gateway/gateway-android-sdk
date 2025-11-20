@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        kotlin_version = '1.9.24'
+        kotlin_version = '2.2.0'
     }
     repositories {
         google()
@@ -10,7 +10,8 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:8.13.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.google.dagger:hilt-android-gradle-plugin:2.48'
+        classpath 'com.google.dagger:hilt-android-gradle-plugin:2.57.2'
+        classpath "com.vanniktech:gradle-maven-publish-plugin:0.35.0"
     }
 }
 

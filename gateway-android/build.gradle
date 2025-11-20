@@ -1,6 +1,5 @@
 apply plugin: 'com.android.library'
-apply plugin: 'maven-publish'
-apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'com.vanniktech.maven.publish'
 
 android {
 
@@ -8,7 +7,7 @@ android {
     namespace = "com.mastercard.gateway.android"
 
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdk 35
         versionName libraryVersionName
         consumerProguardFiles 'proguard.pro'
@@ -67,84 +66,4 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.robolectric:robolectric:4.16'
     testImplementation 'org.mockito:mockito-core:5.20.0'
-}
-
-task androidJavadocs(type: Javadoc) {
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    android.libraryVariants.all { variant ->
-        if (variant.name == 'release') {
-            owner.classpath += variant.javaCompile.classpath
-        }
-    }
-    source = android.sourceSets.main.java.srcDirs
-    exclude '**/R.html', '**/R.*.html', '**/index.html'
-}
-
-task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
-    archiveClassifier.set("javadoc")
-    from androidJavadocs.destinationDir
-}
-
-task androidSourcesJar(type: Jar) {
-    archiveClassifier.set("sources")
-    from android.sourceSets.main.java.srcDirs
-}
-
-publishing {
-    publications {
-        aar(MavenPublication) {
-            groupId = 'com.mastercard.gateway'
-            artifactId = project.name
-            version = libraryVersionName
-
-            afterEvaluate {
-                // Publish the default AAR output
-                artifact("$buildDir/outputs/aar/${project.name}-release.aar")
-                artifact androidJavadocsJar
-                artifact androidSourcesJar
-            }
-
-            pom.withXml {
-                def root = asNode()
-
-                // adds basic info
-                root.appendNode('name', 'Mastercard Payment Gateway Android SDK')
-                root.appendNode('description', 'The Android SDK for Mastercard Payment Gateway')
-                root.appendNode('url', 'https://www.mastercard.com/gateway')
-
-                // adds license info
-                def license = root.appendNode('licenses').appendNode('license')
-                license.appendNode('name', 'Apache License, Version 2.0')
-                license.appendNode('url', 'https://www.apache.org/licenses/LICENSE-2.0.txt')
-                license.appendNode('distribution', 'repo')
-
-                // adds source control info
-                def scm = root.appendNode('scm')
-                scm.appendNode('url', 'https://github.com/Mastercard/gateway-android-sdk')
-                scm.appendNode('connection', 'https://github.com/Mastercard/gateway-android-sdk.git')
-
-                // adds dependencies
-                def dependenciesNode = root.appendNode('dependencies')
-                configurations.implementation.allDependencies.each { dp ->
-                    if (dp.group) {
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', dp.group)
-                        dependencyNode.appendNode('artifactId', dp.name)
-                        dependencyNode.appendNode('version', dp.version)
-
-                        if (configurations.optional.allDependencies.contains(dp)) {
-                            dependencyNode.appendNode('optional', true)
-                        }
-                    }
-                }
-
-                // adds developer info
-                def developers = root.appendNode('developers')
-                def dev = developers.appendNode('developer')
-                dev.appendNode('id', 'simplify-mobile-team')
-                dev.appendNode('name', 'Mastercard Payment Gateway Services')
-                dev.appendNode('email', 'simplify_mobile_team@mastercard.com')
-            }
-        }
-    }
 }
