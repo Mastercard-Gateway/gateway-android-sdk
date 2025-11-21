@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[1.1.9] - 2025-11-21
+## [1.1.9] - 2025-11-21
 ### Added
 * Enabled support for Browser Payment flow, including Ottu integration.
 * Added a loader inside WebView to show progress until content is fully loaded.
