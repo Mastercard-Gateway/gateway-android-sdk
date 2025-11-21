@@ -5,6 +5,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+
+[1.1.9] - 2025-11-21
+### Added
+* Enabled support for Browser Payment flow, including Ottu integration.
+* Added a loader inside WebView to show progress until content is fully loaded.
+* Added full Kotlin support in the SDK and sample application.
+
+### Changed
+* Refactored minimal SDK code to support both 3DS and Browser Payment flows.
+* Replaced Gateway3DSecureCallback with unified GatewayCallback.
+* Refactored and partially rewrote the sample application.
+* Updated Gradle plugin to com.android.tools.build:gradle:8.13.1
+* Increased minSdkVersion from 19 → 23.
+* Cleaned up code related to JCenter.
+* Updated and added new unit tests.
+* Updated libraries to address CVE vulnerabilities.
+  
 [1.1.9-beta01] - 2025-09-04
 ### Added
 - Enabled support for Browser Payment flow, including Ottu integration.
