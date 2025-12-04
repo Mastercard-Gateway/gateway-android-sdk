@@ -1,5 +1,5 @@
 # Gateway Android SDK
-**This Mobile SDK supports 3-D Secure 1 only.** If you require EMV 3DS support, please obtain the version 2 Mobile SDK by following these instructions: https://na.gateway.mastercard.com/api/documentation/integrationGuidelines/mobileSDK/emv3DSsdk.html
+**This Mobile SDK supports 3-D Secure and Browser Payment** If you require EMV 3DS support, please obtain the version 2 Mobile SDK by following these instructions: https://na.gateway.mastercard.com/api/documentation/integrationGuidelines/mobileSDK/emv3DSsdk.html
 
 [![Download](https://api.bintray.com/packages/mpgs/Android/gateway-android-sdk/images/download.svg)](https://bintray.com/mpgs/Android/gateway-android-sdk/_latestVersion)
 [![Build Status](https://travis-ci.org/Mastercard-Gateway/gateway-android-sdk.svg?branch=master)](https://travis-ci.org/Mastercard-Gateway/gateway-android-sdk)
@@ -18,7 +18,7 @@ Once you have updated a session with card information from the app, you may then
 
 ## Installation
 
-This library is hosted in the jCenter repository. To import the Android SDK, include it as a dependency in your build.gradle file. Be sure to replace `X.X.X` with the version number in the shield above. (Minimum supported Android SDK version 19)
+This library is hosted in the maven central. To import the Android SDK, include it as a dependency in your build.gradle file. Be sure to replace `X.X.X` with the version number in the shield above. (Minimum supported Android SDK version 23)
 
 ```groovy
 implementation 'com.mastercard.gateway:gateway-android:X.X.X'
